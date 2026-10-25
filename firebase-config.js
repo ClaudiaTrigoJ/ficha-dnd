@@ -13,7 +13,7 @@ export const firebaseConfig = {
 // AVISOS POR DISCORD (opcional)
 // Pega aquí la URL del webhook del canal del DM entre las comillas.
 // Si se deja vacío, simplemente no se envían avisos a Discord.
-export const discordWebhook = "";
+export const discordWebhook = "https://discord.com/api/webhooks/1563955185024245841/Q-v8YKsqTzCYT9QZG0V0GDLaSVovLZnhbfYnelV3AzNHMS-zKfPdc9e9sr8YmIbbkqI_";
  
 // Mensajes que se envían. Puedes cambiar el texto, pero mantén las
 // palabras entre llaves: {jugador} y {personaje}.
