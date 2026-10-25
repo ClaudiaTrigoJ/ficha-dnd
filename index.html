@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fichas de personaje · D&D</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg">
+<meta name="theme-color" content="#8b2e2e">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f6f1e7;--card:#fffdf8;--tx:#2b2118;--mut:#7a6a58;--ac:#8b2e2e;--ac2:#f0e4d0;--bd:#d9ccb6;--ok:#2f6b3a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#1b1612;--card:#251e18;--tx:#efe6d6;--mut:#a8977f;--ac:#d9685f;--ac2:#352b21;--bd:#443728;--ok:#7fc58b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 Georgia,'Times New Roman',serif}
+main{max-width:760px;margin:0 auto;padding:16px}
+h1{font-size:1.6rem;margin:.2em 0}h2{font-size:1.1rem;margin:0 0 8px;color:var(--ac)}
+p.s{color:var(--mut);margin:0 0 12px;font-size:.9rem}
+section{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin:12px 0}
+label{display:block;font-size:.8rem;color:var(--mut)}
+input,select,textarea{width:100%;font:inherit;padding:8px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx)}
+input[type=checkbox]{width:auto}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+button{font:inherit;cursor:pointer;border:0;border-radius:8px;padding:9px 14px;background:var(--ac);color:var(--onac,#fff)}
+button:disabled{opacity:.4;cursor:not-allowed}
+a.btn{display:inline-block;text-decoration:none;border-radius:8px;padding:9px 14px;background:var(--ac);color:var(--onac,#fff)}
+button.o{background:var(--ac2);color:var(--tx);border:1px solid var(--bd)}
+.d{display:inline-flex;align-items:center;justify-content:center;width:46px;height:50px;margin:3px;font-weight:bold;background:var(--ac2);color:var(--tx);clip-path:polygon(50% 0,95% 25%,95% 75%,50% 100%,5% 75%,5% 25%);animation:land .35s ease-out}
+.d[data-id]{cursor:grab;touch-action:none;user-select:none}
+.d.sel{background:var(--ac);color:var(--onac,#fff)}
+.ghost{position:fixed;z-index:60;pointer-events:none;opacity:.9;transform:scale(1.2)}
+@keyframes land{0%{transform:scale(1.4) rotate(-15deg)}100%{transform:scale(1) rotate(0)}}
+.pool{min-height:60px;border:2px dashed var(--bd);border-radius:10px;padding:4px;margin:8px 0}
+.slots{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px}
+.slot{border:2px dashed var(--bd);border-radius:10px;padding:6px;text-align:center;min-height:100px}
+.slot b{display:block;font-size:.85rem}.slot small{display:block;color:var(--mut)}
+.big{font-size:1.3rem;font-weight:bold}.mut{color:var(--mut);font-size:.85rem}
+.sc{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:420px}td,th{padding:3px;text-align:left}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;align-items:center}
+.bar label{display:flex;gap:4px;align-items:center}
+textarea{min-height:240px;font-family:ui-monospace,Menlo,monospace;font-size:.85rem}
+#ov{display:none;position:fixed;inset:0;z-index:50;background:rgba(10,8,6,.85)}
+#cv{width:100%;height:100%;display:block}
+#ov .h{position:absolute;bottom:calc(14px + env(safe-area-inset-bottom,0px));width:100%;text-align:center;color:#d9c9ad;font-size:.8rem}
+.d{animation:none}.d.fl{background:var(--ok);color:var(--bg)}
+.files{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:10px}
+button.file{background:var(--ac2);color:var(--tx);border:1px solid var(--bd);text-align:left;padding:10px}
+button.file small{display:block;color:var(--mut)}
+td input{width:80px}
+.pts{background:var(--comp,var(--ac));color:var(--oncomp,#fff);border-radius:12px;padding:14px 16px;margin:12px 0;font-size:1.1rem;font-weight:bold;box-shadow:0 0 0 3px var(--ac2)}
+.pts b{font-size:2.2rem;margin:0 8px;vertical-align:middle}.pts small{display:block;font-weight:normal;opacity:.9;font-size:.85rem}
+.pts button{background:#fff;color:#111;margin-top:8px}.pts.no{background:var(--ac2);color:var(--mut);font-weight:normal;box-shadow:none;font-size:.9rem}
+label.btn{display:inline-block;cursor:pointer;border-radius:8px;padding:9px 14px;background:var(--ac2);color:var(--tx);border:1px solid var(--bd);font-size:1rem}
+.av{width:44px;height:44px;border-radius:50%;background:var(--ac);color:var(--onac,#fff);display:inline-flex;align-items:center;justify-content:center;overflow:hidden;font-weight:bold;flex:none}
+.ic{width:72px;height:72px;flex:none;object-fit:cover;object-position:center;border-radius:10px;display:block}
+.hero{width:180px;aspect-ratio:1/1;object-fit:cover;object-position:top;border-radius:12px;flex:none}
+.themed{background:var(--pbg);border-radius:14px;padding:12px;margin-top:8px}
+.themed th{background:var(--ac);color:var(--onac);padding:6px 8px;text-align:left;font-size:.8rem}
+.themed button[data-act="pp"]{background:var(--comp);color:var(--oncomp);padding:2px 10px;margin-left:4px}
+button.file{display:flex;gap:10px;align-items:center}
+button.file[style]{background:var(--card);color:var(--tx);border-color:var(--bd)}
+.bar .sw,.sw{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.95rem;color:var(--tx);position:relative}
+.sw input[type=checkbox]{position:absolute;opacity:0;width:0;height:0;padding:0}
+.sw .trk{width:58px;height:32px;border-radius:999px;border:3px solid var(--tx);background:var(--card);position:relative;transition:.2s;flex:none}
+.sw .knb{position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:var(--bd);transition:.2s;display:flex;align-items:center;justify-content:center}
+.sw .knb::after{content:'';width:6px;height:11px;border:solid var(--bg);border-width:0 3px 3px 0;transform:rotate(45deg) translate(-1px,-1px);opacity:0;transition:.2s}
+.sw input:checked+.trk .knb{left:28px;background:var(--tx)}
+.sw input:checked+.trk .knb::after{opacity:1}
+.sw input:focus-visible+.trk{outline:2px solid var(--ac);outline-offset:2px}.d.base{filter:brightness(.78)}
+.tag{display:inline-block;padding:1px 9px;border-radius:999px;font-size:.8rem;font-weight:bold;border:1px solid var(--bd)}
+#crop{display:none;position:fixed;inset:0;z-index:70;background:rgba(10,8,6,.85);align-items:center;justify-content:center}
+#crop .box{background:var(--card);border-radius:12px;padding:14px;width:min(92%,330px)}
+#ccv{width:280px;max-width:100%;aspect-ratio:1/1;touch-action:none;cursor:grab;border-radius:8px;display:block;margin:0 auto 8px;background:repeating-conic-gradient(#8884 0 25%,#0000 0 50%) 0 0/20px 20px}
+#czoom{width:100%;padding:0}
+button.danger{background:#a32121;color:#fff}.res{border-top:1px dashed var(--bd);padding:8px 0}
+.fcard{border:1px solid var(--bd);border-radius:10px;padding:8px;margin:8px 0}th{font-size:.8rem;color:var(--mut)}h3{margin:12px 0 4px;font-size:1rem;color:var(--ac)}
+</style>
+</head>
+<body>
+<main>
+<h1>Fichas de personaje</h1>
+<div class="bar" style="margin:0 0 10px;gap:20px"><label class="sw"><input type="checkbox" id="t3" checked><span class="trk"><span class="knb"></span></span>Animación 3D</label><label class="sw"><input type="checkbox" id="snd" checked><span class="trk"><span class="knb"></span></span>Sonido</label></div>
+<p class="mut" id="msg"></p>
+<div id="app"><section>Conectando…</section></div>
+</main>
+<div id="crop"><div class="box"><p class="s">Arrastra para elegir la parte de la foto y ajusta el zoom.</p><canvas id="ccv" width="280" height="280"></canvas><input id="czoom" type="range" min="1" max="3" step="0.01" value="1"><div class="bar"><button id="cok">Usar recorte</button><button class="o" id="ccancel">Cancelar</button></div></div></div>
+<div id="ov"><canvas id="cv"></canvas><div class="h">Tirando los dados…</div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getAuth,onAuthStateChanged,GoogleAuthProvider,signInWithPopup,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {getFirestore,doc,collection,setDoc,updateDoc,deleteDoc,getDoc,onSnapshot} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import * as CFG from "./firebase-config.js";
+const firebaseConfig=CFG.firebaseConfig;
+const $=id=>document.getElementById(id);
+const rnd=n=>{const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%n+1};
+const mod=v=>Math.floor((v-10)/2);
+const sg=n=>(n>=0?'+':'')+n;
+/* ---------- sonido ---------- */
+let AC=null,lastC=0;
+function unlock(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();}catch(e){}}
+function clack(){if(!AC||!$('snd').checked)return;const t=AC.currentTime;if(t-lastC<.045)return;lastC=t;
+ const b=AC.createBuffer(1,2205,44100),a=b.getChannelData(0);for(let i=0;i<a.length;i++)a[i]=(Math.random()*2-1)*(1-i/a.length);
+ const s=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();s.buffer=b;f.type='bandpass';f.frequency.value=1500+Math.random()*2500;g.gain.value=.3;
+ s.connect(f);f.connect(g);g.connect(AC.destination);s.start();}
+function thud(){if(!AC||!$('snd').checked)return;const t=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();
+ o.frequency.setValueAtTime(150+Math.random()*40,t);o.frequency.exponentialRampToValueAtTime(55,t+.18);
+ g.gain.setValueAtTime(.45,t);g.gain.exponentialRampToValueAtTime(.001,t+.2);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+.22);clack();}
+
+function tone(f1,f2,d,v){if(!AC||!$('snd').checked)return;const t=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();o.type='triangle';
+ o.frequency.setValueAtTime(f1,t);o.frequency.exponentialRampToValueAtTime(f2,t+d);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d+.02);}
+const pick=()=>tone(500,760,.09,.25),drop=()=>{tone(220,90,.16,.45);clack()},back=()=>tone(700,420,.1,.25);
+
+/* ---------- animación 3D con caras numeradas ---------- */
+function trap(){
+ const c=Math.cos(Math.PI/5),a=.1,h=a*(c+1)/(1-c),T=new THREE.Vector3(0,0,h),B=new THREE.Vector3(0,0,-h);
+ const P=j=>{const t=j*Math.PI/5;return new THREE.Vector3(Math.cos(t),Math.sin(t),j%2?-a:a)};
+ const q=[],add=(x,y,z)=>{const n=new THREE.Vector3().crossVectors(y.clone().sub(x),z.clone().sub(x)),m=x.clone().add(y).add(z);q.push(...(n.dot(m)<0?[x,z,y]:[x,y,z]))};
+ for(let k=0;k<5;k++){const u0=P(2*k),l=P(2*k+1),u1=P(2*k+2),l1=P(2*k+3);add(T,u0,l);add(T,l,u1);add(B,l,u1);add(B,u1,l1);}
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(q.flatMap(v=>v.toArray()),3));g.scale(1.3,1.3,1.3);g.computeVertexNormals();return g;}
+const POLY={4:()=>new THREE.TetrahedronGeometry(1.4),6:()=>new THREE.BoxGeometry(1.5,1.5,1.5),8:()=>new THREE.OctahedronGeometry(1.3),10:trap,12:()=>new THREE.DodecahedronGeometry(1.15),20:()=>new THREE.IcosahedronGeometry(1.25)};
+function label(n){const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');
+ x.font='bold 78px Georgia,serif';x.textAlign='center';x.textBaseline='middle';x.lineWidth=9;x.strokeStyle='#3a1210';x.fillStyle='#f7e6c4';
+ x.strokeText(n,64,66);x.fillText(n,64,66);if(n==6||n==9)x.fillRect(40,108,48,7);return new THREE.CanvasTexture(c);}
+function faces(g){
+ const p=g.attributes.position,ix=g.index,N=ix?ix.count:p.count,V=i=>new THREE.Vector3().fromBufferAttribute(p,ix?ix.getX(i):i),F=[];
+ for(let i=0;i<N;i+=3){const t=[V(i),V(i+1),V(i+2)],nm=new THREE.Vector3().crossVectors(t[1].clone().sub(t[0]),t[2].clone().sub(t[0])).normalize();
+  let f=F.find(f=>f.nm.dot(nm)>.999);if(!f)F.push(f={nm,vs:[]});f.vs.push(...t);}
+ return F.map(f=>{const u=[];f.vs.forEach(v=>{if(!u.some(w=>w.distanceTo(v)<1e-3))u.push(v)});
+  const c=u.reduce((s,v)=>s.add(v),new THREE.Vector3()).divideScalar(u.length);return {nm:f.nm,c,u,k:u.length,r:c.distanceTo(u[0])};});}
+function mkDie(f,col){
+ const mk=POLY[f],g=mk?mk():new THREE.IcosahedronGeometry(1.25),
+ m=new THREE.Mesh(g,new THREE.MeshStandardMaterial({color:col?new THREE.Color(col):new THREE.Color().setHSL(rnd(360)/360,.65,.4),flatShading:true,roughness:.45,metalness:.15}));
+ m.add(new THREE.LineSegments(new THREE.EdgesGeometry(g),new THREE.LineBasicMaterial({color:0xf3d9a8})));
+ m.userData.faces=[];
+ if(mk){const F=faces(g);if(F.length===f){m.userData.faces=F;F.forEach((fc,i)=>{
+  const sz=fc.r*(fc.k===3?1.15:fc.k===4?(f===10?.7:1.05):1.35),
+  pl=new THREE.Mesh(new THREE.PlaneGeometry(sz,sz),new THREE.MeshBasicMaterial({map:label(i+1),transparent:true,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2}));
+  const tg=f===6?fc.u[0].clone().add(fc.u[1]).multiplyScalar(.5):fc.u[0],y=tg.sub(fc.c).normalize(),z=fc.nm,x=new THREE.Vector3().crossVectors(y,z);
+  pl.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(x,y,z));pl.position.copy(fc.c).addScaledVector(z,.012);m.add(pl);});}}
+ return m;}
+function readFace(m,dir){let b=-2,bi=0,n;m.userData.faces.forEach((fc,i)=>{const w=fc.nm.clone().applyQuaternion(m.quaternion),d=w.dot(dir);if(d>b){b=d;bi=i;n=w}});return {v:bi+1,n};}
+function theatre(f,n,col){return new Promise(res=>{
+ const fb=()=>Array.from({length:n},()=>rnd(f));
+ if(!n)return res([]);
+ if(!window.THREE||!$('t3').checked||matchMedia('(prefers-reduced-motion:reduce)').matches)return res(fb());
+ const ov=$('ov');ov.style.display='block';let r;
+ try{const W=innerWidth,H=innerHeight,rf=()=>rnd(1e6)/1e6;
+ r=new THREE.WebGLRenderer({canvas:$('cv'),alpha:true,antialias:true});r.setPixelRatio(Math.min(devicePixelRatio,2));r.setSize(W,H);
+ const sc=new THREE.Scene(),cam=new THREE.PerspectiveCamera(45,W/H,.1,100);
+ sc.add(new THREE.AmbientLight(0xffffff,.75));const dl=new THREE.DirectionalLight(0xffffff,.9);dl.position.set(3,6,8);sc.add(dl);
+ const cols=Math.min(n,Math.max(1,Math.round(Math.sqrt(n*W/H*1.2)))),rows=Math.ceil(n/cols),sp=3,tn=Math.tan(22.5*Math.PI/180);
+ cam.position.z=Math.max((rows*sp/2+1)/tn,(cols*sp/2+1)/(tn*W/H));
+ const D=Array.from({length:n},(_,i)=>{const m=mkDie(f,col),x=((i%cols)-(cols-1)/2)*sp,y=-(Math.floor(i/cols)-(rows-1)/2)*sp,fbk=!m.userData.faces.length,v=fbk?rnd(f):0;
+  m.position.set(x,y,0);m.quaternion.setFromEuler(new THREE.Euler(rf()*6.28,rf()*6.28,rf()*6.28));sc.add(m);
+  let s=null;if(fbk){s=new THREE.Sprite(new THREE.SpriteMaterial({map:label(v),depthTest:false,transparent:true}));s.position.set(x,y,1.8);s.scale.set(.01,.01,1);sc.add(s);}
+  return {m,s,x,y,v,ax:new THREE.Vector3(rf()-.5,rf()-.5,rf()-.5).normalize(),w:10+rf()*8,end:1100+i*120,st:0,nc:0};});
+ const dirOf=d=>cam.position.clone().sub(d.m.position).normalize(),maxE=D[n-1].end+800,t0=performance.now();let fin=false,last=t0;
+ const stop=()=>{if(fin)return;fin=true;D.forEach(d=>{if(!d.st&&d.m.userData.faces.length)d.v=readFace(d.m,dirOf(d)).v});
+  ov.style.display='none';ov.onclick=null;r.dispose();res(D.map(d=>d.v));};
+ 
+ (function fr(){if(fin)return;const t=performance.now(),dt=(t-last)/1000,e=t-t0;last=t;
+  D.forEach(d=>{
+   if(d.st===0){
+    d.m.quaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(d.ax,d.w*dt));d.w*=Math.exp(-dt*1.3);
+    if(Math.random()<dt*2)d.ax.add(new THREE.Vector3(rf()-.5,rf()-.5,rf()-.5)).normalize();
+    d.m.position.y=d.y+Math.abs(Math.sin(e/120))*.9*Math.max(0,1-e/d.end);
+    if(e>d.nc){clack();d.nc=e+90+Math.random()*80}
+    if(e>=d.end){d.st=1;d.t1=e;d.m.position.y=d.y;thud();
+     if(d.m.userData.faces.length){const rd=readFace(d.m,dirOf(d));d.v=rd.v;d.q0=d.m.quaternion.clone();d.qT=new THREE.Quaternion().setFromUnitVectors(rd.n,dirOf(d)).multiply(d.q0);}}
+   }else{const k=Math.min(1,(e-d.t1)/400),z=1-Math.pow(1-k,3);
+    if(d.qT)d.m.quaternion.slerpQuaternions(d.q0,d.qT,z);
+    if(d.s){const q=1.6*z;d.s.scale.set(q,q,1);}}
+  });
+  r.render(sc,cam);if(e>maxE)stop();else requestAnimationFrame(fr);})();
+ }catch(err){ov.style.display='none';res(fb());}
+});}
+const dice=(f,n,col)=>theatre(f,n,col);
+
+/* ---------- datos provisionales (CSV) ---------- */
+const STATS=['Fuerza','Constitución','Destreza','Voluntad','Inteligencia','Carisma','Sabiduría','Suerte'];
+const DEF={classes:[{n:'Guerrero',h:8,m:0,a:6},{n:'Monje',h:6,m:4,a:4},{n:'Clérigo',h:6,m:4,a:4},{n:'Bardo',h:4,m:4,a:4},{n:'Druida',h:6,m:4,a:4},{n:'Tirador',h:4,m:0,a:6},{n:'Asesino',h:4,m:4,a:4},{n:'Hechicero',h:4,m:6,a:0},{n:'Warlock',h:6,m:4,a:6},{n:'Mago',h:4,m:8,a:0}],
+ flowers:[{n:'Flor Roja',res:'hp',d:4,b:{}},{n:'Flor Azul',res:'ma',d:4,b:{}},{n:'Flor Verde',res:'an',d:4,b:{}},{n:'Flor Marrón',res:'',d:4,b:{Fuerza:2,Constitución:2}},{n:'Flor Blanca',res:'',d:4,b:{Destreza:2,Voluntad:2}},{n:'Flor Morada',res:'',d:4,b:{Inteligencia:2,Sabiduría:2}},{n:'Flor Amarilla',res:'',d:4,b:{Carisma:2,Suerte:2}}],
+ rewards:['Más 2 puntos de estadísticas','Hueco de habilidad','Nueva competencia o mejora','Poder de clase','Habilidad especial','Más 2 puntos de estadísticas','Hueco de habilidad','Poder de profesión','Poder de clase o subclase','Poder de raza']};
+let CLS={},FLO={},REW=[],TBL=null,TD=null;
+const RES={hp:'Vida',ma:'Maná',an:'Ánima'};
+const flText=f=>[f.res?`Más 1d${f.d||4} en cada tirada de ${RES[f.res]}`:'',...Object.entries(f.b||{}).filter(([,v])=>v).map(([n,v])=>`${v>0?'+':''}${v} ${n}`)].filter(Boolean).join(' · ');
+const COLS=[['roj','#c0392b'],['azul','#2e6fd6'],['verd','#2f9e44'],['marr','#8d5a2b'],['blanc','#f2f2f2'],['morad','#8e44ad'],['amaril','#e6b800'],['rosa','#e76f9a'],['naranj','#e8801a'],['negr','#333333']];
+const guessCol=n=>{n=(n||'').toLowerCase();const m=COLS.find(([k])=>n.includes(k));return m?m[1]:'#888888'};
+function applyTables(t){t=t||DEF;CLS=Object.fromEntries(t.classes.map(c=>[c.n,[c.h,c.m,c.a]]));FLO=Object.fromEntries(t.flowers.map(f=>[f.n,{t:flText(f),k:f.res||'',d:f.d||4,b:f.b||{},col:f.col||guessCol(f.n)}]));REW=t.rewards;}
+applyTables();
+const clone=o=>JSON.parse(JSON.stringify(o));
+
+const sum=a=>a.reduce((x,y)=>x+y,0);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const chips=(a,k='')=>a.map(v=>`<span class="d ${k}">${v}</span>`).join('');
+const pts=L=>2*(Math.floor(L/5)+1);
+const bon=c=>(FLO[c.flower]||{}).b||{};
+const dv=(c,i)=>{const k=c.sl&&c.sl[i];return k>=0&&c.pool[k]!==undefined?c.pool[k]:null};
+const total=(c,i)=>{const d=dv(c,i);return d===null?null:Math.min(20,d+(bon(c)[STATS[i]]||0))};
+const TX=[['trasfondo','Trasfondo del personaje'],['profesion','Profesión'],['alineamiento','Alineamiento'],['background','Background']];
+const texts=(c,m)=>TX.map(([k,l])=>`<label>${l}</label><textarea ${m==='dm'?`data-sv="t:${k}"`:`data-pt="${k}"`} style="min-height:90px">${esc(c[k]||'')}</textarea>`).join('');
+const rwLv=L=>Array.from({length:L},(_,i)=>i+1).filter(n=>n%5!==0);
+const chipsB=a=>a.map((v,i)=>`<span class="d${i===0?' base':''}">${v}</span>`).join('');
+const av=(c,m)=>c.icon?`<img class="${m==='card'?'ic':'hero'}" src="${esc(c.icon)}" alt="">`:`<span class="av">${esc(((c.name||'?')[0]||'?').toUpperCase())}</span>`;
+const iconCtl=c=>`<div class="bar"><label class="btn">Subir foto<input type="file" accept="image/*" data-icon hidden></label>${c.icon?'<button class="o" data-act="icoff">Quitar foto</button>':''}</div>`;
+const ink=h=>{const m=/^#?([0-9a-f]{6})$/i.exec(h||'');if(!m)return '#fff';const n=parseInt(m[1],16);return (0.299*(n>>16&255)+0.587*(n>>8&255)+0.114*(n&255))>150?'#222':'#fff'};
+const fcol=c=>(FLO[c.flower]||{}).col||'';
+const cst=col=>col?`style="background:${col};color:${ink(col)}"`:'';
+const chipsC=(a,col,first)=>a.map((v,i)=>`<span class="d${first&&i===0?' base':''}" ${cst(col)}>${v}</span>`).join('');
+const tag=c=>`<span class="tag" ${cst(fcol(c))}>${esc(c.flower)}</span>`;
+const DISCORD=(CFG.discordWebhook||'').trim();
+const DMSG=Object.assign({registro:'{jugador} se ha registrado',personaje:'{personaje}, de {jugador}, ha sido creado'},CFG.discordMessages||{});
+function discord(k,v){if(!DISCORD)return;const t=(DMSG[k]||'').replace(/\{jugador\}/g,v.jugador||'').replace(/\{personaje\}/g,v.personaje||'');if(!t)return;
+ fetch(DISCORD,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:'Fichas de personaje',content:t.slice(0,1900),allowed_mentions:{parse:[]}})}).catch(()=>{})}
+const sTot=o=>o?sum(o.r)+sum(o.f):0;
+const hpTot=c=>c.hp?c.hp.r.reduce((t,x,i)=>t+Math.max(1,x+(c.hp.f[i]||0)+c.hp.mod),0):0;
+const usedDice=c=>(c.hp?c.hp.r.length:0)+(c.ma?c.ma.r.length:0)+(c.an?c.an.r.length:0);
+const finOf=c=>({stats:Object.fromEntries(STATS.map((n,i)=>[n,total(c,i)])),hp:hpTot(c),mana:sTot(c.ma),anima:sTot(c.an),puntos:pts(c.level)});
+
+/* ---------- estado ---------- */
+let DB=null,U=null,ME={id:null,dm:false},cfg={maxLevel:1},P={prof:null,grants:[],chars:[]},DM={},view={mode:'player',pid:null,cid:null},sel=null,busy=false,pend=false,wq=Promise.resolve();
+let DR={},NT=[];
+const WS=fn=>{wq=wq.then(fn).catch(()=>{})};
+const arr=q=>q.docs.map(d=>({id:d.id,...d.data()}));
+const toast=m=>{$('msg').textContent=m};
+const W=fn=>{wq=wq.then(fn).catch(e=>toast('No se pudo guardar: '+((e&&e.message)||e)))};
+const chRef=c=>DB.doc(`players/${ME.id}/chars/${c.id}`);
+const curChar=()=>view.mode==='player'&&view.cid?P.chars.find(x=>x.id===view.cid):null;
+const run=async fn=>{if(busy)return;busy=true;unlock();try{await fn()}catch(e){toast(String((e&&e.message)||e))}finally{busy=false}};
+const typing=()=>{const a=document.activeElement;return a&&$('app').contains(a)&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)};
+function schedule(){if(typing()){pend=true;return}render()}
+document.addEventListener('focusout',()=>{if(pend)setTimeout(()=>{if(!typing()){pend=false;render()}},60)});
+
+/* ---------- vistas ---------- */
+function sheet(c,dm,own){
+ const cl=CLS[c.cls]||[0,0,0],fi=c.fin,b=bon(c),used=new Set(c.sl||[]),pool=c.pool||[],free=own&&fi?fi.puntos-sum(Object.values(DR)):0;
+ let h=`<div class="bar">${av(c,'big')}<div><h2 style="margin:0">${esc(c.name)} · ${esc(c.cls)} · Nivel ${c.level}</h2><p class="mut" style="margin:0">${tag(c)} ${esc((FLO[c.flower]||{}).t||'')}</p></div></div>${own||dm?iconCtl(c):''}`;
+ if(own&&fi)h+=free>0||sum(Object.values(DR))?`<div class="pts">Puntos de estadística por repartir:<b>${free}</b><small>Pulsa + junto a la estadística donde quieras sumarlos (máximo 20 en cada una) y luego confirma.</small>${sum(Object.values(DR))?'<button data-act="pc">Confirmar reparto</button>':''}</div>`:'<div class="pts no">Sin puntos de estadística por repartir.</div>';
+ h+='<div class="sc"><table><tr><th>Estadística</th><th>Dado</th><th>Flor</th><th>Total</th><th>Mod</th></tr>'+STATS.map((n,i)=>{const d=dv(c,i),t=fi?fi.stats[n]:total(c,i);
+  return `<tr><td>${n}</td><td>${d??'—'}</td><td>${b[n]?`<span class="tag" ${cst(fcol(c))}>${sg(b[n])}</span>`:''}</td><td>${dm&&fi?`<input type="number" data-sv="s:${n}" value="${t}">`:own&&fi?`${t+(DR[n]||0)} ${free>0&&t+(DR[n]||0)<20?`<button class="o" data-act="pp" data-n="${n}" data-d="1">+</button>`:''}${DR[n]?`<button class="o" data-act="pp" data-n="${n}" data-d="-1">−</button>`:''}`:(t??'—')}</td><td>${t==null?'':sg(mod(own?t+(DR[n]||0):t))}</td></tr>`}).join('')+'</table></div>';
+ if(pool.length)h+=`<p class="mut">Dados tirados: ${chips(pool)}<br>${c.hp?'Descartados':'Sin colocar'}: ${chips(pool.filter((_,k)=>!used.has(k)))||'ninguno'}</p>`;
+ const rc=key=>(FLO[c.flower]||{}).k===({hp:'hp',mana:'ma',anima:'an'}[key])?fcol(c):'';
+ const res=(t,o,die,key,ex)=>{if(!die)return `<p>${t}: esta clase no tira dado.</p>`;if(!o||!o.r.length)return `<p class="mut">${t}: sin tirar</p>`;
+  return `<p><b>${t}</b> (d${die}): ${chipsC(o.r,'',true)}${o.f.length?' + flor '+chipsC(o.f,rc(key)):''}${ex||''} → ${dm&&fi?`<input type="number" data-sv="f:${key}" value="${fi[key]}">`:`<b>${fi?fi[key]:(key==='hp'?hpTot(c):sTot(o))}</b>`}</p>`};
+ h+=res('Vida',c.hp,cl[0],'hp',c.hp?` · Con ${c.hp.con} (${sg(c.hp.mod)} por dado)`:'')+res('Maná',c.ma,cl[1],'mana')+res('Ánima',c.an,cl[2],'anima');
+ let ri=0;h+='<h3>Recompensas por nivel</h3><ul>'+Array.from({length:c.level+1},(_,i)=>i).map(n=>n%5===0?`<li>Nivel ${n}: +2 puntos de estadísticas</li>`:`<li>Nivel ${n} (${REW[n%10]}): ${c.rw?'<b>'+c.rw.r[ri++]+'</b>':'sin tirar'}</li>`).join('')+'</ul>';
+ const pu=fi?fi.puntos:pts(c.level);
+ h+=own?'':`<p>Puntos de estadística por repartir: ${dm&&fi?`<input type="number" data-sv="f:puntos" value="${pu}">`:`<b>${pu}</b>`}</p>`;
+ h+=texts(c,dm?'dm':'me');
+ if(dm)h+='<div class="bar"><button data-act="save">Guardar cambios</button></div>';
+ return h;
+}
+const files=(cs,p)=>cs.length?`<div class="files">${cs.map(c=>`<button class="file${c.icon?' has':''}" ${c.icon&&themeVars(c)?`style="${themeVars(c)}"`:''} data-act="open" data-p="${p}" data-c="${c.id}">${av(c,'card')}<span>${esc(c.name)}<small>${esc(c.cls)} · Nv ${c.level} · ${c.done?'completa':'en curso'}${c.fin&&c.fin.puntos>0?' · '+c.fin.puntos+' pts por repartir':''}</small></span></button>`).join('')}</div>`:'';
+
+function vFlow(c){
+ const cl=CLS[c.cls],lk=!!c.hp,placed=!!c.sl.length&&c.sl.every(x=>x>=0),b=bon(c),used=new Set(c.sl),n=8+(+c.extra||0);
+ if(c.done)return `<section>${sheet(c,false,true)}<p class="mut">Ficha completa y enviada automáticamente al DM.</p></section>`;
+ let h=`<section><div class="bar">${av(c,'big')}<div><h2 style="margin:0">${esc(c.name)} · ${esc(c.cls)} · Nivel ${c.level}</h2><p class="mut" style="margin:0">${tag(c)} ${esc((FLO[c.flower]||{}).t||'')}</p></div></div>${iconCtl(c)}</section><section><h2>1 · Estadísticas</h2>`;
+ if(!c.pool.length)h+=`<p class="s">Se tiran ${n} dados d20${c.extra?` (8 base + ${c.extra} de bono)`:''}. Después coloca ocho en las casillas; los sobrantes se descartan.</p><div class="bar"><button data-act="st">Tirar dados de estadísticas</button></div>`;
+ else{const at=k=>lk?'':`data-id="${k}"`;
+  h+=`<p class="s">${lk?'Estadísticas fijadas.':'Arrastra un dado a cada casilla (en móvil: toca un dado y luego la casilla).'}</p><div class="mut">Dados disponibles</div><div id="pool" class="pool">${c.pool.map((v,k)=>used.has(k)?'':`<span class="d ${sel===k?'sel':''}" ${at(k)}>${v}</span>`).join('')||'<span class="mut">Todos colocados</span>'}</div><div class="slots">`+
+  STATS.map((nm,i)=>{const k=c.sl[i],d=k>=0?c.pool[k]:null;return `<div class="slot" data-slot="${i}"><b>${nm}</b>${d!==null?`<span class="d ${sel===k?'sel':''}" ${at(k)} ${b[nm]?cst(fcol(c)):''}>${d}</span>${b[nm]?`<small><span class="tag" ${cst(fcol(c))}>${sg(b[nm])}</span></small>`:''}<small>mod ${sg(mod(Math.min(20,d+(b[nm]||0))))}</small>`:'<small>—</small>'}</div>`}).join('')+'</div>';}
+ const base=!!c.hp,left=c.level-(base?usedDice(c)-(c.hp.nb||0):0);
+ const row=(k,t,d,o)=>{const col=(FLO[c.flower]||{}).k===k?fcol(c):'';if(!d)return `<div class="res"><b>${t}</b> <span class="mut">tu clase no tiene dado de ${t.toLowerCase()}</span></div>`;
+  return `<div class="res"><b>${t}</b> (d${d})${k==='hp'&&c.hp?` <span class="mut">Con ${c.hp.con}: ${sg(c.hp.mod)} por dado</span>`:''}<div>${o&&o.r.length?chipsC(o.r,'',true)+(o.f.length?' + flor '+chipsC(o.f,col):'')+` → <b>${k==='hp'?hpTot(c):sTot(o)}</b>`:'<span class="mut">sin tiradas</span>'}</div>
+  <div class="bar"><input id="q-${k}" type="number" min="1" max="${Math.max(1,left)}" value="1" style="width:70px"><button data-act="rd" data-res="${k}" ${base&&left>0?'':'disabled'}>Tirar dado(s) de ${t.toLowerCase()}</button></div></div>`};
+ h+=`</section><section><h2>2 · Tiradas obligatorias (nivel 0)</h2>`+(base?'<p class="s">Hecho. El primer dado de cada recurso (en tono más oscuro) es la tirada obligatoria.</p>':`<p class="s">Se tira un dado de cada recurso de tu clase (vida, maná y ánima). Son obligatorias y no cuentan para el reparto de tu nivel.</p><div class="bar"><button data-act="base" ${placed?'':'disabled'}>Tirar dados obligatorios</button></div>${placed?'':'<p class="mut">Coloca primero los ocho dados de estadística.</p>'}`)+'</section>';
+ h+=`<section><h2>3 · Reparto de dados por nivel</h2><p class="s">Tienes <b>${left}</b> de ${c.level} dado${c.level>1?'s':''} para repartir entre tus recursos. Puedes tirar de uno en uno y decidir dónde va el siguiente.</p>${base?'':'<p class="mut">Haz antes las tiradas obligatorias.</p>'}${row('hp','Vida',cl[0],c.hp)}${row('ma','Maná',cl[1],c.ma)}${row('an','Ánima',cl[2],c.an)}</section>`;
+ const nr=rwLv(c.level).length;
+ h+=`<section><h2>4 · Recompensas por nivel</h2><p class="s">Hay ${nr} tirada${nr>1?'s':''} de recompensa. El nivel 0 y los niveles terminados en 0 o 5 dan 2 puntos de estadística y no tiran. Al terminar, la ficha se envía sola al DM.</p><div class="bar"><button data-act="rw" ${base&&left===0?'':'disabled'}>Tirar recompensas</button></div>${base&&left>0?'<p class="mut">Reparte antes todos tus dados.</p>':''}</section>`;
+ h+=`<section><h2>Sobre tu personaje</h2><p class="mut">Se guarda al salir de cada campo.</p>${texts(c,'me')}</section>`;
+ return h;
+}
+function vPlayer(){
+ if(!P.prof)return '<section><h2>Bienvenido</h2><p class="s">Escribe tu nombre para que el DM te reconozca.</p><div class="g"><div><label>Tu nombre</label><input id="pn"></div></div><div class="bar"><button data-act="prof">Continuar</button></div></section>';
+ const c=view.cid&&P.chars.find(x=>x.id===view.cid);
+ if(c)return '<div class="bar"><button class="o" data-act="back">&lt; Volver a mis personajes</button></div>'+vFlow(c);
+ const used=new Set(P.chars.map(x=>x.grant)),free=P.grants.filter(g=>!used.has(g.id)),ml=cfg.maxLevel||1;
+ let h=`<section><h2>Hola, ${esc(P.prof.name)}</h2>${P.chars.length?files(P.chars,ME.id):'<p class="s">Aún no tienes personajes.</p>'}</section>`;
+ if(!free.length)return h+'<section><p class="s">El DM aún no te ha permitido crear un personaje nuevo.</p></section>';
+ return h+`<section><h2>Nuevo personaje</h2>${free[0].extra?`<p class="s">Bono: ${free[0].extra} dado(s) d20 extra en estadísticas.</p>`:''}<div class="g"><div><label>Nombre</label><input id="cn"></div>
+ <div><label>Clase</label><select id="cc">${Object.keys(CLS).map(k=>`<option value="${k}">${k}</option>`).join('')}</select></div>
+ <div><label>Flor</label><select id="cf">${Object.entries(FLO).map(([k,v])=>`<option value="${k}">${k} — ${v.t}</option>`).join('')}</select></div>
+ <div><label>Nivel (máximo ${ml})</label><select id="cl">${Array.from({length:ml},(_,i)=>`<option>${i+1}</option>`).join('')}</select></div></div>
+ <p class="mut">Después de crear el personaje, estos datos no se pueden cambiar.</p><div class="bar"><button data-act="create">Crear y empezar tiradas</button></div></section>`;
+}
+const sOpt=v=>'<option value="">—</option>'+STATS.map(n=>`<option ${n===v?'selected':''}>${n}</option>`).join('');
+function vTables(){
+ if(!TD)TD=clone(TBL||DEF);
+ let h='<section><h2>Tablas de información</h2><p class="s">Solo el DM ve y edita esto. Los cambios se aplican a los personajes que se creen a partir de ahora; los ya creados conservan sus datos. Pon 0 si una clase no tiene ese dado.</p></section>';
+ h+='<section id="tbl"><h2>Clases</h2><div class="sc"><table><tr><th>Clase</th><th>Vida (d)</th><th>Maná (d)</th><th>Ánima (d)</th><th></th></tr>'+TD.classes.map((c,i)=>`<tr><td><input data-c="${i}" data-k="n" value="${esc(c.n)}" style="width:130px"></td><td><input type="number" data-c="${i}" data-k="h" value="${c.h}"></td><td><input type="number" data-c="${i}" data-k="m" value="${c.m}"></td><td><input type="number" data-c="${i}" data-k="a" value="${c.a}"></td><td><button class="o" data-act="tcdel" data-i="${i}">Quitar</button></td></tr>`).join('')+'</table></div><div class="bar"><button class="o" data-act="tcadd">Añadir clase</button></div>';
+ h+='<h2 style="margin-top:16px">Flores</h2>'+TD.flowers.map((f,i)=>{const be=Object.entries(f.b||{});
+  return `<div class="fcard"><div class="g"><div><label>Nombre</label><input data-f="${i}" data-k="n" value="${esc(f.n)}"></div>
+  <div><label>Dado extra en cada tirada de…</label><select data-f="${i}" data-k="res">${[['','Ninguno'],['hp','Vida'],['ma','Maná'],['an','Ánima']].map(([v,t])=>`<option value="${v}" ${v===(f.res||'')?'selected':''}>${t}</option>`).join('')}</select></div>
+  <div><label>Caras del dado extra</label><input type="number" data-f="${i}" data-k="d" value="${f.d||4}"></div>
+  <div><label>Color</label><input type="color" data-f="${i}" data-k="col" value="${f.col||guessCol(f.n)}" style="padding:2px;height:38px"></div></div>
+  <div class="g" style="margin-top:6px">${[0,1].map(n=>`<div><label>Bono de estadística ${n+1}</label><select data-f="${i}" data-k="s${n}">${sOpt(be[n]&&be[n][0])}</select></div><div><label>Valor</label><input type="number" data-f="${i}" data-k="v${n}" value="${be[n]?be[n][1]:0}"></div>`).join('')}</div>
+  <p class="mut">Efecto: ${esc(flText(f))||'—'}</p><button class="o" data-act="tfdel" data-i="${i}">Quitar flor</button></div>`}).join('')+'<div class="bar"><button class="o" data-act="tfadd">Añadir flor</button></div>';
+ h+='<h2 style="margin-top:16px">Recompensas por nivel</h2><p class="s">Según la última cifra del nivel. Los niveles múltiplos de 5 dan siempre 2 puntos de estadística y no tiran dado.</p>'+TD.rewards.map((t,i)=>`<div class="bar"><b style="width:36px">X${i}</b><input data-r="${i}" value="${esc(t)}" style="flex:1"></div>`).join('');
+ h+=`<h2 style="margin-top:16px">Estadísticas</h2><p class="mut">${STATS.join(' · ')} (no editable)</p><div class="bar"><button data-act="tsave">Guardar tablas</button><button class="o" data-act="treset">Restaurar valores iniciales</button></div></section>`;
+ return h;
+}
+function grab(){if(!TD)return;
+ document.querySelectorAll('#tbl [data-c]').forEach(e=>{const c=TD.classes[+e.dataset.c],k=e.dataset.k;if(c)c[k]=k==='n'?e.value.trim():Math.max(0,Math.min(20,+e.value||0))});
+ document.querySelectorAll('#tbl [data-f]').forEach(e=>{const f=TD.flowers[+e.dataset.f];if(!f)return;const k=e.dataset.k;f._e=f._e||{};
+  if(k==='n')f.n=e.value.trim();else if(k==='res')f.res=e.value;else if(k==='col')f.col=e.value;else if(k==='d')f.d=Math.max(2,+e.value||4);else f._e[k]=e.value});
+ TD.flowers.forEach(f=>{if(f._e){const b={};[0,1].forEach(i=>{const n=f._e['s'+i],v=+f._e['v'+i]||0;if(n&&v)b[n]=(b[n]||0)+v});f.b=b;delete f._e}});
+ document.querySelectorAll('#tbl [data-r]').forEach(e=>{TD.rewards[+e.dataset.r]=e.value.trim()});}
+function ntSection(){const u=NT.filter(n=>!n.read);
+ return `<section><h2>Avisos${u.length?' ('+u.length+')':''}</h2>`+(u.length?u.slice(0,15).map(n=>`<div class="res"><b>${n.type==='new_player'?'Nuevo jugador':'Personaje terminado'}</b>: ${esc(n.type==='new_player'?n.name:`${n.name} ha terminado "${n.cname}"`)}<div class="bar">${n.type==='char_done'?`<button data-act="nview" data-id="${n.id}" data-p="${n.pid}" data-c="${n.cid}">Ver ficha</button>`:''}<button class="o" data-act="nread" data-id="${n.id}">Marcar como leído</button></div></div>`).join('')+'<div class="bar"><button class="o" data-act="nall">Marcar todo como leído</button></div>':'<p class="s">Sin avisos nuevos.</p>')
+  +(('Notification' in window&&Notification.permission==='default')?'<div class="bar"><button class="o" data-act="nperm">Activar avisos del navegador</button></div><p class="mut">Con los avisos activados, el navegador te avisa mientras la app esté abierta.</p>':'')+'</section>'}
+function alertNt(d){if(d.read)return;const m=d.type==='new_player'?`Nuevo jugador: ${d.name}`:`${d.name} ha terminado el personaje ${d.cname}`;toast(m);
+ try{if('Notification' in window&&Notification.permission==='granted')new Notification('Fichas de personaje',{body:m})}catch(e){}}
+function vDM(){
+ if(view.cid){const p=DM[view.pid],c=p&&p.chars.find(x=>x.id===view.cid);
+  if(c)return `<div class="bar"><button class="o" data-act="back">&lt; Volver a todos los jugadores</button><button class="danger" data-act="delc" data-p="${view.pid}" data-c="${c.id}">Eliminar personaje</button></div><section><p class="mut">Jugador: ${esc(p.prof.name)}</p>${sheet(c,true)}</section>`;}
+ let h=ntSection()+`<section><h2>Ajustes</h2><div class="g"><div><label>Nivel máximo que pueden elegir los jugadores</label><input id="ml" type="number" min="1" max="30" value="${cfg.maxLevel||1}"></div></div><div class="bar"><button data-act="ml">Guardar</button></div></section>`;
+ const ps=Object.values(DM).sort((a,b)=>String(a.prof.name).localeCompare(b.prof.name));
+ if(!ps.length)h+='<section><p class="s">Aún no hay jugadores. Aparecerán aquí cuando abran la página y escriban su nombre.</p></section>';
+ ps.forEach(p=>{const used=new Set(p.chars.map(c=>c.grant)),free=p.grants.filter(g=>!used.has(g.id));
+  h+=`<section><h2>${esc(p.prof.name)}</h2><p class="mut">${p.chars.length} personaje(s) · ${free.length} permiso(s) sin usar</p>
+  <div class="bar"><label>Dados extra de bono <input data-xin="${p.id}" type="number" min="0" value="0" style="width:70px"></label><button data-act="grant" data-p="${p.id}">Permitir nuevo personaje</button><button class="danger" data-act="delp" data-p="${p.id}">Eliminar jugador</button></div>
+  ${free.map(g=>`<div class="mut">Permiso sin usar (+${g.extra||0} dados) <button class="o" data-act="rev" data-p="${p.id}" data-g="${g.id}">Revocar</button></div>`).join('')}${files(p.chars,p.id)}</section>`;});
+ return h;
+}
+function render(){
+ const A=$('app');if(!DB)return;
+ if(!ME.id){A.innerHTML=`<section><h2>Entrar</h2><div class="bar"><button data-act="google">Entrar con Google</button></div><p class="mut">o con correo y contraseña</p><div class="g"><div><label>Correo</label><input id="le" type="email" autocomplete="email"></div><div><label>Contraseña</label><input id="lp" type="password" autocomplete="current-password"></div></div><div class="bar"><button class="o" data-act="login">Entrar</button><button class="o" data-act="register">Crear cuenta</button></div></section>`;return}
+ let h=`<div class="bar"><span class="mut">${esc(ME.email||'')}</span><button class="o" data-act="out">Salir</button></div>`;
+ if(ME.dm)h+=`<div class="bar">${[['dm','Panel del DM'+(NT.some(n=>!n.read)?' ('+NT.filter(n=>!n.read).length+')':'')],['tables','Tablas'],['player','Mis personajes']].map(([v,t])=>`<button class="${view.mode===v?'':'o'}" data-act="mode" data-v="${v}">${t}</button>`).join('')}</div>`;
+ const body=ME.dm&&view.mode==='dm'?vDM():ME.dm&&view.mode==='tables'?vTables():vPlayer();
+ const cc=view.mode==='tables'?null:view.mode==='player'?curChar():(DM[view.pid]&&view.cid?DM[view.pid].chars.find(x=>x.id===view.cid):null);
+ const tv=themeVars(cc);A.innerHTML=h+(tv?`<div class="themed" style="${tv}">${body}</div>`:`<div>${body}</div>`);
+}
+
+/* ---------- tiradas ---------- */
+const roll={
+ async st(){const c=curChar();if(!c||c.pool.length)return;const v=await dice(20,8+(+c.extra||0));c.pool=v;c.sl=Array(8).fill(-1);W(()=>chRef(c).update({pool:v,sl:c.sl}));render();},
+ async base(){const c=curChar();if(!c||c.hp||!c.sl.length||c.sl.some(x=>x<0))return;
+  const cl=CLS[c.cls],fl=FLO[c.flower]||{},con=total(c,1),o={hp:{r:[],f:[]},ma:{r:[],f:[]},an:{r:[],f:[]}};let nb=0;
+  for(const [k,i] of [['hp',0],['ma',1],['an',2]]){const d=cl[i];if(!d)continue;nb++;const col=fl.k===k?fl.col:null;o[k].r=await dice(d,1);o[k].f=col?await dice(fl.d||4,1,col):[];}
+  c.hp={...o.hp,con,mod:mod(con),nb};c.ma=o.ma;c.an=o.an;W(()=>chRef(c).update({hp:c.hp,ma:c.ma,an:c.an}));render();},
+ async rd(k){const c=curChar();if(!c||c.rw||!c.hp)return;
+  const cl=CLS[c.cls],die=cl[{hp:0,ma:1,an:2}[k]],left=c.level-(usedDice(c)-c.hp.nb);if(!die||left<=0)return;
+  const q=Math.max(1,Math.min(left,+($('q-'+k)||{}).value||1)),fl=FLO[c.flower]||{};
+  const col=fl.k===k?fl.col:null,r=await dice(die,q),f=col?await dice(fl.d||4,q,col):[];
+  c[k].r=[...c[k].r,...r];c[k].f=[...c[k].f,...f];
+  W(()=>chRef(c).update({hp:c.hp,ma:c.ma,an:c.an}));render();},
+ async rw(){const c=curChar();if(!c||c.rw||!c.hp||usedDice(c)-c.hp.nb!==c.level)return;const r=await dice(20,rwLv(c.level).length);
+  c.rw={r};c.fin=finOf(c);c.done=true;W(()=>chRef(c).update({rw:c.rw,fin:c.fin,done:true}));if(!ME.dm)WS(()=>DB.doc('notifs/done_'+c.id).set({type:'char_done',pid:ME.id,name:(P.prof&&P.prof.name)||'',cname:c.name,cid:c.id,at:Date.now(),read:false}));if(!ME.dm)discord('personaje',{jugador:(P.prof&&P.prof.name)||'',personaje:c.name});render();}
+};
+
+/* ---------- arrastrar dados ---------- */
+function place(x,y,id){const c=curChar();if(!c||c.hp)return;
+ const el=document.elementFromPoint(x,y),sl=el&&el.closest('[data-slot]'),sa=[...c.sl],from=sa.indexOf(id);let ch=false;
+ if(sl){const i=+sl.dataset.slot,prev=sa[i];if(from>=0)sa[from]=prev;sa[i]=id;drop();ch=true}
+ else if(el&&el.closest('#pool')&&from>=0){sa[from]=-1;back();ch=true}
+ if(ch){c.sl=sa;W(()=>chRef(c).update({sl:sa}))}}
+let dr=null;
+document.addEventListener('pointerdown',e=>{const d=e.target.closest('.d[data-id]');if(d){unlock();pick();dr={id:+d.dataset.id,x:e.clientX,y:e.clientY,m:false,el:d};}});
+addEventListener('pointermove',e=>{if(!dr)return;
+ if(!dr.m&&Math.hypot(e.clientX-dr.x,e.clientY-dr.y)>8){dr.m=true;dr.g=dr.el.cloneNode(true);dr.g.className='d ghost';document.body.appendChild(dr.g);dr.el.style.opacity=.3;}
+ if(dr.m){dr.g.style.left=e.clientX-23+'px';dr.g.style.top=e.clientY-25+'px';}});
+addEventListener('pointerup',e=>{if(!dr)return;const d=dr;dr=null;
+ if(d.m){d.g.remove();place(e.clientX,e.clientY,d.id);sel=null;}else sel=sel===d.id?null:d.id;render();});
+addEventListener('pointercancel',()=>{if(dr){if(dr.g)dr.g.remove();dr=null;render();}});
+document.addEventListener('click',e=>{if(sel===null||e.target.closest('.d[data-id]'))return;
+ if(e.target.closest('[data-slot],#pool')){place(e.clientX,e.clientY,sel);sel=null;render();}});
+
+/* ---------- acciones ---------- */
+function iconTarget(){if(view.mode==='player'){const c=curChar();return c&&{c,ref:chRef(c)}}const p=DM[view.pid],c=p&&p.chars.find(x=>x.id===view.cid);return c&&{c,ref:DB.doc(`players/${view.pid}/chars/${c.id}`)}}
+function setIcon(v){const t=iconTarget();if(!t)return;t.c.icon=v;W(()=>t.ref.update({icon:v}));render()}
+const CS=280;let CR=null,cd=null;
+function cropOut(){const o=document.createElement('canvas');o.width=o.height=256;const f=256/CS;o.getContext('2d').drawImage(CR.img,CR.ox*f,CR.oy*f,CR.img.width*CR.s*f,CR.img.height*CR.s*f);return o}
+function encodeIcon(cv){let alpha=false;const dt=cv.getContext('2d').getImageData(0,0,cv.width,cv.height).data;for(let i=3;i<dt.length;i+=4)if(dt[i]<250){alpha=true;break}
+ let sz=256;for(let k=0;k<5;k++){const c=document.createElement('canvas');c.width=c.height=sz;c.getContext('2d').drawImage(cv,0,0,sz,sz);
+  let d=alpha?c.toDataURL('image/webp',.85):c.toDataURL('image/jpeg',.82);if(alpha&&!d.startsWith('data:image/webp'))d=c.toDataURL('image/png');
+  if(d.length<=90000)return d;sz=Math.round(sz*.8)}return null}
+function finishCrop(){const d=encodeIcon(cropOut());CR=null;if(!d){toast('La imagen es demasiado grande.');return}setIcon(d)}
+function drawCrop(){const x=$('ccv').getContext('2d');x.clearRect(0,0,CS,CS);x.drawImage(CR.img,CR.ox,CR.oy,CR.img.width*CR.s,CR.img.height*CR.s)}
+function clampCrop(){CR.ox=Math.min(0,Math.max(CS-CR.img.width*CR.s,CR.ox));CR.oy=Math.min(0,Math.max(CS-CR.img.height*CR.s,CR.oy))}
+function readIcon(file){const img=new Image(),u=URL.createObjectURL(file);
+ img.onload=()=>{const min=Math.max(CS/img.width,CS/img.height);CR={img,min,s:min,ox:(CS-img.width*min)/2,oy:0};clampCrop();
+  if(Math.abs(img.width-img.height)/Math.max(img.width,img.height)<.02){finishCrop();return}
+  $('czoom').value=1;drawCrop();$('crop').style.display='flex'};
+ img.onerror=()=>toast('No se pudo leer la imagen.');img.src=u}
+$('ccv').addEventListener('pointerdown',e=>{if(!CR)return;cd={x:e.clientX,y:e.clientY,ox:CR.ox,oy:CR.oy};$('ccv').setPointerCapture(e.pointerId)});
+$('ccv').addEventListener('pointermove',e=>{if(!cd||!CR)return;const k=CS/$('ccv').clientWidth;CR.ox=cd.ox+(e.clientX-cd.x)*k;CR.oy=cd.oy+(e.clientY-cd.y)*k;clampCrop();drawCrop()});
+$('ccv').addEventListener('pointerup',()=>{cd=null});
+$('czoom').addEventListener('input',e=>{if(!CR)return;const old=CR.s,cx=(CS/2-CR.ox)/old,cy=(CS/2-CR.oy)/old;CR.s=CR.min*(+e.target.value);CR.ox=CS/2-cx*CR.s;CR.oy=CS/2-cy*CR.s;clampCrop();drawCrop()});
+$('cok').onclick=()=>{$('crop').style.display='none';if(CR)finishCrop()};
+$('ccancel').onclick=()=>{$('crop').style.display='none';CR=null};
+
+const PAL=new Map();
+function rgb2hsl(r,g,b){r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2,d=mx-mn;let h=0,sa=0;
+ if(d){sa=d/(1-Math.abs(2*l-1));h=mx===r?((g-b)/d)%6:mx===g?(b-r)/d+2:(r-g)/d+4;h=(h*60+360)%360}return [h,sa,l]}
+function extractPal(src){const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=c.height=32;const x=c.getContext('2d');x.drawImage(im,0,0,32,32);
+ const d=x.getImageData(0,0,32,32).data,B=Array.from({length:24},()=>({w:0,h:0,s:0}));let tot=0;
+ for(let i=0;i<d.length;i+=4){if(d[i+3]<128)continue;const [h,sa,l]=rgb2hsl(d[i],d[i+1],d[i+2]),w=sa*(1-Math.abs(2*l-1));if(w<.05)continue;const b=B[Math.floor(h/15)%24];b.w+=w;b.h+=h*w;b.s+=sa*w;tot+=w}
+ let best=B[0];B.forEach(b=>{if(b.w>best.w)best=b});PAL.set(src,tot>2&&best.w>0?{h:best.h/best.w,s:best.s/best.w}:false);schedule()};im.src=src}
+function themeVars(c){if(!c||!c.icon)return '';const p=PAL.get(c.icon);if(p===undefined){PAL.set(c.icon,null);extractPal(c.icon);return ''}if(!p)return '';
+ const H=Math.round(p.h),S=Math.round(Math.max(35,Math.min(80,p.s*100))),C=(H+180)%360,hs=(h,sa,l)=>`hsl(${h} ${sa}% ${l}%)`;
+ return `--ac:${hs(H,S,68)};--ac2:${hs(H,Math.round(S*.4),30)};--bd:${hs(H,Math.round(S*.3),36)};--card:${hs(H,Math.round(S*.5),22)};--bg:${hs(H,Math.round(S*.45),14)};--tx:${hs(H,15,94)};--mut:${hs(H,15,72)};--comp:${hs(C,S,62)};--pbg:${hs(H,Math.round(S*.5),13)};--onac:#111;--oncomp:#111;color-scheme:dark`}
+function saveSheet(){const p=DM[view.pid],c=p&&p.chars.find(x=>x.id===view.cid);if(!c)return;const o={},fin=c.fin?{...c.fin,stats:{...c.fin.stats}}:null;
+ document.querySelectorAll('#app [data-sv]').forEach(el=>{const k=el.dataset.sv;
+  if(k[0]==='s'){if(fin)fin.stats[k.slice(2)]=+el.value||0}else if(k[0]==='f'){if(fin)fin[k.slice(2)]=+el.value||0}else o[k.slice(2)]=el.value;});
+ if(fin){o.fin=fin;c.fin=fin;}
+ W(()=>DB.doc(`players/${view.pid}/chars/${c.id}`).update(o));toast('Guardado');}
+$('app').addEventListener('change',e=>{const t=e.target;if(t.dataset.sv)saveSheet();else if(t.dataset.icon!==undefined&&t.files&&t.files[0]){const f=t.files[0];t.value='';readIcon(f)}else if(t.closest('#tbl'))grab();
+ else if(t.dataset.pt){const c=curChar();if(c){const k=t.dataset.pt,v=t.value.slice(0,3000);c[k]=v;W(()=>chRef(c).update({[k]:v}));toast('Guardado')}}});
+$('app').addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b||b.disabled)return;const a=b.dataset.act,d=b.dataset;toast('');
+ if(a==='google')signInWithPopup(auth,new GoogleAuthProvider()).catch(e=>toast(authMsg(e)));
+ else if(a==='login')signInWithEmailAndPassword(auth,$('le').value.trim(),$('lp').value).catch(e=>toast(authMsg(e)));
+ else if(a==='register')createUserWithEmailAndPassword(auth,$('le').value.trim(),$('lp').value).catch(e=>toast(authMsg(e)));
+ else if(a==='out')signOut(auth);
+ else if(a==='mode'){DR={};if(d.v==='tables')TD=clone(TBL||DEF);view.mode=d.v;view.cid=view.pid=null;render()}
+ else if(a==='back'){DR={};view.cid=view.pid=null;render()}
+ else if(a==='open'){DR={};view.pid=d.p;view.cid=d.c;render()}
+ else if(a==='prof'){const n=$('pn').value.trim();if(!n)return;P.prof={name:n};W(()=>DB.doc('players/'+ME.id).set({name:n,email:ME.email||''}));if(!ME.dm)WS(()=>DB.doc('notifs/reg_'+ME.id).set({type:'new_player',pid:ME.id,name:n,cname:'',cid:'',at:Date.now(),read:false}));if(!ME.dm)discord('registro',{jugador:n});render()}
+ else if(a==='create'){const n=$('cn').value.trim();if(!n){toast('Ponle un nombre al personaje.');return}
+  const used=new Set(P.chars.map(x=>x.grant)),g=P.grants.find(x=>!used.has(x.id));if(!g)return;
+  const cid=g.id,doc={name:n,cls:$('cc').value,flower:$('cf').value,level:Math.min(+$('cl').value||1,cfg.maxLevel||1),grant:g.id,extra:+g.extra||0,created:Date.now(),pool:[],sl:[],done:false};
+  P.chars.push({id:cid,...doc});view.cid=cid;view.pid=ME.id;W(()=>DB.doc(`players/${ME.id}/chars/${cid}`).set(doc));render()}
+ else if(a==='st'||a==='rw')run(()=>roll[a]());
+ else if(a==='rd')run(()=>roll.rd(d.res));
+ else if(a==='base')run(()=>roll.base());
+ else if(a==='icoff')setIcon('');
+ else if(a==='delc'){const pl=DM[d.p],c=pl&&pl.chars.find(x=>x.id===d.c);if(!c||!confirm(`¿Eliminar el personaje "${c.name}"?\n\nSe borrará su ficha y no se podrá recuperar. El jugador recuperará el permiso para crear otro (puedes revocarlo después).`))return;
+  pl.chars=pl.chars.filter(x=>x.id!==d.c);view.cid=view.pid=null;W(()=>DB.doc(`players/${d.p}/chars/${d.c}`).delete());toast('Personaje eliminado');render()}
+ else if(a==='delp'){const pl=DM[d.p];if(!pl||!confirm(`¿Eliminar al jugador "${pl.prof.name}"?\n\nSe borrarán también todos sus personajes y permisos. Esta acción no se puede deshacer.`))return;
+  const cs=[...pl.chars],gs=[...pl.grants];delete DM[d.p];
+  cs.forEach(c=>W(()=>DB.doc(`players/${d.p}/chars/${c.id}`).delete()));gs.forEach(g=>W(()=>DB.doc(`permits/${d.p}/grants/${g.id}`).delete()));
+  W(()=>DB.doc(`players/${d.p}`).delete());toast('Jugador eliminado');render()}
+ else if(a==='nread'){const n=NT.find(x=>x.id===d.id);if(n){n.read=true;W(()=>DB.doc('notifs/'+d.id).update({read:true}))}render()}
+ else if(a==='nall'){NT.filter(n=>!n.read).forEach(n=>{n.read=true;W(()=>DB.doc('notifs/'+n.id).update({read:true}))});render()}
+ else if(a==='nview'){const n=NT.find(x=>x.id===d.id);if(n){n.read=true;W(()=>DB.doc('notifs/'+d.id).update({read:true}))}DR={};view.pid=d.p;view.cid=d.c;render()}
+ else if(a==='nperm'){Notification.requestPermission().then(()=>render())}
+ else if(a==='tcadd'){grab();TD.classes.push({n:'Nueva clase',h:6,m:4,a:4});render()}
+ else if(a==='tcdel'){grab();TD.classes.splice(+d.i,1);render()}
+ else if(a==='tfadd'){grab();TD.flowers.push({n:'Nueva flor',res:'',d:4,b:{},col:'#888888'});render()}
+ else if(a==='tfdel'){grab();TD.flowers.splice(+d.i,1);render()}
+ else if(a==='treset'){if(confirm('¿Restaurar las tablas iniciales? Se perderán los cambios sin guardar.')){TD=clone(DEF);render()}}
+ else if(a==='tsave'){grab();const cn=TD.classes.map(c=>c.n),fn=TD.flowers.map(f=>f.n);
+  if(!cn.length||!fn.length||cn.some(x=>!x)||fn.some(x=>!x)||new Set(cn).size!==cn.length||new Set(fn).size!==fn.length){toast('Revisa los nombres: no pueden estar vacíos ni repetidos.');return}
+  const doc={classes:TD.classes.map(c=>({n:c.n,h:c.h,m:c.m,a:c.a})),flowers:TD.flowers.map(f=>({n:f.n,res:f.res||'',d:f.d||4,b:f.b||{},col:f.col||guessCol(f.n)})),rewards:TD.rewards.slice(0,10),classNames:cn,flowerNames:fn};
+  TBL=doc;applyTables(doc);W(()=>DB.doc('config/tables').set(doc));toast('Tablas guardadas');render()}
+ else if(a==='pp'){const c=curChar();if(!c||!c.fin)return;const dl=+d.d,n=d.n;if(dl>0&&(c.fin.puntos-sum(Object.values(DR))<=0||c.fin.stats[n]+(DR[n]||0)>=20))return;if(dl<0&&!(DR[n]>0))return;DR[n]=(DR[n]||0)+dl;render()}
+ else if(a==='pc'){const c=curChar();if(!c||!c.fin)return;const fin={...c.fin,stats:{...c.fin.stats}};let g=0;STATS.forEach(n=>{const v=DR[n]||0;fin.stats[n]+=v;g+=v});
+  if(!g||g>fin.puntos)return;fin.puntos-=g;c.fin=fin;DR={};W(()=>chRef(c).update({fin}));toast('Puntos repartidos');render()}
+ else if(a==='ml'){const n=Math.max(1,Math.min(30,+$('ml').value||1));cfg.maxLevel=n;W(()=>DB.doc('config/main').set({maxLevel:n}));toast('Nivel máximo guardado: '+n)}
+ else if(a==='grant'){const x=Math.max(0,+document.querySelector(`[data-xin="${d.p}"]`).value||0),gid='g'+Date.now().toString(36);
+  DM[d.p].grants.push({id:gid,extra:x});W(()=>DB.doc(`permits/${d.p}/grants/${gid}`).set({extra:x,at:Date.now()}));render()}
+ else if(a==='rev'){DM[d.p].grants=DM[d.p].grants.filter(g=>g.id!==d.g);W(()=>DB.doc(`permits/${d.p}/grants/${d.g}`).delete());render()}
+ else if(a==='save')saveSheet();
+});
+
+/* ---------- Firebase: acceso y datos ---------- */
+let auth,db,subs=[];
+const authMsg=e=>({'auth/invalid-credential':'Correo o contraseña incorrectos.','auth/email-already-in-use':'Ese correo ya tiene cuenta: usa Entrar.','auth/weak-password':'La contraseña necesita al menos 6 caracteres.','auth/invalid-email':'Correo no válido.','auth/popup-closed-by-user':'Se cerró la ventana de acceso.'}[e&&e.code]||('Error: '+((e&&e.code)||e)));
+const unsubAll=()=>{subs.forEach(f=>f());subs=[]};
+(function boot(){
+ if(firebaseConfig.apiKey.startsWith('PEGA')){$('app').innerHTML='<section><h2>Falta configurar Firebase</h2><p>Abre index.html y pega tu configuración de Firebase (mira la guía LEEME.md).</p></section>';return}
+ const app=initializeApp(firebaseConfig);auth=getAuth(app);db=getFirestore(app);
+ DB={doc:p=>{const r=doc(db,p);return {set:d=>setDoc(r,d),update:d=>updateDoc(r,d),delete:()=>deleteDoc(r),onSnapshot:(f,e)=>{subs.push(onSnapshot(r,s=>f({exists:s.exists(),data:()=>s.data()}),e))}}},
+  collection:p=>({onSnapshot:(f,e)=>{subs.push(onSnapshot(collection(db,p),q=>f({docs:q.docs.map(d=>({id:d.id,data:()=>d.data()})),changes:q.docChanges().map(c=>({type:c.type,data:()=>c.doc.data()}))}),e))}})};
+ onAuthStateChanged(auth,async u=>{
+  unsubAll();P={prof:null,grants:[],chars:[]};DM={};cfg={maxLevel:1};view={mode:'player',pid:null,cid:null};
+  if(!u){ME={id:null,dm:false};render();return}
+  ME={id:u.uid,email:u.email,dm:false};
+  try{await getDoc(doc(db,'dmcheck/x'));ME.dm=true}catch(e){}
+  view.mode=ME.dm?'dm':'player';
+  const er=e=>toast('Error de datos: '+((e&&e.code)||e));
+  DB.doc('config/main').onSnapshot(s=>{if(s.exists)cfg=s.data();schedule()},er);
+  DB.doc('config/tables').onSnapshot(s=>{TBL=s.exists?s.data():null;applyTables(TBL);schedule()},er);
+  DB.doc('players/'+ME.id).onSnapshot(s=>{P.prof=s.exists?s.data():null;schedule()},er);
+  DB.collection(`permits/${ME.id}/grants`).onSnapshot(q=>{P.grants=arr(q);schedule()},er);
+  DB.collection(`players/${ME.id}/chars`).onSnapshot(q=>{P.chars=arr(q);schedule()},er);
+  if(ME.dm){let first=true;DB.collection('notifs').onSnapshot(q=>{NT=arr(q).sort((a,b)=>b.at-a.at);if(!first)q.changes.filter(c=>c.type==='added').forEach(c=>alertNt(c.data()));first=false;schedule()},er)}
+  if(ME.dm)DB.collection('players').onSnapshot(q=>{q.docs.forEach(d=>{const id=d.id;let p=DM[id];
+   if(!p){p=DM[id]={id,prof:d.data(),grants:[],chars:[]};
+    DB.collection(`players/${id}/chars`).onSnapshot(s=>{p.chars=arr(s);schedule()},er);
+    DB.collection(`permits/${id}/grants`).onSnapshot(s=>{p.grants=arr(s);schedule()},er);}
+   else p.prof=d.data();});const ids=new Set(q.docs.map(d=>d.id));Object.keys(DM).forEach(k=>{if(!ids.has(k))delete DM[k]});schedule()},er);
+  render();
+ });
+})();
+</script>
+</body>
+</html>
