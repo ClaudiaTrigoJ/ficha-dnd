@@ -7,4 +7,17 @@ export const firebaseConfig = {
   storageBucket: "fichas-dnd-6d163.firebasestorage.app",
   messagingSenderId: "269177881747",
   appId: "1:269177881747:web:48769e96bae00006c13966"
+}; 
+
+// ---------------------------------------------------------------
+// AVISOS POR DISCORD (opcional)
+// Pega aquí la URL del webhook del canal del DM entre las comillas.
+// Si se deja vacío, simplemente no se envían avisos a Discord.
+export const discordWebhook = "";
+ 
+// Mensajes que se envían. Puedes cambiar el texto, pero mantén las
+// palabras entre llaves: {jugador} y {personaje}.
+export const discordMessages = {
+  registro: "{jugador} se ha registrado",
+  personaje: "{personaje}, de {jugador}, ha sido creado"
 };
