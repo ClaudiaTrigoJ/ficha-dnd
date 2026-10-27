@@ -15,7 +15,8 @@ service cloud.firestore {
     }
     // Nombres de clases y flores: los de la tabla editable del DM (o los iniciales)
     function tnames(f, dflt) {
-      return exists(/databases/$(database)/documents/config/tables)
+      return (exists(/databases/$(database)/documents/config/tables)
+              && f in get(/databases/$(database)/documents/config/tables).data)
         ? get(/databases/$(database)/documents/config/tables).data[f] : dflt;
     }
 
@@ -68,6 +69,10 @@ service cloud.firestore {
           && request.resource.data.level <= maxLevel()
           && request.resource.data.cls in tnames('classNames', ['Guerrero','Monje','Clérigo','Bardo','Druida','Tirador','Asesino','Hechicero','Warlock','Mago'])
           && request.resource.data.flower in tnames('flowerNames', ['Flor Roja','Flor Azul','Flor Verde','Flor Marrón','Flor Blanca','Flor Morada','Flor Amarilla'])
+          && request.resource.data.rand is bool
+          && ((request.resource.data.rand == true && request.resource.data.race == '')
+              || (request.resource.data.rand == false
+                  && request.resource.data.race in tnames('raceNames', ['Humano','Ángel','Demonio','Vampiro','Dracónido'])))
           && request.resource.data.pool.size() == 0
           && request.resource.data.done == false;
 
@@ -103,9 +108,13 @@ service cloud.firestore {
           let k = request.resource.data.diff(resource.data).affectedKeys();
           let n = request.resource.data;
           let o = resource.data;
-          return k.hasOnly(['pool','sl','hp','ma','an','rw','fin','done'])
-            // 1. estadísticas
-            && (!k.hasAny(['pool']) || (o.pool.size() == 0 && n.pool.size() == 8 + o.extra))
+          return k.hasOnly(['race','pool','sl','hp','ma','an','rw','fin','done'])
+            // 0. raza aleatoria: solo se puede fijar una vez
+            && (!k.hasAny(['race']) || (('rand' in o) && o.rand == true && o.race == ''
+                  && n.race in tnames('raceNames', ['Humano','Ángel','Demonio','Vampiro','Dracónido'])))
+            // 1. estadísticas (la raza aleatoria da 1 dado extra)
+            && (!k.hasAny(['pool']) || (o.pool.size() == 0 && (!('race' in o) || o.race != '')
+                  && n.pool.size() == 8 + o.extra + (('rand' in o) && o.rand == true ? 1 : 0)))
             && (!k.hasAny(['sl']) || (!('hp' in o) && n.pool.size() > 0 && n.sl.size() == 8))
             // 2. tirada obligatoria (nivel 0) y reparto de dados (nunca más que el nivel)
             && (!k.hasAny(['hp','ma','an']) || (o.sl.size() == 8 && !(-1 in o.sl) && !('rw' in o)
