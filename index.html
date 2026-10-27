@@ -47,6 +47,8 @@ textarea{min-height:240px;font-family:ui-monospace,Menlo,monospace;font-size:.85
 button.file{background:var(--ac2);color:var(--tx);border:1px solid var(--bd);text-align:left;padding:10px}
 button.file small{display:block;color:var(--mut)}
 td input{width:80px}
+.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}th.num,.themed th.num{text-align:right}td.num input{text-align:right}
+.n{display:inline-block;min-width:2.4ch;text-align:right}
 .pts{background:var(--comp,var(--ac));color:var(--oncomp,#fff);border-radius:12px;padding:14px 16px;margin:12px 0;font-size:1.1rem;font-weight:bold;box-shadow:0 0 0 3px var(--ac2)}
 .pts b{font-size:2.2rem;margin:0 8px;vertical-align:middle}.pts small{display:block;font-weight:normal;opacity:.9;font-size:.85rem}
 .pts button{background:#fff;color:#111;margin-top:8px}.pts.no{background:var(--ac2);color:var(--mut);font-weight:normal;box-shadow:none;font-size:.9rem}
@@ -72,6 +74,8 @@ button.file[style]{background:var(--card);color:var(--tx);border-color:var(--bd)
 #crop .box{background:var(--card);border-radius:12px;padding:14px;width:min(92%,330px)}
 #ccv{width:280px;max-width:100%;aspect-ratio:1/1;touch-action:none;cursor:grab;border-radius:8px;display:block;margin:0 auto 8px;background:repeating-conic-gradient(#8884 0 25%,#0000 0 50%) 0 0/20px 20px}
 #czoom{width:100%;padding:0}
+#roul{display:none;position:fixed;inset:0;z-index:70;background:rgba(10,8,6,.88);align-items:center;justify-content:center}
+#roul .box{background:var(--card);border-radius:14px;padding:14px;width:min(94%,360px)}#rcv{width:100%;height:auto;display:block}
 button.danger{background:#a32121;color:#fff}.res{border-top:1px dashed var(--bd);padding:8px 0}
 .fcard{border:1px solid var(--bd);border-radius:10px;padding:8px;margin:8px 0}th{font-size:.8rem;color:var(--mut)}h3{margin:12px 0 4px;font-size:1rem;color:var(--ac)}
 </style>
@@ -84,6 +88,7 @@ button.danger{background:#a32121;color:#fff}.res{border-top:1px dashed var(--bd)
 <div id="app"><section>Conectando…</section></div>
 </main>
 <div id="crop"><div class="box"><p class="s">Arrastra para elegir la parte de la foto y ajusta el zoom.</p><canvas id="ccv" width="280" height="280"></canvas><input id="czoom" type="range" min="1" max="3" step="0.01" value="1"><div class="bar"><button id="cok">Usar recorte</button><button class="o" id="ccancel">Cancelar</button></div></div></div>
+<div id="roul"><div class="box"><canvas id="rcv" width="320" height="330"></canvas><p class="big" id="rres" style="text-align:center;margin:6px 0 0"></p></div></div>
 <div id="ov"><canvas id="cv"></canvas><div class="h">Tirando los dados…</div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script type="module">
@@ -181,15 +186,17 @@ const dice=(f,n,col)=>theatre(f,n,col);
 const STATS=['Fuerza','Constitución','Destreza','Voluntad','Inteligencia','Carisma','Sabiduría','Suerte'];
 const DEF={classes:[{n:'Guerrero',h:8,m:0,a:6},{n:'Monje',h:6,m:4,a:4},{n:'Clérigo',h:6,m:4,a:4},{n:'Bardo',h:4,m:4,a:4},{n:'Druida',h:6,m:4,a:4},{n:'Tirador',h:4,m:0,a:6},{n:'Asesino',h:4,m:4,a:4},{n:'Hechicero',h:4,m:6,a:0},{n:'Warlock',h:6,m:4,a:6},{n:'Mago',h:4,m:8,a:0}],
  flowers:[{n:'Flor Roja',res:'hp',d:4,b:{}},{n:'Flor Azul',res:'ma',d:4,b:{}},{n:'Flor Verde',res:'an',d:4,b:{}},{n:'Flor Marrón',res:'',d:4,b:{Fuerza:2,Constitución:2}},{n:'Flor Blanca',res:'',d:4,b:{Destreza:2,Voluntad:2}},{n:'Flor Morada',res:'',d:4,b:{Inteligencia:2,Sabiduría:2}},{n:'Flor Amarilla',res:'',d:4,b:{Carisma:2,Suerte:2}}],
- rewards:['Más 2 puntos de estadísticas','Hueco de habilidad','Nueva competencia o mejora','Poder de clase','Habilidad especial','Más 2 puntos de estadísticas','Hueco de habilidad','Poder de profesión','Poder de clase o subclase','Poder de raza']};
-let CLS={},FLO={},REW=[],TBL=null,TD=null;
+ rewards:['Más 2 puntos de estadísticas','Hueco de habilidad','Nueva competencia o mejora','Poder de clase','Habilidad especial','Más 2 puntos de estadísticas','Hueco de habilidad','Poder de profesión','Poder de clase o subclase','Poder de raza'],
+ races:['Humano','Ángel','Demonio','Vampiro','Dracónido']};
+let CLS={},FLO={},REW=[],RACES=[],TBL=null,TD=null;
 const RES={hp:'Vida',ma:'Maná',an:'Ánima'};
 const flText=f=>[f.res?`Más 1d${f.d||4} en cada tirada de ${RES[f.res]}`:'',...Object.entries(f.b||{}).filter(([,v])=>v).map(([n,v])=>`${v>0?'+':''}${v} ${n}`)].filter(Boolean).join(' · ');
 const COLS=[['roj','#c0392b'],['azul','#2e6fd6'],['verd','#2f9e44'],['marr','#8d5a2b'],['blanc','#f2f2f2'],['morad','#8e44ad'],['amaril','#e6b800'],['rosa','#e76f9a'],['naranj','#e8801a'],['negr','#333333']];
 const guessCol=n=>{n=(n||'').toLowerCase();const m=COLS.find(([k])=>n.includes(k));return m?m[1]:'#888888'};
-function applyTables(t){t=t||DEF;CLS=Object.fromEntries(t.classes.map(c=>[c.n,[c.h,c.m,c.a]]));FLO=Object.fromEntries(t.flowers.map(f=>[f.n,{t:flText(f),k:f.res||'',d:f.d||4,b:f.b||{},col:f.col||guessCol(f.n)}]));REW=t.rewards;}
+function applyTables(t){t=t||DEF;CLS=Object.fromEntries(t.classes.map(c=>[c.n,[c.h,c.m,c.a]]));FLO=Object.fromEntries(t.flowers.map(f=>[f.n,{t:flText(f),k:f.res||'',d:f.d||4,b:f.b||{},col:f.col||guessCol(f.n)}]));REW=t.rewards;RACES=(t.races&&t.races.length)?t.races:DEF.races;}
 applyTables();
 const clone=o=>JSON.parse(JSON.stringify(o));
+const mkTD=()=>{const t=clone(TBL||DEF);t.races=(t.races&&t.races.length)?t.races:clone(DEF.races);return t};
 
 const sum=a=>a.reduce((x,y)=>x+y,0);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -213,6 +220,7 @@ const DISCORD=(CFG.discordWebhook||'').trim();
 const DMSG=Object.assign({registro:'{jugador} se ha registrado',personaje:'{personaje}, de {jugador}, ha sido creado'},CFG.discordMessages||{});
 function discord(k,v){if(!DISCORD)return;const t=(DMSG[k]||'').replace(/\{jugador\}/g,v.jugador||'').replace(/\{personaje\}/g,v.personaje||'');if(!t)return;
  fetch(DISCORD,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:'Fichas de personaje',content:t.slice(0,1900),allowed_mentions:{parse:[]}})}).catch(()=>{})}
+const rtxt=c=>c.race?esc(c.race)+' · ':(c.rand?'Raza por tirar · ':'');
 const sTot=o=>o?sum(o.r)+sum(o.f):0;
 const hpTot=c=>c.hp?c.hp.r.reduce((t,x,i)=>t+Math.max(1,x+(c.hp.f[i]||0)+c.hp.mod),0):0;
 const usedDice=c=>(c.hp?c.hp.r.length:0)+(c.ma?c.ma.r.length:0)+(c.an?c.an.r.length:0);
@@ -235,10 +243,11 @@ document.addEventListener('focusout',()=>{if(pend)setTimeout(()=>{if(!typing()){
 /* ---------- vistas ---------- */
 function sheet(c,dm,own){
  const cl=CLS[c.cls]||[0,0,0],fi=c.fin,b=bon(c),used=new Set(c.sl||[]),pool=c.pool||[],free=own&&fi?fi.puntos-sum(Object.values(DR)):0;
- let h=`<div class="bar">${av(c,'big')}<div><h2 style="margin:0">${esc(c.name)} · ${esc(c.cls)} · Nivel ${c.level}</h2><p class="mut" style="margin:0">${tag(c)} ${esc((FLO[c.flower]||{}).t||'')}</p></div></div>${own||dm?iconCtl(c):''}`;
+ let h=`<div class="bar">${av(c,'big')}<div><h2 style="margin:0">${esc(c.name)} · ${rtxt(c)}${esc(c.cls)} · Nivel ${c.level}</h2><p class="mut" style="margin:0">${tag(c)} ${esc((FLO[c.flower]||{}).t||'')}</p></div></div>${own||dm?iconCtl(c):''}`;
  if(own&&fi)h+=free>0||sum(Object.values(DR))?`<div class="pts">Puntos de estadística por repartir:<b>${free}</b><small>Pulsa + junto a la estadística donde quieras sumarlos (máximo 20 en cada una) y luego confirma.</small>${sum(Object.values(DR))?'<button data-act="pc">Confirmar reparto</button>':''}</div>`:'<div class="pts no">Sin puntos de estadística por repartir.</div>';
- h+='<div class="sc"><table><tr><th>Estadística</th><th>Dado</th><th>Flor</th><th>Total</th><th>Mod</th></tr>'+STATS.map((n,i)=>{const d=dv(c,i),t=fi?fi.stats[n]:total(c,i);
-  return `<tr><td>${n}</td><td>${d??'—'}</td><td>${b[n]?`<span class="tag" ${cst(fcol(c))}>${sg(b[n])}</span>`:''}</td><td>${dm&&fi?`<input type="number" data-sv="s:${n}" value="${t}">`:own&&fi?`${t+(DR[n]||0)} ${free>0&&t+(DR[n]||0)<20?`<button class="o" data-act="pp" data-n="${n}" data-d="1">+</button>`:''}${DR[n]?`<button class="o" data-act="pp" data-n="${n}" data-d="-1">−</button>`:''}`:(t??'—')}</td><td>${t==null?'':sg(mod(own?t+(DR[n]||0):t))}</td></tr>`}).join('')+'</table></div>';
+ h+='<div class="sc"><table><tr><th>Estadística</th><th class="num">Dado</th><th class="num">Flor</th><th class="num">Total</th><th class="num">Mod</th></tr>'+STATS.map((n,i)=>{const d=dv(c,i),t=fi?fi.stats[n]:total(c,i);
+  const val=own&&fi?t+(DR[n]||0):t,btn=own&&fi?`${DR[n]?`<button class="o" data-act="pp" data-n="${n}" data-d="-1">−</button>`:''}${free>0&&t+(DR[n]||0)<20?`<button class="o" data-act="pp" data-n="${n}" data-d="1">+</button>`:''} `:'';
+  return `<tr><td>${n}</td><td class="num">${d??'—'}</td><td class="num">${b[n]?`<span class="tag" ${cst(fcol(c))}>${sg(b[n])}</span>`:''}</td><td class="num">${dm&&fi?`<input type="number" data-sv="s:${n}" value="${t}">`:`${btn}<span class="n">${val??'—'}</span>`}</td><td class="num">${val==null?'':sg(mod(val))}</td></tr>`}).join('')+'</table></div>';
  if(pool.length)h+=`<p class="mut">Dados tirados: ${chips(pool)}<br>${c.hp?'Descartados':'Sin colocar'}: ${chips(pool.filter((_,k)=>!used.has(k)))||'ninguno'}</p>`;
  const rc=key=>(FLO[c.flower]||{}).k===({hp:'hp',mana:'ma',anima:'an'}[key])?fcol(c):'';
  const res=(t,o,die,key,ex)=>{if(!die)return `<p>${t}: esta clase no tira dado.</p>`;if(!o||!o.r.length)return `<p class="mut">${t}: sin tirar</p>`;
@@ -251,13 +260,14 @@ function sheet(c,dm,own){
  if(dm)h+='<div class="bar"><button data-act="save">Guardar cambios</button></div>';
  return h;
 }
-const files=(cs,p)=>cs.length?`<div class="files">${cs.map(c=>`<button class="file${c.icon?' has':''}" ${c.icon&&themeVars(c)?`style="${themeVars(c)}"`:''} data-act="open" data-p="${p}" data-c="${c.id}">${av(c,'card')}<span>${esc(c.name)}<small>${esc(c.cls)} · Nv ${c.level} · ${c.done?'completa':'en curso'}${c.fin&&c.fin.puntos>0?' · '+c.fin.puntos+' pts por repartir':''}</small></span></button>`).join('')}</div>`:'';
+const files=(cs,p)=>cs.length?`<div class="files">${cs.map(c=>`<button class="file${c.icon?' has':''}" ${c.icon&&themeVars(c)?`style="${themeVars(c)}"`:''} data-act="open" data-p="${p}" data-c="${c.id}">${av(c,'card')}<span>${esc(c.name)}<small>${rtxt(c)}${esc(c.cls)} · Nv ${c.level} · ${c.done?'completa':'en curso'}${c.fin&&c.fin.puntos>0?' · '+c.fin.puntos+' pts por repartir':''}</small></span></button>`).join('')}</div>`:'';
 
 function vFlow(c){
- const cl=CLS[c.cls],lk=!!c.hp,placed=!!c.sl.length&&c.sl.every(x=>x>=0),b=bon(c),used=new Set(c.sl),n=8+(+c.extra||0);
+ const cl=CLS[c.cls],lk=!!c.hp,placed=!!c.sl.length&&c.sl.every(x=>x>=0),b=bon(c),used=new Set(c.sl),n=8+(+c.extra||0)+(c.rand?1:0),
+  raceSec=c.rand?`<section><h2>Raza</h2>${c.race?`<p>Raza aleatoria: <b>${esc(c.race)}</b>. Te da 1 dado extra de estadística.</p>`:`<p class="s">Has elegido raza aleatoria. Gira la ruleta: la raza que salga queda fijada y recibes 1 dado extra de estadística.</p><div class="bar"><button data-act="race">Girar ruleta</button></div>`}</section>`:'';
  if(c.done)return `<section>${sheet(c,false,true)}<p class="mut">Ficha completa y enviada automáticamente al DM.</p></section>`;
- let h=`<section><div class="bar">${av(c,'big')}<div><h2 style="margin:0">${esc(c.name)} · ${esc(c.cls)} · Nivel ${c.level}</h2><p class="mut" style="margin:0">${tag(c)} ${esc((FLO[c.flower]||{}).t||'')}</p></div></div>${iconCtl(c)}</section><section><h2>1 · Estadísticas</h2>`;
- if(!c.pool.length)h+=`<p class="s">Se tiran ${n} dados d20${c.extra?` (8 base + ${c.extra} de bono)`:''}. Después coloca ocho en las casillas; los sobrantes se descartan.</p><div class="bar"><button data-act="st">Tirar dados de estadísticas</button></div>`;
+ let h=`<section><div class="bar">${av(c,'big')}<div><h2 style="margin:0">${esc(c.name)} · ${rtxt(c)}${esc(c.cls)} · Nivel ${c.level}</h2><p class="mut" style="margin:0">${tag(c)} ${esc((FLO[c.flower]||{}).t||'')}</p></div></div>${iconCtl(c)}</section>${raceSec}<section><h2>1 · Estadísticas</h2>`;
+ if(!c.pool.length)h+=`<p class="s">Se tiran ${n} dados d20${c.extra||c.rand?` (8 base${c.extra?` + ${c.extra} de bono`:''}${c.rand?' + 1 por raza aleatoria':''})`:''}. Después coloca ocho en las casillas; los sobrantes se descartan.</p><div class="bar"><button data-act="st" ${c.race?'':'disabled'}>Tirar dados de estadísticas</button></div>${c.race?'':'<p class="mut">Primero gira la ruleta de raza.</p>'}`;
  else{const at=k=>lk?'':`data-id="${k}"`;
   h+=`<p class="s">${lk?'Estadísticas fijadas.':'Arrastra un dado a cada casilla (en móvil: toca un dado y luego la casilla).'}</p><div class="mut">Dados disponibles</div><div id="pool" class="pool">${c.pool.map((v,k)=>used.has(k)?'':`<span class="d ${sel===k?'sel':''}" ${at(k)}>${v}</span>`).join('')||'<span class="mut">Todos colocados</span>'}</div><div class="slots">`+
   STATS.map((nm,i)=>{const k=c.sl[i],d=k>=0?c.pool[k]:null;return `<div class="slot" data-slot="${i}"><b>${nm}</b>${d!==null?`<span class="d ${sel===k?'sel':''}" ${at(k)} ${b[nm]?cst(fcol(c)):''}>${d}</span>${b[nm]?`<small><span class="tag" ${cst(fcol(c))}>${sg(b[nm])}</span></small>`:''}<small>mod ${sg(mod(Math.min(20,d+(b[nm]||0))))}</small>`:'<small>—</small>'}</div>`}).join('')+'</div>';}
@@ -281,13 +291,14 @@ function vPlayer(){
  if(!free.length)return h+'<section><p class="s">El DM aún no te ha permitido crear un personaje nuevo.</p></section>';
  return h+`<section><h2>Nuevo personaje</h2>${free[0].extra?`<p class="s">Bono: ${free[0].extra} dado(s) d20 extra en estadísticas.</p>`:''}<div class="g"><div><label>Nombre</label><input id="cn"></div>
  <div><label>Clase</label><select id="cc">${Object.keys(CLS).map(k=>`<option value="${k}">${k}</option>`).join('')}</select></div>
+ <div><label>Raza</label><select id="cr">${RACES.map(r=>`<option value="${esc(r)}">${esc(r)}</option>`).join('')}<option value="__rand">Aleatoria (ruleta)</option></select></div>
  <div><label>Flor</label><select id="cf">${Object.entries(FLO).map(([k,v])=>`<option value="${k}">${k} — ${v.t}</option>`).join('')}</select></div>
  <div><label>Nivel (máximo ${ml})</label><select id="cl">${Array.from({length:ml},(_,i)=>`<option>${i+1}</option>`).join('')}</select></div></div>
- <p class="mut">Después de crear el personaje, estos datos no se pueden cambiar.</p><div class="bar"><button data-act="create">Crear y empezar tiradas</button></div></section>`;
+ <p class="mut">Después de crear el personaje, estos datos no se pueden cambiar. Si eliges raza aleatoria, la ruleta se gira dentro de la ficha y te da 1 dado extra de estadística.</p><div class="bar"><button data-act="create">Crear y empezar tiradas</button></div></section>`;
 }
 const sOpt=v=>'<option value="">—</option>'+STATS.map(n=>`<option ${n===v?'selected':''}>${n}</option>`).join('');
 function vTables(){
- if(!TD)TD=clone(TBL||DEF);
+ if(!TD)TD=mkTD();
  let h='<section><h2>Tablas de información</h2><p class="s">Solo el DM ve y edita esto. Los cambios se aplican a los personajes que se creen a partir de ahora; los ya creados conservan sus datos. Pon 0 si una clase no tiene ese dado.</p></section>';
  h+='<section id="tbl"><h2>Clases</h2><div class="sc"><table><tr><th>Clase</th><th>Vida (d)</th><th>Maná (d)</th><th>Ánima (d)</th><th></th></tr>'+TD.classes.map((c,i)=>`<tr><td><input data-c="${i}" data-k="n" value="${esc(c.n)}" style="width:130px"></td><td><input type="number" data-c="${i}" data-k="h" value="${c.h}"></td><td><input type="number" data-c="${i}" data-k="m" value="${c.m}"></td><td><input type="number" data-c="${i}" data-k="a" value="${c.a}"></td><td><button class="o" data-act="tcdel" data-i="${i}">Quitar</button></td></tr>`).join('')+'</table></div><div class="bar"><button class="o" data-act="tcadd">Añadir clase</button></div>';
  h+='<h2 style="margin-top:16px">Flores</h2>'+TD.flowers.map((f,i)=>{const be=Object.entries(f.b||{});
@@ -297,6 +308,7 @@ function vTables(){
   <div><label>Color</label><input type="color" data-f="${i}" data-k="col" value="${f.col||guessCol(f.n)}" style="padding:2px;height:38px"></div></div>
   <div class="g" style="margin-top:6px">${[0,1].map(n=>`<div><label>Bono de estadística ${n+1}</label><select data-f="${i}" data-k="s${n}">${sOpt(be[n]&&be[n][0])}</select></div><div><label>Valor</label><input type="number" data-f="${i}" data-k="v${n}" value="${be[n]?be[n][1]:0}"></div>`).join('')}</div>
   <p class="mut">Efecto: ${esc(flText(f))||'—'}</p><button class="o" data-act="tfdel" data-i="${i}">Quitar flor</button></div>`}).join('')+'<div class="bar"><button class="o" data-act="tfadd">Añadir flor</button></div>';
+ h+='<h2 style="margin-top:16px">Razas</h2><p class="s">Por ahora solo los nombres. Más adelante se podrán añadir bonos.</p>'+TD.races.map((r,i)=>`<div class="bar"><input data-ra="${i}" value="${esc(r)}" style="flex:1"><button class="o" data-act="trdel" data-i="${i}">Quitar</button></div>`).join('')+'<div class="bar"><button class="o" data-act="tradd">Añadir raza</button></div>';
  h+='<h2 style="margin-top:16px">Recompensas por nivel</h2><p class="s">Según la última cifra del nivel. Los niveles múltiplos de 5 dan siempre 2 puntos de estadística y no tiran dado.</p>'+TD.rewards.map((t,i)=>`<div class="bar"><b style="width:36px">X${i}</b><input data-r="${i}" value="${esc(t)}" style="flex:1"></div>`).join('');
  h+=`<h2 style="margin-top:16px">Estadísticas</h2><p class="mut">${STATS.join(' · ')} (no editable)</p><div class="bar"><button data-act="tsave">Guardar tablas</button><button class="o" data-act="treset">Restaurar valores iniciales</button></div></section>`;
  return h;
@@ -306,6 +318,7 @@ function grab(){if(!TD)return;
  document.querySelectorAll('#tbl [data-f]').forEach(e=>{const f=TD.flowers[+e.dataset.f];if(!f)return;const k=e.dataset.k;f._e=f._e||{};
   if(k==='n')f.n=e.value.trim();else if(k==='res')f.res=e.value;else if(k==='col')f.col=e.value;else if(k==='d')f.d=Math.max(2,+e.value||4);else f._e[k]=e.value});
  TD.flowers.forEach(f=>{if(f._e){const b={};[0,1].forEach(i=>{const n=f._e['s'+i],v=+f._e['v'+i]||0;if(n&&v)b[n]=(b[n]||0)+v});f.b=b;delete f._e}});
+ document.querySelectorAll('#tbl [data-ra]').forEach(e=>{TD.races[+e.dataset.ra]=e.value.trim()});
  document.querySelectorAll('#tbl [data-r]').forEach(e=>{TD.rewards[+e.dataset.r]=e.value.trim()});}
 function ntSection(){const u=NT.filter(n=>!n.read);
  return `<section><h2>Avisos${u.length?' ('+u.length+')':''}</h2>`+(u.length?u.slice(0,15).map(n=>`<div class="res"><b>${n.type==='new_player'?'Nuevo jugador':'Personaje terminado'}</b>: ${esc(n.type==='new_player'?n.name:`${n.name} ha terminado "${n.cname}"`)}<div class="bar">${n.type==='char_done'?`<button data-act="nview" data-id="${n.id}" data-p="${n.pid}" data-c="${n.cid}">Ver ficha</button>`:''}<button class="o" data-act="nread" data-id="${n.id}">Marcar como leído</button></div></div>`).join('')+'<div class="bar"><button class="o" data-act="nall">Marcar todo como leído</button></div>':'<p class="s">Sin avisos nuevos.</p>')
@@ -335,8 +348,24 @@ function render(){
 }
 
 /* ---------- tiradas ---------- */
+function spinWheel(list){return new Promise(res=>{
+ const n=list.length,a=2*Math.PI/n,TAU=2*Math.PI;
+ if(matchMedia('(prefers-reduced-motion:reduce)').matches)return res(list[rnd(n)-1]);
+ const ov=$('roul'),x=$('rcv').getContext('2d'),R=150,total=(5+rnd(3))*TAU+rnd(100000)/100000*TAU,dur=4800,t0=performance.now(),fs=Math.max(11,17-n/2);let last=-1;
+ ov.style.display='flex';$('rres').textContent='';
+ const idxOf=th=>Math.floor((((-th)%TAU)+TAU)%TAU/a);
+ const draw=th=>{x.clearRect(0,0,320,330);x.save();x.translate(160,178);x.rotate(th);
+  for(let i=0;i<n;i++){x.beginPath();x.moveTo(0,0);x.arc(0,0,R,-Math.PI/2+i*a,-Math.PI/2+(i+1)*a);x.closePath();x.fillStyle=`hsl(${Math.round(i*360/n)} 55% 42%)`;x.fill();x.strokeStyle='#fff';x.lineWidth=2;x.stroke();
+   x.save();x.rotate(-Math.PI/2+(i+.5)*a);x.fillStyle='#fff';x.font=`bold ${fs}px Georgia,serif`;x.textAlign='right';x.textBaseline='middle';x.fillText(list[i],R-12,0);x.restore();}
+  x.beginPath();x.arc(0,0,10,0,TAU);x.fillStyle='#fff';x.fill();x.restore();
+  x.fillStyle='#fff';x.strokeStyle='#222';x.lineWidth=2;x.beginPath();x.moveTo(148,4);x.lineTo(172,4);x.lineTo(160,32);x.closePath();x.fill();x.stroke();};
+ (function fr(t){const e=Math.min(1,(t-t0)/dur),th=total*(1-Math.pow(1-e,3)),i=idxOf(th);
+  if(i!==last){last=i;tone(900,600,.04,.12)}draw(th);
+  if(e<1)requestAnimationFrame(fr);else{const r=list[i];$('rres').textContent=r;thud();setTimeout(()=>{ov.style.display='none';res(r)},1600)}})(t0);
+});}
 const roll={
- async st(){const c=curChar();if(!c||c.pool.length)return;const v=await dice(20,8+(+c.extra||0));c.pool=v;c.sl=Array(8).fill(-1);W(()=>chRef(c).update({pool:v,sl:c.sl}));render();},
+ async race(){const c=curChar();if(!c||!c.rand||c.race)return;const r=await spinWheel(RACES);c.race=r;W(()=>chRef(c).update({race:r}));render();},
+ async st(){const c=curChar();if(!c||c.pool.length||!c.race)return;const v=await dice(20,8+(+c.extra||0)+(c.rand?1:0));c.pool=v;c.sl=Array(8).fill(-1);W(()=>chRef(c).update({pool:v,sl:c.sl}));render();},
  async base(){const c=curChar();if(!c||c.hp||!c.sl.length||c.sl.some(x=>x<0))return;
   const cl=CLS[c.cls],fl=FLO[c.flower]||{},con=total(c,1),o={hp:{r:[],f:[]},ma:{r:[],f:[]},an:{r:[],f:[]}};let nb=0;
   for(const [k,i] of [['hp',0],['ma',1],['an',2]]){const d=cl[i];if(!d)continue;nb++;const col=fl.k===k?fl.col:null;o[k].r=await dice(d,1);o[k].f=col?await dice(fl.d||4,1,col):[];}
@@ -414,15 +443,15 @@ $('app').addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
  else if(a==='login')signInWithEmailAndPassword(auth,$('le').value.trim(),$('lp').value).catch(e=>toast(authMsg(e)));
  else if(a==='register')createUserWithEmailAndPassword(auth,$('le').value.trim(),$('lp').value).catch(e=>toast(authMsg(e)));
  else if(a==='out')signOut(auth);
- else if(a==='mode'){DR={};if(d.v==='tables')TD=clone(TBL||DEF);view.mode=d.v;view.cid=view.pid=null;render()}
+ else if(a==='mode'){DR={};if(d.v==='tables')TD=mkTD();view.mode=d.v;view.cid=view.pid=null;render()}
  else if(a==='back'){DR={};view.cid=view.pid=null;render()}
  else if(a==='open'){DR={};view.pid=d.p;view.cid=d.c;render()}
  else if(a==='prof'){const n=$('pn').value.trim();if(!n)return;P.prof={name:n};W(()=>DB.doc('players/'+ME.id).set({name:n,email:ME.email||''}));if(!ME.dm)WS(()=>DB.doc('notifs/reg_'+ME.id).set({type:'new_player',pid:ME.id,name:n,cname:'',cid:'',at:Date.now(),read:false}));if(!ME.dm)discord('registro',{jugador:n});render()}
  else if(a==='create'){const n=$('cn').value.trim();if(!n){toast('Ponle un nombre al personaje.');return}
   const used=new Set(P.chars.map(x=>x.grant)),g=P.grants.find(x=>!used.has(x.id));if(!g)return;
-  const cid=g.id,doc={name:n,cls:$('cc').value,flower:$('cf').value,level:Math.min(+$('cl').value||1,cfg.maxLevel||1),grant:g.id,extra:+g.extra||0,created:Date.now(),pool:[],sl:[],done:false};
+  const rv=$('cr').value,cid=g.id,doc={name:n,cls:$('cc').value,race:rv==='__rand'?'':rv,rand:rv==='__rand',flower:$('cf').value,level:Math.min(+$('cl').value||1,cfg.maxLevel||1),grant:g.id,extra:+g.extra||0,created:Date.now(),pool:[],sl:[],done:false};
   P.chars.push({id:cid,...doc});view.cid=cid;view.pid=ME.id;W(()=>DB.doc(`players/${ME.id}/chars/${cid}`).set(doc));render()}
- else if(a==='st'||a==='rw')run(()=>roll[a]());
+ else if(a==='st'||a==='rw'||a==='race')run(()=>roll[a]());
  else if(a==='rd')run(()=>roll.rd(d.res));
  else if(a==='base')run(()=>roll.base());
  else if(a==='icoff')setIcon('');
@@ -436,14 +465,16 @@ $('app').addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
  else if(a==='nall'){NT.filter(n=>!n.read).forEach(n=>{n.read=true;W(()=>DB.doc('notifs/'+n.id).update({read:true}))});render()}
  else if(a==='nview'){const n=NT.find(x=>x.id===d.id);if(n){n.read=true;W(()=>DB.doc('notifs/'+d.id).update({read:true}))}DR={};view.pid=d.p;view.cid=d.c;render()}
  else if(a==='nperm'){Notification.requestPermission().then(()=>render())}
+ else if(a==='tradd'){grab();TD.races.push('Nueva raza');render()}
+ else if(a==='trdel'){grab();TD.races.splice(+d.i,1);render()}
  else if(a==='tcadd'){grab();TD.classes.push({n:'Nueva clase',h:6,m:4,a:4});render()}
  else if(a==='tcdel'){grab();TD.classes.splice(+d.i,1);render()}
  else if(a==='tfadd'){grab();TD.flowers.push({n:'Nueva flor',res:'',d:4,b:{},col:'#888888'});render()}
  else if(a==='tfdel'){grab();TD.flowers.splice(+d.i,1);render()}
  else if(a==='treset'){if(confirm('¿Restaurar las tablas iniciales? Se perderán los cambios sin guardar.')){TD=clone(DEF);render()}}
- else if(a==='tsave'){grab();const cn=TD.classes.map(c=>c.n),fn=TD.flowers.map(f=>f.n);
-  if(!cn.length||!fn.length||cn.some(x=>!x)||fn.some(x=>!x)||new Set(cn).size!==cn.length||new Set(fn).size!==fn.length){toast('Revisa los nombres: no pueden estar vacíos ni repetidos.');return}
-  const doc={classes:TD.classes.map(c=>({n:c.n,h:c.h,m:c.m,a:c.a})),flowers:TD.flowers.map(f=>({n:f.n,res:f.res||'',d:f.d||4,b:f.b||{},col:f.col||guessCol(f.n)})),rewards:TD.rewards.slice(0,10),classNames:cn,flowerNames:fn};
+ else if(a==='tsave'){grab();const cn=TD.classes.map(c=>c.n),fn=TD.flowers.map(f=>f.n),rn=TD.races;
+  if(!cn.length||!fn.length||cn.some(x=>!x)||fn.some(x=>!x)||new Set(cn).size!==cn.length||new Set(fn).size!==fn.length||!rn.length||rn.some(x=>!x)||new Set(rn).size!==rn.length){toast('Revisa los nombres: no pueden estar vacíos ni repetidos.');return}
+  const doc={classes:TD.classes.map(c=>({n:c.n,h:c.h,m:c.m,a:c.a})),flowers:TD.flowers.map(f=>({n:f.n,res:f.res||'',d:f.d||4,b:f.b||{},col:f.col||guessCol(f.n)})),rewards:TD.rewards.slice(0,10),classNames:cn,flowerNames:fn,races:rn,raceNames:rn};
   TBL=doc;applyTables(doc);W(()=>DB.doc('config/tables').set(doc));toast('Tablas guardadas');render()}
  else if(a==='pp'){const c=curChar();if(!c||!c.fin)return;const dl=+d.d,n=d.n;if(dl>0&&(c.fin.puntos-sum(Object.values(DR))<=0||c.fin.stats[n]+(DR[n]||0)>=20))return;if(dl<0&&!(DR[n]>0))return;DR[n]=(DR[n]||0)+dl;render()}
  else if(a==='pc'){const c=curChar();if(!c||!c.fin)return;const fin={...c.fin,stats:{...c.fin.stats}};let g=0;STATS.forEach(n=>{const v=DR[n]||0;fin.stats[n]+=v;g+=v});
