@@ -11,13 +11,7 @@ export const firebaseConfig = {
 
 // ---------------------------------------------------------------
 // AVISOS POR DISCORD (opcional)
-// Pega aquí la URL del webhook del canal del DM entre las comillas.
-// Si se deja vacío, simplemente no se envían avisos a Discord.
-export const discordWebhook = "https://discord.com/api/webhooks/1563955185024245841/Q-v8YKsqTzCYT9QZG0V0GDLaSVovLZnhbfYnelV3AzNHMS-zKfPdc9e9sr8YmIbbkqI_";
- 
-// Mensajes que se envían. Puedes cambiar el texto, pero mantén las
-// palabras entre llaves: {jugador} y {personaje}.
-export const discordMessages = {
-  registro: "{jugador} se ha registrado",
-  personaje: "{personaje}, de {jugador}, ha sido creado"
-};
+// NUNCA pegues aquí la URL del webhook de Discord: este archivo es público.
+// Pega la dirección de tu Cloudflare Worker (la que termina en .workers.dev).
+// Si se deja vacío, no se envían avisos a Discord.
+export const discordProxy = "avisos-fichas-discord.claudiatrigojimenez.workers.dev";
