@@ -14,4 +14,4 @@ export const firebaseConfig = {
 // NUNCA pegues aquí la URL del webhook de Discord: este archivo es público.
 // Pega la dirección de tu Cloudflare Worker (la que termina en .workers.dev).
 // Si se deja vacío, no se envían avisos a Discord.
-export const discordProxy = "avisos-fichas-discord.claudiatrigojimenez.workers.dev";
+export const discordProxy = "https://avisos-fichas-discord.claudiatrigojimenez.workers.dev";
