@@ -89,7 +89,7 @@ service cloud.firestore {
         function gearOk() {
           let k = request.resource.data.diff(resource.data).affectedKeys();
           let n = request.resource.data;
-          return k.hasOnly(['eq','inv','money'])
+          return k.hasOnly(['eq','inv','money','comp'])
             && (!k.hasAny(['eq']) || (n.eq is map
                   && n.eq.keys().hasOnly(['casco', 'pechera', 'guantes', 'grebas', 'botas', 'a1', 'a2', 'a3'])
                   && (!('casco' in n.eq) || (n.eq.casco is string && n.eq.casco.size() <= 60))
@@ -101,6 +101,7 @@ service cloud.firestore {
                   && (!('a2' in n.eq) || (n.eq.a2 is string && n.eq.a2.size() <= 60))
                   && (!('a3' in n.eq) || (n.eq.a3 is string && n.eq.a3.size() <= 60))))
             && (!k.hasAny(['inv']) || (n.inv is string && n.inv.size() <= 3000))
+            && (!k.hasAny(['comp']) || (n.comp is string && n.comp.size() <= 3000))
             && (!k.hasAny(['money']) || (n.money is map
                   && n.money.keys().hasOnly(['cobre', 'plata', 'electrum', 'oro', 'platino'])
                   && (!('cobre' in n.money) || (n.money.cobre is int && n.money.cobre >= 0 && n.money.cobre <= 999999999))
