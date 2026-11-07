@@ -53,9 +53,9 @@ table.st{min-width:0;width:100%;max-width:430px;margin:0 auto}table.st td{paddin
 table.rw{min-width:0;width:100%;max-width:520px;border-collapse:collapse;margin:0 10px}
 table.rw td{padding:6px 8px;border-bottom:1px dashed var(--bd)}table.rw td:first-child{white-space:nowrap;color:var(--mut);width:1%}
 table.rw td.num{width:56px;font-weight:bold}table.rw tr:last-child td{border-bottom:0}
-.pts{background:var(--comp,var(--ac));color:var(--oncomp,#fff);border-radius:12px;padding:14px 16px;margin:12px 0;font-size:1.1rem;font-weight:bold;box-shadow:0 0 0 3px var(--ac2)}
-.pts b{font-size:2.2rem;margin:0 8px;vertical-align:middle}.pts small{display:block;font-weight:normal;opacity:.9;font-size:.85rem}
-.pts button{background:#fff;color:#111;margin-top:8px}.pts.no{background:var(--ac2);color:var(--mut);font-weight:normal;box-shadow:none;font-size:.9rem}
+.pts{background:var(--comp,var(--ac));color:var(--oncomp,#fff);border-radius:10px;padding:8px 12px;margin:10px 0;font-size:.95rem;font-weight:bold;box-shadow:0 0 0 2px var(--ac2)}
+.pts b{font-size:1.3rem;margin:0 6px;vertical-align:middle}.pts small{display:block;font-weight:normal;opacity:.9;font-size:.8rem}
+.pts button{background:#fff;color:#111;margin-top:6px;padding:5px 12px}.pts.no{background:var(--ac2);color:var(--mut);font-weight:normal;box-shadow:none;font-size:.9rem}
 label.btn{display:inline-block;cursor:pointer;border-radius:8px;padding:9px 14px;background:var(--ac2);color:var(--tx);border:1px solid var(--bd);font-size:1rem}
 .av{width:44px;height:44px;border-radius:50%;background:var(--ac);color:var(--onac,#fff);display:inline-flex;align-items:center;justify-content:center;overflow:hidden;font-weight:bold;flex:none}
 .ic{width:72px;height:72px;flex:none;object-fit:cover;object-position:center;border-radius:10px;display:block}
@@ -93,6 +93,7 @@ button.danger{background:#a32121;color:#fff}.res{border-top:1px dashed var(--bd)
 #bgv{display:none;position:fixed;inset:0;z-index:80;background:rgba(10,8,6,.85);padding:calc(10px + env(safe-area-inset-top,0px)) 10px calc(10px + env(safe-area-inset-bottom,0px))}
 #bgv .box{background:var(--card);color:var(--tx);border-radius:12px;padding:12px;max-width:900px;height:100%;margin:0 auto;display:flex;flex-direction:column;gap:8px}
 #bgv .bar{margin:0;justify-content:space-between}
+#phv{display:none;position:fixed;inset:0;z-index:80;background:rgba(10,8,6,.85);align-items:center;justify-content:center;padding:10px}#phv .box{background:var(--card);color:var(--tx);border-radius:12px;padding:14px;max-width:min(92vw,560px);display:flex;flex-direction:column;gap:12px;align-items:center}#phi img{max-width:100%;max-height:68vh;border-radius:10px;display:block}#phi .ph0{width:160px;height:160px;border-radius:50%;background:var(--ac2);display:flex;align-items:center;justify-content:center;font-size:4rem;color:var(--mut)}
 #bgt{flex:1;min-height:0;resize:none;font-family:Georgia,'Times New Roman',serif;font-size:1.1rem;line-height:1.6}
 main.wide{max-width:1500px}
 .fx-out{animation:fout .5s ease forwards}@keyframes fout{to{opacity:0;transform:translateY(-14px) scale(.98)}}
@@ -131,6 +132,8 @@ main.wide{max-width:1500px}
 .hc .hn{position:absolute;left:7px;top:6px;color:var(--mut);font-size:.8rem;font-style:italic}
 .hc .hl{position:absolute;right:5px;bottom:4px;font-size:.7rem;background:var(--ac2);border-radius:6px;padding:1px 6px;color:var(--mut)}
 .hc.lk{opacity:.6;background:repeating-linear-gradient(45deg,var(--card) 0 7px,var(--ac2) 7px 14px)}
+.cpl{padding:6px 4px;border-bottom:1px dashed var(--bd)}.cpl:last-of-type{border-bottom:0}
+@media (max-width:760px){.hg{grid-template-columns:1fr}}
 .hc.hv{box-shadow:inset 0 0 0 2px var(--ac)}
 .it{cursor:grab;user-select:none;-webkit-user-select:none;border-radius:6px;padding:1px 2px}
 .it.sel{outline:2px solid var(--ac)}
@@ -151,6 +154,7 @@ main.wide{max-width:1500px}
 </main>
 <div id="crop"><div class="box"><p class="s">Arrastra para elegir la parte de la foto y ajusta el zoom.</p><canvas id="ccv" width="280" height="280"></canvas><input id="czoom" type="range" min="1" max="3" step="0.01" value="1"><div class="bar"><button id="cok">Usar recorte</button><button class="o" id="ccancel">Cancelar</button></div></div></div>
 <div id="bgv"><div class="box"><div class="bar"><b id="bgti">Background</b><button class="o" id="bgx" aria-label="Reducir" title="Reducir" style="padding:4px 7px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><polyline points="20 10 14 10 14 4"/><polyline points="4 14 10 14 10 20"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button></div><textarea id="bgt" maxlength="3000"></textarea></div></div>
+<div id="phv"><div class="box"><div id="phi"></div><div class="bar" style="justify-content:center"><label class="btn" title="Subir foto" aria-label="Subir foto" style="padding:8px 12px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><input type="file" accept="image/*" id="phf" hidden></label><button class="danger" id="phd" title="Quitar foto" aria-label="Quitar foto" style="padding:8px 12px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button><button class="o" id="phx">Cerrar</button></div></div></div>
 <div id="itm"><div class="box"><h2 id="itt" style="margin-top:0"></h2><div id="itf"></div><div class="bar" style="margin-top:12px"><button id="itok">Guardar</button><button class="o" id="itx">Cancelar</button></div></div></div>
 <div id="roul"><div class="box"><canvas id="rcv" width="320" height="330"></canvas><p class="big" id="rres" style="text-align:center;margin:6px 0 0"></p></div></div>
 <div id="ov"><canvas id="cv"></canvas><div class="h">Tirando los dados…</div></div>
@@ -249,18 +253,19 @@ const dice=(f,n,col)=>theatre(f,n,col);
 /* ---------- datos provisionales (CSV) ---------- */
 const STATS=['Fuerza','Constitución','Destreza','Voluntad','Inteligencia','Carisma','Sabiduría','Suerte'];
 const DEF={classes:[{n:'Guerrero',h:8,m:0,a:6},{n:'Monje',h:6,m:4,a:4},{n:'Clérigo',h:6,m:4,a:4},{n:'Bardo',h:4,m:4,a:4},{n:'Druida',h:6,m:4,a:4},{n:'Tirador',h:4,m:0,a:6},{n:'Asesino',h:4,m:4,a:4},{n:'Hechicero',h:4,m:6,a:0},{n:'Warlock',h:6,m:4,a:6},{n:'Mago',h:4,m:6,a:0}],
- flowers:[{n:'Flor Roja',res:'hp',d:4,b:{}},{n:'Flor Azul',res:'ma',d:4,b:{}},{n:'Flor Verde',res:'an',d:4,b:{}},{n:'Flor Marrón',res:'',d:4,b:{Fuerza:2,Constitución:2}},{n:'Flor Blanca',res:'',d:4,b:{Destreza:2,Voluntad:2}},{n:'Flor Morada',res:'',d:4,b:{Inteligencia:2,Sabiduría:2}},{n:'Flor Amarilla',res:'',d:4,b:{Carisma:2,Suerte:2}}],
+ flowers:[{n:'Sin Flor',res:'',d:4,b:{}},{n:'Flor Roja',res:'hp',d:4,b:{}},{n:'Flor Azul',res:'ma',d:4,b:{}},{n:'Flor Verde',res:'an',d:4,b:{}},{n:'Flor Marrón',res:'',d:4,b:{Fuerza:2,Constitución:2}},{n:'Flor Blanca',res:'',d:4,b:{Destreza:2,Voluntad:2}},{n:'Flor Morada',res:'',d:4,b:{Inteligencia:2,Sabiduría:2}},{n:'Flor Amarilla',res:'',d:4,b:{Carisma:2,Suerte:2}}],
  rewards:['Más 2 puntos de estadísticas','Hueco de habilidad','Nueva competencia o mejora','Poder de clase','Habilidad especial','Más 2 puntos de estadísticas','Hueco de habilidad','Poder de profesión','Poder de clase o subclase','Poder de raza'],
- races:['Humano','Ángel','Demonio','Vampiro','Dracónido']};
-let CLS={},FLO={},REW=[],RACES=[],TBL=null,TD=null;
+ races:['Humano','Ángel','Demonio','Vampiro','Dracónido'],resBonus:2};
+let RESB=2,CLS={},FLO={},REW=[],RACES=[],TBL=null,TD=null;
 const RES={hp:'Vida',ma:'Maná',an:'Ánima'};
 const flText=f=>[f.res?`Más 1d${f.d||4} en cada tirada de ${RES[f.res]}`:'',...Object.entries(f.b||{}).filter(([,v])=>v).map(([n,v])=>`${v>0?'+':''}${v} ${n}`)].filter(Boolean).join(' · ');
 const COLS=[['roj','#c0392b'],['azul','#2e6fd6'],['verd','#2f9e44'],['marr','#8d5a2b'],['blanc','#f2f2f2'],['morad','#8e44ad'],['amaril','#e6b800'],['rosa','#e76f9a'],['naranj','#e8801a'],['negr','#333333']];
 const guessCol=n=>{n=(n||'').toLowerCase();const m=COLS.find(([k])=>n.includes(k));return m?m[1]:'#888888'};
-function applyTables(t){t=t||DEF;CLS=Object.fromEntries(t.classes.map(c=>[c.n,[c.h,c.m,c.a]]));FLO=Object.fromEntries(t.flowers.map(f=>[f.n,{t:flText(f),k:f.res||'',d:f.d||4,b:f.b||{},col:f.col||guessCol(f.n)}]));REW=t.rewards;RACES=(t.races&&t.races.length)?t.races:DEF.races;}
+const withSF=a=>a.some(f=>f.n==='Sin Flor')?a:[{n:'Sin Flor',res:'',d:4,b:{}},...a];
+function applyTables(t){t=t||DEF;t={...t,flowers:withSF(t.flowers)};RESB=Number.isFinite(+t.resBonus)&&t.resBonus!==undefined&&t.resBonus!==null?+t.resBonus:2;CLS=Object.fromEntries(t.classes.map(c=>[c.n,[c.h,c.m,c.a]]));FLO=Object.fromEntries(t.flowers.map(f=>[f.n,{t:flText(f),k:f.res||'',d:f.d||4,b:f.b||{},col:f.col||guessCol(f.n)}]));REW=t.rewards;RACES=(t.races&&t.races.length)?t.races:DEF.races;}
 applyTables();
 const clone=o=>JSON.parse(JSON.stringify(o));
-const mkTD=()=>{const t=clone(TBL||DEF);t.races=(t.races&&t.races.length)?t.races:clone(DEF.races);return t};
+const mkTD=()=>{const t=clone(TBL||DEF);t.flowers=withSF(t.flowers);t.resBonus=RESB;t.races=(t.races&&t.races.length)?t.races:clone(DEF.races);return t};
 
 const sum=a=>a.reduce((x,y)=>x+y,0);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -302,7 +307,8 @@ const nameCtl=c=>c.name?'':`<div class="res"><label>Nombre del personaje</label>
 const rwLv=L=>Array.from({length:L},(_,i)=>i+1).filter(n=>n%5!==0);
 const chipsB=a=>a.map((v,i)=>`<span class="d${i===0?' base':''}">${v}</span>`).join('');
 const av=(c,m)=>c.icon?`<img class="${m==='card'?'ic':'hero'}" src="${esc(c.icon)}" alt="">`:`<span class="av">${esc(((c.name||'?')[0]||'?').toUpperCase())}</span>`;
-const iconCtl=c=>`<div class="bar"><label class="btn">Subir foto<input type="file" accept="image/*" data-icon hidden></label>${c.icon?'<button class="o" data-act="icoff">Quitar foto</button>':''}</div>`;
+const iconCtl=c=>'';
+const pjc=c=>`<div class="pjc" role="button" tabindex="0" data-act="phbig" title="Foto del personaje" aria-label="Foto del personaje" style="cursor:pointer">${c.icon?`<img src="${esc(c.icon)}" alt="">`:esc(((c.name||'?')[0]||'?').toUpperCase())}</div>`;
 const ink=h=>{const m=/^#?([0-9a-f]{6})$/i.exec(h||'');if(!m)return '#fff';const n=parseInt(m[1],16);return (0.299*(n>>16&255)+0.587*(n>>8&255)+0.114*(n&255))>150?'#222':'#fff'};
 const fcol=c=>(FLO[c.flower]||{}).col||'';
 const cst=col=>col?`style="background:${col};color:${ink(col)}"`:'';
@@ -312,15 +318,17 @@ const PROXY=(CFG.discordProxy||'').trim();
 async function discord(k,v){if(!PROXY){console.info('Aviso Discord: discordProxy está vacío en firebase-config.js');return}if(!auth||!auth.currentUser)return;
  try{const t=await auth.currentUser.getIdToken();fetch(PROXY,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+t},body:JSON.stringify({k,cid:(v&&v.cid)||''})}).then(r=>{console.info('Aviso Discord: el Worker respondió',r.status)}).catch(e=>console.warn('Aviso Discord: no se pudo llamar al Worker',e))}catch(e){console.warn('Aviso Discord',e)}}
 const rtxt=c=>c.race?esc(c.race)+' · ':(c.rand?'Raza por tirar · ':'');
-const sTot=o=>o?sum(o.r)+sum(o.f):0;
-const hpTot=c=>c.hp?c.hp.r.reduce((t,x,i)=>t+Math.max(1,x+(c.hp.f[i]||0)+c.hp.mod),0):0;
+const RB=c=>c&&c.rb?RESB:0;
+const sTot=(o,c)=>o?sum(o.r)+sum(o.f)+RB(c)*o.r.length:0;
+const hpTot=c=>c.hp?c.hp.r.reduce((t,x,i)=>t+Math.max(1,x+(c.hp.f[i]||0)+c.hp.mod+RB(c)),0):0;
 const usedDice=c=>(c.hp?c.hp.r.length:0)+(c.ma?c.ma.r.length:0)+(c.an?c.an.r.length:0);
-const finOf=c=>({stats:Object.fromEntries(STATS.map((n,i)=>[n,total(c,i)])),hp:hpTot(c),mana:sTot(c.ma),anima:sTot(c.an),puntos:pts(c.level)});
+const finOf=c=>({stats:Object.fromEntries(STATS.map((n,i)=>[n,total(c,i)])),hp:hpTot(c),mana:sTot(c.ma,c),anima:sTot(c.an,c),puntos:pts(c.level)});
 
 /* ---------- estado ---------- */
 let DB=null,U=null,ME={id:null,dm:false},cfg={maxLevel:1},P={prof:null,grants:[],chars:[]},DM={},view={mode:'player',pid:null,cid:null},sel=null,busy=false,pend=false,wq=Promise.resolve();
-let DR={},NT=[],selI=null,IT=null,FX=null,HOLD=0;
+let DR={},NT=[],selI=null,IT=null,FX=null,HOLD=0,RWV=null;
 const COINS=[['cobre','Cobre'],['plata','Plata'],['electrum','Electrum'],['oro','Oro'],['platino','Platino']],COIN=COINS.map(x=>x[0]),MAXM=999999999;
+function calcExp(t,cur){t=String(t).replace(/\s+/g,'').replace(/,/g,'');if(!/^[+-]?\d+([+-]\d+)*$/.test(t))return null;const rel=/^[+-]/.test(t);const n=(t.match(/[+-]?\d+/g)||[]).reduce((a,x)=>a+parseInt(x,10),0);return rel?(cur||0)+n:n}
 function moneyNorm(m){m={...m};COIN.forEach(k=>{m[k]=Math.max(0,Math.min(MAXM,Math.floor(+m[k])||0))});for(let j=0;j<4;j++){const v=m[COIN[j]];if(v>=100){m[COIN[j+1]]+=Math.floor(v/100);m[COIN[j]]=v%100}}m.platino=Math.min(MAXM,m.platino);return m}
 function moneySub(m,i,n){m={...m};const k=COIN[i];if((m[k]||0)>=n){m[k]-=n;return m}
  if(i>=4)return null;const need=n-(m[k]||0),b=Math.ceil(need/100),r=moneySub(m,i+1,b);if(!r)return null;r[k]=(r[k]||0)+b*100-n;return r}
@@ -350,26 +358,26 @@ function folios(c,dm,own){
  let a=`<section><div class="bar" style="justify-content:space-between;margin:0"><h2 style="margin:0">${esc(cnm(c))}</h2><span class="mut">${rtxt(c)}Nivel ${c.level}</span></div>`
   +(dm?`<label style="margin-top:8px">Nombre del personaje</label><input data-sv="t:name" maxlength="60" value="${esc(c.name||'')}">`:'')
   +(own&&c.done?nameCtl(c):'')+topF(c,dm?'dm':'me')+'</section>';
- a+=`<section><h2>Personaje</h2><div class="pj"><div class="pjc">${c.icon?`<img src="${esc(c.icon)}" alt="">`:esc(((c.name||'?')[0]||'?').toUpperCase())}</div><div class="pjr">${CIR('x n',c.level,'Nivel')}${CIR('x t',esc(c.race||(c.rand?'?':'—')),'Raza')}${CIR('x t',esc(clsTxt(c)),'Clase')}</div></div>${own||dm?iconCtl(c):''}<p class="mut" style="margin:8px 0 0">${tag(c)} ${esc((FLO[c.flower]||{}).t||'')}</p></section>`;
+ a+=`<section><h2>Personaje</h2><div class="pj">${pjc(c)}<div class="pjr">${CIR('x n',c.level,'Nivel')}${CIR('x t',esc(c.race||(c.rand?'?':'—')),'Raza')}${CIR('x t',esc(clsTxt(c)),'Clase')}</div></div><p class="mut" style="margin:8px 0 0">${tag(c)} ${esc((FLO[c.flower]||{}).t||'')}</p></section>`;
  const row=(n,i)=>{const d=dv(c,i),t=fi?fi.stats[n]:total(c,i),val=own&&fi?t+(DR[n]||0):t,
    btn=own&&fi?`${DR[n]?`<button class="o" data-act="pp" data-n="${n}" data-d="-1">−</button>`:''}${free>0&&t+(DR[n]||0)<20?`<button class="o" data-act="pp" data-n="${n}" data-d="1">+</button>`:''}`:'';
   return `<div class="sr"><div class="sn"><b>${n}</b><small>${d!=null?'Dado '+d:''}${b[n]?` <span class="tag" ${cst(fcol(c))}>Flor ${sg(b[n])}</span>`:''}</small></div><div class="sb">${btn}</div><div class="circ b">${dm&&fi?`<input type="number" data-sv="s:${n}" value="${t}">`:(val??'—')}</div><div class="circ s" title="Modificador">${val==null?'':sg(mod(val))}</div></div>`};
- const ban=own&&fi?(free>0||sum(Object.values(DR))?`<div class="pts">Puntos de estadística por repartir:<b>${free}</b><small>Pulsa + junto a la estadística donde quieras sumarlos (máximo 20 en cada una) y luego confirma.</small>${sum(Object.values(DR))?'<button data-act="pc">Confirmar reparto</button>':''}</div>`:'<div class="pts no">Sin puntos de estadística por repartir.</div>'):'';
+ const ban=own&&fi?(free>0||sum(Object.values(DR))?`<div class="pts">Puntos de estadística por repartir:<b>${free}</b><small>Pulsa + junto a la estadística donde quieras sumarlos (máximo 20 en cada una) y luego confirma.</small><button data-act="pc" ${sum(Object.values(DR))?'':'disabled'}>Confirmar reparto</button></div>`:'<div class="pts no">Sin puntos de estadística por repartir.</div>'):'';
  const pu=fi?fi.puntos:pts(c.level);
  a+=`<section><h2>Estadísticas</h2>${ban}<div class="sg"><div>${STATS.slice(0,4).map((n,i)=>row(n,i)).join('')}</div><div>${STATS.slice(4).map((n,i)=>row(n,i+4)).join('')}</div></div>`
   +(pool.length?`<p class="mut">Dados tirados: ${chips(pool)}<br>${c.hp?'Descartados':'Sin colocar'}: ${chips(pool.filter((_,k)=>!used.has(k)))||'ninguno'}</p>`:'')
   +(own?'':`<p>Puntos de estadística por repartir: ${dm&&fi?`<input type="number" data-sv="f:puntos" value="${pu}" style="width:90px">`:`<b>${pu}</b>`}</p>`)+'</section>';
  const rc=key=>(FLO[c.flower]||{}).k===({hp:'hp',mana:'ma',anima:'an'}[key])?fcol(c):'';
  const res=(t,o,die,key,ex)=>{if(!die)return `<p>${t}: esta clase no tira dado.</p>`;if(!o||!o.r.length)return `<p class="mut">${t}: sin tirar</p>`;
-  return `<p><b>${t}</b> (d${die}): ${chipsC(o.r,'',true)}${o.f.length?' + flor '+chipsC(o.f,rc(key)):''}${ex||''} → ${dm&&fi?`<input type="number" data-sv="f:${key}" value="${fi[key]}" style="width:90px">`:`<b>${fi?fi[key]:(key==='hp'?hpTot(c):sTot(o))}</b>`}</p>`};
- const vid=c.hp?(fi?fi.hp:hpTot(c)):'—',man=c.ma&&cl[1]?(fi?fi.mana:sTot(c.ma)):'—',ani=c.an&&cl[2]?(fi?fi.anima:sTot(c.an)):'—';
+  return `<p><b>${t}</b> (d${die}): ${chipsC(o.r,'',true)}${o.f.length?' + flor '+chipsC(o.f,rc(key)):''}${c.rb&&RESB?` · bono ${sg(RESB)} por dado`:''}${ex||''} → ${dm&&fi?`<input type="number" data-sv="f:${key}" value="${fi[key]}" style="width:90px">`:`<b>${fi?fi[key]:(key==='hp'?hpTot(c):sTot(o,c))}</b>`}</p>`};
+ const vid=c.hp?(fi?fi.hp:hpTot(c)):'—',man=c.ma&&cl[1]?(fi?fi.mana:sTot(c.ma,c)):'—',ani=c.an&&cl[2]?(fi?fi.anima:sTot(c.an,c)):'—';
  const arm=(k,l)=>CIR('x a',dm?`<input data-sv="t:${k}" maxlength="20" value="${esc(c[k]||'')}" placeholder="12+2">`:esc(c[k]||'—'),l);
  a+=`<section><h2>Defensas y recursos</h2><div class="pjr">${arm('armF','Armadura física')}${CIR('x n',ani,'Ánima')}${CIR('x n',vid,'Vida')}${CIR('x n',man,'Maná')}${arm('armM','Armadura mágica')}</div><h3>Detalle de tiradas</h3>`
   +res('Vida',c.hp,cl[0],'hp',c.hp?` · Con ${c.hp.con} (${sg(c.hp.mod)} por dado)`:'')+res('Maná',c.ma,cl[1],'mana')+res('Ánima',c.an,cl[2],'anima')+'</section>';
  const eq=c.eq||{},mo=c.money||{};
  const eqf=(k,l)=>`<div class="el">${l?`<label>${l}</label>`:''}<input data-eq="${k}" maxlength="60" value="${esc(eq[k]||'')}"${l?'':' placeholder="Arma equipada"'}></div>`;
- a+=`<div class="g2"><section><h2>Equipamiento</h2>${[['casco','Casco'],['pechera','Pechera'],['guantes','Guantes'],['grebas','Grebas'],['botas','Botas']].map(([k,l])=>eqf(k,l)).join('')}<div style="height:10px"></div>${['a1','a2','a3'].map(k=>eqf(k,'')).join('')}</section>
-  <section>${expBtn('inv','Inventario')}<textarea data-inv data-bigk="inv" maxlength="3000" style="min-height:220px;height:220px;resize:none;font-family:inherit">${esc(c.inv||'')}</textarea><h3>Dinero</h3><div class="mo">${COINS.map(([k,l])=>`<div class="mc"><label>${l}</label><input type="number" inputmode="numeric" min="0" step="1" data-mo="${k}" value="${mo[k]??0}"><div class="mb"><input type="number" inputmode="numeric" min="1" step="1" data-amt="${k}" placeholder="1" aria-label="Cantidad de ${l}"><button type="button" class="o" data-act="mm" data-k="${k}" data-s="1" title="Sumar" aria-label="Sumar ${l}">+</button><button type="button" class="o" data-act="mm" data-k="${k}" data-s="-1" title="Restar" aria-label="Restar ${l}">&minus;</button></div></div>`).join('')}</div><p class="mut" style="margin:6px 0 0">Al llegar a 100 se pasa a la siguiente moneda.</p></section></div>`;
+ a+=`<div class="g2"><section><h2>Equipamiento</h2>${[['casco','Casco'],['pechera','Pechera'],['guantes','Guantes'],['grebas','Grebas'],['botas','Botas']].map(([k,l])=>eqf(k,l)).join('')}<div style="height:10px"></div><label>Armas</label>${['a1','a2','a3'].map(k=>eqf(k,'')).join('')}</section>
+  <section>${expBtn('inv','Inventario')}<textarea data-inv data-bigk="inv" maxlength="3000" style="min-height:220px;height:220px;resize:none;font-family:inherit">${esc(c.inv||'')}</textarea><h3>Dinero</h3><div class="mo">${COINS.map(([k,l])=>`<div class="mc"><label>${l}</label><input type="text" inputmode="text" autocomplete="off" data-mo="${k}" value="${mo[k]??0}" title="Puedes escribir una suma, como 10+5, y pulsar Enter"><div class="mb"><input type="text" inputmode="text" autocomplete="off" data-amt="${k}" placeholder="1" aria-label="Cantidad de ${l}"><button type="button" class="o" data-act="mm" data-k="${k}" data-s="1" title="Sumar" aria-label="Sumar ${l}">+</button><button type="button" class="o" data-act="mm" data-k="${k}" data-s="-1" title="Restar" aria-label="Restar ${l}">&minus;</button></div></div>`).join('')}</div><p class="mut" style="margin:6px 0 0">Al llegar a 100 se pasa a la siguiente moneda. Puedes escribir sumas (10+5) y pulsar Enter; si empiezas con + o − se aplica al valor actual.</p></section></div>`;
  a+=`<section>${bgBox(c,dm?'dm':'me')}</section>`;
  /* ----- folio 2 ----- */
  const hcell=i=>{const id=(c.sh||{})[i],lk=i>=4&&c.level<hLv(i);
@@ -380,7 +388,8 @@ function folios(c,dm,own){
  const stl=(t,ids)=>ids.length?`<h3>${t}</h3>`+ids.map(id=>`<div class="itw">${itHtml(c,id)}<button class="o" data-act="itdis" data-id="${id}">Descartar</button></div>`).join(''):'';
  z+=`<section><h2>Sin colocar</h2>`+(stH.length||stP.length?`<p class="s">Arrastra una a una casilla (o tócala y toca la casilla) para colocarla. Si la casilla ya está ocupada, la que había pasa a descartadas.</p>${stl('Habilidades',stH)}${stl('Pasivas',stP)}`:'<p class="s">No hay habilidades ni pasivas sin colocar.</p>')+'</section>';
  z+=`<section><h2>Habilidades</h2><div class="hg">${Array.from({length:24},(_,i)=>hcell(i)).join('')}</div></section>`;
- z+=`<section>${expBtn('comp','Competencias')}<textarea data-comp data-bigk="comp" maxlength="3000" style="min-height:130px;height:130px;resize:none;font-family:inherit">${esc(c.comp||'')}</textarea></section>`;
+ const CP=Array.isArray(c.comps)?c.comps:[];
+ z+=`<section><h2>Competencias</h2>`+(CP.length?CP.map((t,k)=>dm?`<div class="bar" style="margin:4px 0"><input data-cp="${k}" maxlength="200" value="${esc(t)}" style="flex:1;min-width:140px"><button class="danger" type="button" data-act="cpdel" data-i="${k}" title="Quitar" aria-label="Quitar competencia">${'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>'}</button></div>`:`<div class="cpl">${esc(t)}</div>`).join(''):'<p class="s">Aún no tienes competencias.</p>')+(dm?`<div class="bar"><input id="cpn" maxlength="200" placeholder="Nueva competencia" style="flex:1;min-width:140px"><button type="button" data-act="cpadd">Añadir</button></div>`:'')+'</section>';
  let ri=0;const given=n=>[...Object.values(HB),...Object.values(PB)].filter(x=>x.lv===n).length;
  z+='<section><h2>Recompensas por nivel</h2><div class="rws">'+Array.from({length:c.level+1},(_,i)=>i).map(n=>{const pt=n%5===0,
   dmc=dm&&!pt?`<div class="rwb"><button class="o" data-act="itnew" data-k="h" data-lv="${n}">Dar habilidad</button><button class="o" data-act="itnew" data-k="p" data-lv="${n}">Dar pasiva</button>${given(n)?`<span class="mut">(${given(n)})</span>`:''}</div>`:'';
@@ -397,19 +406,19 @@ function vFlow(c){
  const cl=clsD(c),lk=!!c.hp,placed=!!c.sl.length&&c.sl.every(x=>x>=0),b=bon(c),used=new Set(c.sl),n=8+(+c.extra||0)+(c.rand?1:0),
   raceSec=c.rand?`<section><h2>Raza</h2>${c.race?`<p>Raza aleatoria: <b>${esc(c.race)}</b>. Te da 1 dado extra de estadística.</p>`:`<p class="s">Has elegido raza aleatoria. Gira la ruleta: la raza que salga queda fijada y recibes 1 dado extra de estadística.</p><div class="bar"><button data-act="race">Girar ruleta</button></div>`}</section>`:'';
  if(c.done)return `<div${FX===c.id?' class="fx-in"':''}>`+folios(c,false,true)+'<p class="mut">Ficha completa y enviada automáticamente al DM.</p></div>';
- let h=`<section><div class="bar" style="justify-content:space-between;margin:0"><h2 style="margin:0">${esc(cnm(c))}</h2><span class="mut">${rtxt(c)}${esc(clsTxt(c))} · Nivel ${c.level}</span></div><p class="mut" style="margin:6px 0 0">${tag(c)} ${esc((FLO[c.flower]||{}).t||'')}</p>${iconCtl(c)}</section>${raceSec}<section><h2>1 · Estadísticas</h2>`;
+ let h=`<section><div class="bar" style="justify-content:space-between;margin:0"><h2 style="margin:0">${esc(cnm(c))}</h2><span class="mut">${rtxt(c)}${esc(clsTxt(c))} · Nivel ${c.level}</span></div><p class="mut" style="margin:6px 0 0">${tag(c)} ${esc((FLO[c.flower]||{}).t||'')}</p><div class="pj" style="margin:10px 0 0"><div class="pjc" style="width:96px;height:96px;font-size:2rem;cursor:pointer" role="button" tabindex="0" data-act="phbig" title="Foto del personaje" aria-label="Foto del personaje">${c.icon?`<img src="${esc(c.icon)}" alt="">`:esc(((c.name||'?')[0]||'?').toUpperCase())}</div></div></section>${raceSec}<section><h2>1 · Estadísticas</h2>`;
  if(!c.pool.length)h+=`<p class="s">Se tiran ${n} dados d20${c.extra||c.rand?` (8 base${c.extra?` + ${c.extra} de bono`:''}${c.rand?' + 1 por raza aleatoria':''})`:''}. Después coloca ocho en las casillas; los sobrantes se descartan.</p><div class="bar"><button data-act="st" ${c.race?'':'disabled'}>Tirar dados de estadísticas</button></div>${c.race?'':'<p class="mut">Primero gira la ruleta de raza.</p>'}`;
  else{const at=k=>lk?'':`data-id="${k}"`;
   h+=`<p class="s">${lk?'Estadísticas fijadas.':'Arrastra un dado a cada casilla (en móvil: toca un dado y luego la casilla).'}</p><div class="mut">Dados disponibles</div><div id="pool" class="pool">${c.pool.map((v,k)=>used.has(k)?'':`<span class="d ${sel===k?'sel':''}" ${at(k)}>${v}</span>`).join('')||'<span class="mut">Todos colocados</span>'}</div><div class="slots">`+
   STATS.map((nm,i)=>{const k=c.sl[i],d=k>=0?c.pool[k]:null;return `<div class="slot" data-slot="${i}"><b>${nm}</b>${d!==null?`<span class="d ${sel===k?'sel':''}" ${at(k)} ${b[nm]?cst(fcol(c)):''}>${d}</span>${b[nm]?`<small><span class="tag" ${cst(fcol(c))}>${sg(b[nm])}</span></small>`:''}<small>mod ${sg(mod(Math.min(20,d+(b[nm]||0))))}</small>`:'<small>—</small>'}</div>`}).join('')+'</div>';}
  const base=!!c.hp,left=c.level-(base?usedDice(c)-(c.hp.nb||0):0);
  const row=(k,t,d,o)=>{const col=(FLO[c.flower]||{}).k===k?fcol(c):'';if(!d)return `<div class="res"><b>${t}</b> <span class="mut">tu clase no tiene dado de ${t.toLowerCase()}</span></div>`;
-  return `<div class="res"><b>${t}</b> (d${d})${k==='hp'&&c.hp?` <span class="mut">Con ${c.hp.con}: ${sg(c.hp.mod)} por dado</span>`:''}<div>${o&&o.r.length?chipsC(o.r,'',true)+(o.f.length?' + flor '+chipsC(o.f,col):'')+` → <b>${k==='hp'?hpTot(c):sTot(o)}</b>`:'<span class="mut">sin tiradas</span>'}</div>
+  return `<div class="res"><b>${t}</b> (d${d})${k==='hp'&&c.hp?` <span class="mut">Con ${c.hp.con}: ${sg(c.hp.mod)} por dado</span>`:''}<div>${o&&o.r.length?chipsC(o.r,'',true)+(o.f.length?' + flor '+chipsC(o.f,col):'')+(c.rb&&RESB&&o.r.length?` · bono ${sg(RESB)} por dado`:'')+` → <b>${k==='hp'?hpTot(c):sTot(o,c)}</b>`:'<span class="mut">sin tiradas</span>'}</div>
   <div class="bar"><input id="q-${k}" type="number" min="1" max="${Math.max(1,left)}" value="1" style="width:70px"><button data-act="rd" data-res="${k}" ${base&&left>0?'':'disabled'}>Tirar dado(s) de ${t.toLowerCase()}</button></div></div>`};
  h+=`</section><section><h2>2 · Tiradas obligatorias (nivel 0)</h2>`+(base?'<p class="s">Hecho. El primer dado de cada recurso (en tono más oscuro) es la tirada obligatoria.</p>':`<p class="s">Se tira un dado de cada recurso de tu clase (vida, maná y ánima). Son obligatorias y no cuentan para el reparto de tu nivel.</p><div class="bar"><button data-act="base" ${placed?'':'disabled'}>Tirar dados obligatorios</button></div>${placed?'':'<p class="mut">Coloca primero los ocho dados de estadística.</p>'}`)+'</section>';
  h+=`<section><h2>3 · Reparto de dados por nivel</h2><p class="s">Tienes <b>${left}</b> de ${c.level} dado${c.level>1?'s':''} para repartir entre tus recursos. Puedes tirar de uno en uno y decidir dónde va el siguiente.</p>${base?'':'<p class="mut">Haz antes las tiradas obligatorias.</p>'}${row('hp','Vida',cl[0],c.hp)}${row('ma','Maná',cl[1],c.ma)}${row('an','Ánima',cl[2],c.an)}</section>`;
  const nr=rwLv(c.level).length;
- h+=`<section><h2>4 · Recompensas por nivel</h2><p class="s">Hay ${nr} tirada${nr>1?'s':''} de recompensa. El nivel 0 y los niveles terminados en 0 o 5 dan 2 puntos de estadística y no tiran. Al terminar, la ficha se envía sola al DM.</p><div class="bar"><button data-act="rw" ${base&&left===0?'':'disabled'}>Tirar recompensas</button></div>${base&&left>0?'<p class="mut">Reparte antes todos tus dados.</p>':''}</section>`;
+ h+=`<section><h2>4 · Recompensas por nivel</h2><p class="s">Hay ${nr} tirada${nr>1?'s':''} de recompensa. El nivel 0 y los niveles terminados en 0 o 5 dan 2 puntos de estadística y no tiran. Al terminar, la ficha se envía sola al DM.</p><div class="bar"><button data-act="rw" ${base&&left===0&&!RWV?'':'disabled'}>Tirar recompensas</button></div>${RWV?`<p>Recompensas tiradas: ${chips(RWV)}</p><p class="mut">Un momento: se está preparando tu ficha…</p>`:''}${base&&left>0?'<p class="mut">Reparte antes todos tus dados.</p>':''}</section>`;
  return h;
 }
 function vPlayer(){
@@ -441,7 +450,7 @@ function vTables(){
   <div><label>Color</label><input type="color" data-f="${i}" data-k="col" value="${f.col||guessCol(f.n)}" style="padding:2px;height:38px"></div></div>
   <div class="g" style="margin-top:6px">${[0,1].map(n=>`<div><label>Bono de estadística ${n+1}</label><select data-f="${i}" data-k="s${n}">${sOpt(be[n]&&be[n][0])}</select></div><div><label>Valor</label><input type="number" data-f="${i}" data-k="v${n}" value="${be[n]?be[n][1]:0}"></div>`).join('')}</div>
   <p class="mut">Efecto: ${esc(flText(f))||'—'}</p><button class="o" data-act="tfdel" data-i="${i}">Quitar flor</button></div>`}).join('')+'<div class="bar"><button class="o" data-act="tfadd">Añadir flor</button></div>';
- h+='<h2 style="margin-top:16px">Razas</h2><p class="s">Por ahora solo los nombres. Más adelante se podrán añadir bonos.</p>'+TD.races.map((r,i)=>`<div class="bar"><input data-ra="${i}" value="${esc(r)}" style="flex:1"><button class="o" data-act="trdel" data-i="${i}">Quitar</button></div>`).join('')+'<div class="bar"><button class="o" data-act="tradd">Añadir raza</button></div>';
+ h+=`<h2 style="margin-top:16px">Bono de recursos</h2><p class="s">Cuando concedes un personaje con la casilla "Bono de recursos", se suma este número a cada dado de vida, maná y ánima que tire el jugador. Afecta a las tiradas que se hagan a partir de ahora.</p><div class="g"><div><label>Bono por dado</label><input type="number" data-rbv value="${TD.resBonus}"></div></div>`+'<h2 style="margin-top:16px">Razas</h2><p class="s">Por ahora solo los nombres. Más adelante se podrán añadir bonos.</p>'+TD.races.map((r,i)=>`<div class="bar"><input data-ra="${i}" value="${esc(r)}" style="flex:1"><button class="o" data-act="trdel" data-i="${i}">Quitar</button></div>`).join('')+'<div class="bar"><button class="o" data-act="tradd">Añadir raza</button></div>';
  h+='<h2 style="margin-top:16px">Recompensas por nivel</h2><p class="s">Según la última cifra del nivel. Los niveles múltiplos de 5 dan siempre 2 puntos de estadística y no tiran dado.</p>'+TD.rewards.map((t,i)=>`<div class="bar"><b style="width:36px">X${i}</b><input data-r="${i}" value="${esc(t)}" style="flex:1"></div>`).join('');
  h+=`<h2 style="margin-top:16px">Estadísticas</h2><p class="mut">${STATS.join(' · ')} (no editable)</p><div class="bar"><button data-act="tsave">Guardar tablas</button><button class="o" data-act="treset">Restaurar valores iniciales</button></div></section>`;
  return h;
@@ -451,6 +460,7 @@ function grab(){if(!TD)return;
  document.querySelectorAll('#tbl [data-f]').forEach(e=>{const f=TD.flowers[+e.dataset.f];if(!f)return;const k=e.dataset.k;f._e=f._e||{};
   if(k==='n')f.n=e.value.trim();else if(k==='res')f.res=e.value;else if(k==='col')f.col=e.value;else if(k==='d')f.d=Math.max(2,+e.value||4);else f._e[k]=e.value});
  TD.flowers.forEach(f=>{if(f._e){const b={};[0,1].forEach(i=>{const n=f._e['s'+i],v=+f._e['v'+i]||0;if(n&&v)b[n]=(b[n]||0)+v});f.b=b;delete f._e}});
+ document.querySelectorAll('#tbl [data-rbv]').forEach(e=>{TD.resBonus=Math.max(-20,Math.min(20,Math.floor(+e.value)||0))});
  document.querySelectorAll('#tbl [data-ra]').forEach(e=>{TD.races[+e.dataset.ra]=e.value.trim()});
  document.querySelectorAll('#tbl [data-r]').forEach(e=>{TD.rewards[+e.dataset.r]=e.value.trim()});}
 function ntSection(){const u=NT.filter(n=>!n.read);
@@ -466,8 +476,8 @@ function vDM(){
  if(!ps.length)h+='<section><p class="s">Aún no hay jugadores. Aparecerán aquí cuando abran la página y escriban su nombre.</p></section>';
  ps.forEach(p=>{const used=new Set(p.chars.map(c=>c.grant)),free=p.grants.filter(g=>!used.has(g.id));
   h+=`<section><h2>${esc(p.prof.name)}</h2><p class="mut">${p.chars.length} personaje(s) · ${free.length} permiso(s) sin usar</p>
-  <div class="bar"><label>Dados extra de bono <input data-xin="${p.id}" type="number" min="0" value="0" style="width:70px"></label><button data-act="grant" data-p="${p.id}">Permitir nuevo personaje</button><button class="danger" data-act="delp" data-p="${p.id}">Eliminar jugador</button></div>
-  ${free.map(g=>`<div class="mut">Permiso sin usar (+${g.extra||0} dados) <button class="o" data-act="rev" data-p="${p.id}" data-g="${g.id}">Revocar</button></div>`).join('')}${files(p.chars,p.id)}</section>`;});
+  <div class="bar"><label>Dados extra de bono <input data-xin="${p.id}" type="number" min="0" value="0" style="width:70px"></label><label style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-rbin="${p.id}" style="width:auto">Bono de recursos</label><button data-act="grant" data-p="${p.id}">Permitir nuevo personaje</button><button class="danger" data-act="delp" data-p="${p.id}">Eliminar jugador</button></div>
+  ${free.map(g=>`<div class="mut">Permiso sin usar (+${g.extra||0} dados${g.rb?', bono de recursos':''}) <button class="o" data-act="rev" data-p="${p.id}" data-g="${g.id}">Revocar</button></div>`).join('')}${files(p.chars,p.id)}</section>`;});
  return h;
 }
 function render(){
@@ -500,7 +510,7 @@ function spinWheel(list){return new Promise(res=>{
 });}
 async function toSheet(c){const a=$('app');const red=matchMedia('(prefers-reduced-motion:reduce)').matches;
  if(!red){const el=a.querySelector('.themed')||a.firstElementChild;const sec=[...a.querySelectorAll('section')];sec.forEach(x=>x.classList.add('fx-out'));await new Promise(r=>setTimeout(r,520));FX=c.id}
- HOLD=0;render();if(FX){setTimeout(()=>{FX=null},1200);window.scrollTo(0,0)}}
+ HOLD=0;RWV=null;render();if(FX){setTimeout(()=>{FX=null},1200);window.scrollTo(0,0)}}
 const roll={
  async race(){const c=curChar();if(!c||!c.rand||c.race)return;const r=await spinWheel(RACES);c.race=r;W(()=>chRef(c).update({race:r}));render();},
  async st(){const c=curChar();if(!c||c.pool.length||!c.race)return;const v=await dice(20,8+(+c.extra||0)+(c.rand?1:0));c.pool=v;c.sl=Array(8).fill(-1);W(()=>chRef(c).update({pool:v,sl:c.sl}));render();},
@@ -515,7 +525,7 @@ const roll={
   c[k].r=[...c[k].r,...r];c[k].f=[...c[k].f,...f];
   W(()=>chRef(c).update({hp:c.hp,ma:c.ma,an:c.an}));render();},
  async rw(){const c=curChar();if(!c||c.rw||!c.hp||usedDice(c)-c.hp.nb!==c.level)return;const r=await dice(20,rwLv(c.level).length);
-  HOLD=1;c.rw={r};c.fin=finOf(c);c.done=true;W(()=>chRef(c).update({rw:c.rw,fin:c.fin,done:true}));if(!ME.dm)WS(async()=>{try{await DB.doc('notifs/done_'+c.id).set({type:'char_done',pid:ME.id,name:(P.prof&&P.prof.name)||'',cname:c.name,cid:c.id,at:Date.now(),read:false})}catch(e){}discord('personaje',{cid:c.id})});await toSheet(c);}
+  RWV=r;render();HOLD=1;c.rw={r};c.fin=finOf(c);c.done=true;W(()=>chRef(c).update({rw:c.rw,fin:c.fin,done:true}));if(!ME.dm)WS(async()=>{try{await DB.doc('notifs/done_'+c.id).set({type:'char_done',pid:ME.id,name:(P.prof&&P.prof.name)||'',cname:c.name,cid:c.id,at:Date.now(),read:false})}catch(e){}discord('personaje',{cid:c.id})});await new Promise(z=>setTimeout(z,5000));await toSheet(c);}
 };
 
 /* ---------- arrastrar dados ---------- */
@@ -617,9 +627,16 @@ function cbBlur(w){const {L,lab}=cbCur(w),i=w.querySelector('.cbi'),q=norm(i.val
   else if(e.key==='Escape'){if(!l.hidden){e.preventDefault();t.value=cbCur(w).lab;cbClose(w)}}});
  A.addEventListener('focusout',e=>{const t=e.target;if(!isCbi(t))return;t._m=0;const w=cbWrap(t);if(w&&w.isConnected)cbBlur(w)});}
 
-const BGT={background:'Background',inv:'Inventario',comp:'Competencias'};let bgK='background';
+const BGT={background:'Background',inv:'Inventario'};let bgK='background';
 const bgArea=()=>document.querySelector(`#app textarea[data-bigk="${bgK}"]`);
 function bgOpen(k){bgK=k;const ta=bgArea();if(!ta)return;const x=iconTarget(),tv=x?themeVars(x.c):'';$('bgv').setAttribute('style',(tv?tv+';':'')+'display:block');$('bgti').textContent=BGT[k]||'';$('bgt').value=ta.value;$('bgt').focus();$('bgt').setSelectionRange(0,0);$('bgt').scrollTop=0}
+function phOpen(){const x=iconTarget();if(!x)return;const c=x.c,tv=themeVars(c);$('phv').setAttribute('style',(tv?tv+';':'')+'display:flex');
+ $('phi').innerHTML=c.icon?`<img src="${esc(c.icon)}" alt="Foto ampliada">`:`<div class="ph0">${esc(((c.name||'?')[0]||'?').toUpperCase())}</div>`;$('phd').style.display=c.icon?'':'none'}
+function phClose(){$('phv').style.display='none'}
+$('phx').onclick=phClose;$('phv').addEventListener('click',e=>{if(e.target===$('phv'))phClose()});
+$('phd').onclick=()=>{phClose();setIcon('')};
+$('phf').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];e.target.value='';phClose();if(f)readIcon(f)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('phv').style.display==='flex')phClose()});
 function bgSave(){const v=$('bgt').value,ta=bgArea();if(ta&&ta.value!==v){ta.value=v;ta.dispatchEvent(new Event('change',{bubbles:true}))}}
 function bgClose(){bgSave();$('bgv').style.display='none'}
 $('bgt').addEventListener('change',bgSave);$('bgx').onclick=bgClose;
@@ -628,9 +645,11 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('bgv').style.disp
 function gearSave(t){const x=iconTarget();if(!x)return;const {c,ref}=x;
  if(t.dataset.eq!==undefined){const eq={...(c.eq||{}),[t.dataset.eq]:t.value.slice(0,60)};c.eq=eq;W(()=>ref.update({eq}))}
  else if(t.dataset.inv!==undefined){const v=t.value.slice(0,3000);c.inv=v;W(()=>ref.update({inv:v}))}
- else if(t.dataset.comp!==undefined){const v=t.value.slice(0,3000);c.comp=v;W(()=>ref.update({comp:v}))}
- else{const money=moneyNorm({...(c.money||{}),[t.dataset.mo]:t.value});c.money=money;W(()=>ref.update({money}));toast('Guardado');render();return}
+ else{const cur=(c.money||{})[t.dataset.mo]||0,val=calcExp(t.value,cur);if(val===null){toast('Escribe un número o una suma, como 10+5.');render();return}const money=moneyNorm({...(c.money||{}),[t.dataset.mo]:val});c.money=money;W(()=>ref.update({money}));toast('Guardado');render();return}
  toast('Guardado')}
+function cpSave(t){if(!ME.dm)return;const x=iconTarget();if(!x)return;const {c,ref}=x,a=[...(c.comps||[])],k=+t.dataset.cp;if(!(k>=0&&k<a.length))return;const v=t.value.trim().slice(0,200);if(v)a[k]=v;else a.splice(k,1);c.comps=a;W(()=>ref.update({comps:a}));toast('Guardado');render()}
+function cpAdd(){if(!ME.dm)return;const x=iconTarget(),inp=$('app').querySelector('#cpn');if(!x||!inp)return;const v=inp.value.trim().slice(0,200);if(!v)return;const a=[...(x.c.comps||[]),v];if(a.length>60){toast('Máximo 60 competencias.');return}x.c.comps=a;W(()=>x.ref.update({comps:a}));toast('Guardado');render()}
+function cpDel(i){if(!ME.dm)return;const x=iconTarget();if(!x)return;const a=[...(x.c.comps||[])];if(!(i>=0&&i<a.length))return;if(!confirm(`¿Quitar la competencia "${a[i]}"?`))return;a.splice(i,1);x.c.comps=a;W(()=>x.ref.update({comps:a}));toast('Guardado');render()}
 function slotAt(el){const q=el&&el.closest&&el.closest('[data-hs],[data-ps]');return q?(q.dataset.hs!==undefined?{k:'h',i:+q.dataset.hs}:{k:'p',i:+q.dataset.ps}):null}
 function tryMove(id,k,i){const x=iconTarget();if(!x)return;const {c,ref}=x,M=(c.habs||{})[id]?'h':(c.pass||{})[id]?'p':null;if(!M||M!==k)return;
  if(k==='h'&&c.level<hLv(i)){toast('Esa casilla se desbloquea al nivel '+hLv(i)+'.');return}
@@ -678,9 +697,11 @@ document.addEventListener('click',e=>{if(!selI||e.target.closest('.it[data-iid]'
 function syncSub(){const cc=$('cc'),cs=$('cs');if(!cc||!cs)return;const L=Object.keys(CLS).filter(n=>n!==cc.value);
  if(!L.includes(cs.value)){cs.value=L[0]||'';cs.closest('.cb').querySelector('.cbi').value=cs.value}}
 $('app').addEventListener('change',e=>{const t=e.target;if(t.id==='csub'||t.id==='cc'){if(t.id==='csub')$('csubw').style.display=t.checked?'':'none';syncSub();return}
- if(t.dataset.eq!==undefined||t.dataset.inv!==undefined||t.dataset.comp!==undefined||t.dataset.mo!==undefined){gearSave(t);return}
+ if(t.dataset.eq!==undefined||t.dataset.inv!==undefined||t.dataset.mo!==undefined){gearSave(t);return}
+ if(t.dataset.cp!==undefined){cpSave(t);return}
  if(t.dataset.sv)saveSheet();else if(t.dataset.icon!==undefined&&t.files&&t.files[0]){const f=t.files[0];t.value='';readIcon(f)}else if(t.closest('#tbl'))grab();
  else if(t.dataset.pt){const c=curChar();if(c){const k=t.dataset.pt,v=t.value.slice(0,3000);c[k]=v;W(()=>chRef(c).update({[k]:v}));toast('Guardado')}}});
+$('app').addEventListener('keydown',e=>{const t=e.target;if(t&&t.dataset&&t.dataset.act==='phbig'&&(e.key==='Enter'||e.key===' ')){e.preventDefault();phOpen()}});
 $('app').addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b||b.disabled)return;const a=b.dataset.act,d=b.dataset;toast('');
  if(a==='google')signInWithPopup(auth,new GoogleAuthProvider()).catch(e=>toast(authMsg(e)));
  else if(a==='login')signInWithEmailAndPassword(auth,$('le').value.trim(),$('lp').value).catch(e=>toast(authMsg(e)));
@@ -693,7 +714,7 @@ $('app').addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
  else if(a==='create'){const n=$('cn').value.trim().slice(0,60);
   const used=new Set(P.chars.map(x=>x.grant)),g=P.grants.find(x=>!used.has(x.id));if(!g)return;
   const sb=$('csub')&&$('csub').checked?$('cs').value:'';if(sb&&(sb===$('cc').value||!(sb in CLS))){toast('Elige una subclase distinta de la clase principal.');return}
-  const rv=$('cr').value,cid=g.id,doc={name:n,cls:$('cc').value,sub:sb,race:rv==='__rand'?'':rv,rand:rv==='__rand',flower:$('cf').value,level:Math.min(+$('cl').value||1,cfg.maxLevel||1),grant:g.id,extra:+g.extra||0,created:Date.now(),pool:[],sl:[],done:false};
+  const rv=$('cr').value,cid=g.id,doc={name:n,cls:$('cc').value,sub:sb,race:rv==='__rand'?'':rv,rand:rv==='__rand',flower:$('cf').value,level:Math.min(+$('cl').value||1,cfg.maxLevel||1),grant:g.id,extra:+g.extra||0,rb:!!g.rb,created:Date.now(),pool:[],sl:[],done:false};
   P.chars.push({id:cid,...doc});view.cid=cid;view.pid=ME.id;W(()=>DB.doc(`players/${ME.id}/chars/${cid}`).set(doc));render()}
  else if(a==='st'||a==='rw'||a==='race')run(()=>roll[a]());
  else if(a==='rd')run(()=>roll.rd(d.res));
@@ -721,17 +742,20 @@ $('app').addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
  else if(a==='treset'){if(confirm('¿Restaurar las tablas iniciales? Se perderán los cambios sin guardar.')){TD=clone(DEF);render()}}
  else if(a==='tsave'){grab();const cn=TD.classes.map(c=>c.n),fn=TD.flowers.map(f=>f.n),rn=TD.races;
   if(!cn.length||!fn.length||cn.some(x=>!x)||fn.some(x=>!x)||new Set(cn).size!==cn.length||new Set(fn).size!==fn.length||!rn.length||rn.some(x=>!x)||new Set(rn).size!==rn.length){toast('Revisa los nombres: no pueden estar vacíos ni repetidos.');return}
-  const doc={classes:TD.classes.map(c=>({n:c.n,h:c.h,m:c.m,a:c.a})),flowers:TD.flowers.map(f=>({n:f.n,res:f.res||'',d:f.d||4,b:f.b||{},col:f.col||guessCol(f.n)})),rewards:TD.rewards.slice(0,10),classNames:cn,flowerNames:fn,races:rn,raceNames:rn};
+  const doc={classes:TD.classes.map(c=>({n:c.n,h:c.h,m:c.m,a:c.a})),flowers:TD.flowers.map(f=>({n:f.n,res:f.res||'',d:f.d||4,b:f.b||{},col:f.col||guessCol(f.n)})),rewards:TD.rewards.slice(0,10),resBonus:TD.resBonus,classNames:cn,flowerNames:fn,races:rn,raceNames:rn};
   TBL=doc;applyTables(doc);W(()=>DB.doc('config/tables').set(doc));toast('Tablas guardadas');render()}
  else if(a==='pp'){const c=curChar();if(!c||!c.fin)return;const dl=+d.d,n=d.n;if(dl>0&&(c.fin.puntos-sum(Object.values(DR))<=0||c.fin.stats[n]+(DR[n]||0)>=20))return;if(dl<0&&!(DR[n]>0))return;DR[n]=(DR[n]||0)+dl;render()}
  else if(a==='pc'){const c=curChar();if(!c||!c.fin)return;const fin={...c.fin,stats:{...c.fin.stats}};let g=0;STATS.forEach(n=>{const v=DR[n]||0;fin.stats[n]+=v;g+=v});
   if(!g||g>fin.puntos)return;fin.puntos-=g;c.fin=fin;DR={};W(()=>chRef(c).update({fin}));toast('Puntos repartidos');render()}
  else if(a==='ml'){const n=Math.max(1,Math.min(99,+$('ml').value||1));cfg.maxLevel=n;W(()=>DB.doc('config/main').set({maxLevel:n}));toast('Nivel máximo guardado: '+n)}
  else if(a==='grant'){const x=Math.max(0,+document.querySelector(`[data-xin="${d.p}"]`).value||0),gid='g'+Date.now().toString(36);
-  DM[d.p].grants.push({id:gid,extra:x});W(()=>DB.doc(`permits/${d.p}/grants/${gid}`).set({extra:x,at:Date.now()}));render()}
+  const rb=!!document.querySelector(`[data-rbin="${d.p}"]`).checked;DM[d.p].grants.push({id:gid,extra:x,rb});W(()=>DB.doc(`permits/${d.p}/grants/${gid}`).set({extra:x,rb,at:Date.now()}));render()}
  else if(a==='rev'){DM[d.p].grants=DM[d.p].grants.filter(g=>g.id!==d.g);W(()=>DB.doc(`permits/${d.p}/grants/${d.g}`).delete());render()}
+ else if(a==='phbig')phOpen()
  else if(a==='bgbig')bgOpen(d.k||'background')
- else if(a==='mm'){const x=iconTarget();if(!x)return;const {c,ref}=x,inp=document.querySelector(`#app input[data-amt="${d.k}"]`),n=Math.max(1,Math.min(MAXM,Math.floor(+(inp&&inp.value))||1)),i=COIN.indexOf(d.k),base=moneyNorm(c.money||{});
+ else if(a==='cpadd')cpAdd()
+ else if(a==='cpdel')cpDel(+d.i)
+ else if(a==='mm'){const x=iconTarget();if(!x)return;const {c,ref}=x,inp=document.querySelector(`#app input[data-amt="${d.k}"]`),n=Math.max(1,Math.min(MAXM,inp&&inp.value.trim()?(calcExp(inp.value,0)??1):1)),i=COIN.indexOf(d.k),base=moneyNorm(c.money||{});
   let m;if(d.s==='1'){m=moneyNorm({...base,[d.k]:base[d.k]+n})}else{m=moneySub(base,i,n);if(!m){toast('No tienes suficiente dinero.');return}m=moneyNorm(m)}
   c.money=m;W(()=>ref.update({money:m}));toast('Guardado');render()}
  else if(a==='itnew')itOpen(d.k,'',d.lv===undefined?'':d.lv)

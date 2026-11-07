@@ -63,9 +63,10 @@ service cloud.firestore {
         allow create: if me(uid)
           && exists(/databases/$(database)/documents/permits/$(uid)/grants/$(cid))
           && request.resource.data.grant == cid
-          && request.resource.data.keys().hasOnly(['name','cls','sub','race','rand','flower','level','grant','extra','created','pool','sl','done'])
+          && request.resource.data.keys().hasOnly(['name','cls','sub','race','rand','flower','level','grant','extra','created','pool','sl','done','rb'])
           && request.resource.data.name is string && request.resource.data.name.size() <= 60
           && request.resource.data.extra == get(/databases/$(database)/documents/permits/$(uid)/grants/$(cid)).data.extra
+          && request.resource.data.get('rb', false) == get(/databases/$(database)/documents/permits/$(uid)/grants/$(cid)).data.get('rb', false)
           && request.resource.data.level is int
           && request.resource.data.level >= 1
           && request.resource.data.level <= maxLevel()
@@ -75,7 +76,7 @@ service cloud.firestore {
                   && (request.resource.data.sub == ''
                       || (request.resource.data.sub != request.resource.data.cls
                           && request.resource.data.sub in tnames('classNames', ['Guerrero','Monje','Clérigo','Bardo','Druida','Tirador','Asesino','Hechicero','Warlock','Mago'])))))
-          && request.resource.data.flower in tnames('flowerNames', ['Flor Roja','Flor Azul','Flor Verde','Flor Marrón','Flor Blanca','Flor Morada','Flor Amarilla'])
+          && request.resource.data.flower in tnames('flowerNames', ['Sin Flor','Flor Roja','Flor Azul','Flor Verde','Flor Marrón','Flor Blanca','Flor Morada','Flor Amarilla'])
           && request.resource.data.rand is bool
           && ((request.resource.data.rand == true && request.resource.data.race == '')
               || (request.resource.data.rand == false
@@ -89,7 +90,7 @@ service cloud.firestore {
         function gearOk() {
           let k = request.resource.data.diff(resource.data).affectedKeys();
           let n = request.resource.data;
-          return k.hasOnly(['eq','inv','money','comp'])
+          return k.hasOnly(['eq','inv','money'])
             && (!k.hasAny(['eq']) || (n.eq is map
                   && n.eq.keys().hasOnly(['casco', 'pechera', 'guantes', 'grebas', 'botas', 'a1', 'a2', 'a3'])
                   && (!('casco' in n.eq) || (n.eq.casco is string && n.eq.casco.size() <= 60))
@@ -101,7 +102,6 @@ service cloud.firestore {
                   && (!('a2' in n.eq) || (n.eq.a2 is string && n.eq.a2.size() <= 60))
                   && (!('a3' in n.eq) || (n.eq.a3 is string && n.eq.a3.size() <= 60))))
             && (!k.hasAny(['inv']) || (n.inv is string && n.inv.size() <= 3000))
-            && (!k.hasAny(['comp']) || (n.comp is string && n.comp.size() <= 3000))
             && (!k.hasAny(['money']) || (n.money is map
                   && n.money.keys().hasOnly(['cobre', 'plata', 'electrum', 'oro', 'platino'])
                   && (!('cobre' in n.money) || (n.money.cobre is int && n.money.cobre >= 0 && n.money.cobre <= 999999999))
