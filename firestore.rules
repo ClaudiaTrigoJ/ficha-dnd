@@ -84,7 +84,7 @@ service cloud.firestore {
           && request.resource.data.pool.size() == 0
           && request.resource.data.done == false;
 
-        allow update: if isDM() || (me(uid) && (ownerOk() || textOk() || iconOk() || spendOk() || nameOk() || gearOk() || slotsOk()));
+        allow update: if isDM() || (me(uid) && (ownerOk() || textOk() || iconOk() || spendOk() || nameOk() || gearOk() || slotsOk() || notesOk() || lvRollOk() || lvRwOk() || flowerOk()));
 
         // Equipamiento, inventario y dinero: el jugador y el DM pueden escribirlos cuando quieran
         function gearOk() {
@@ -214,6 +214,55 @@ service cloud.firestore {
                   && 5 * n.rw.r.size() == 4 * o.level + o.level % 5
                   && 5 * n.fin.puntos == 2 * (o.level - o.level % 5) + 10
                   && st20(n.fin)));
+        }
+
+
+        // Notas del jugador (texto JSON con las secciones)
+        function notesOk() {
+          let k = request.resource.data.diff(resource.data).affectedKeys();
+          return k.hasOnly(['notes']) && request.resource.data.notes is string && request.resource.data.notes.size() <= 20000;
+        }
+
+        // Despues de terminar la ficha: dados de recursos de una subida de nivel (nunca mas que el nivel, solo anadir)
+        function lvRollOk() {
+          let k = request.resource.data.diff(resource.data).affectedKeys();
+          let n = request.resource.data;
+          let o = resource.data;
+          return o.get('done', false) == true && k.hasOnly(['hp','ma','an','fin']) && k.hasAny(['hp','ma','an'])
+            && n.hp.nb == o.hp.nb && used(n) - n.hp.nb <= o.level
+            && n.hp.r.size() >= o.hp.r.size() && n.ma.r.size() >= o.ma.r.size() && n.an.r.size() >= o.an.r.size()
+            && (!k.hasAny(['fin']) || (n.fin.stats == o.fin.stats && n.fin.puntos == o.fin.puntos));
+        }
+
+        // Despues de terminar la ficha: tiradas de recompensa de los niveles nuevos (se anaden al final)
+        function lvRwOk() {
+          let k = request.resource.data.diff(resource.data).affectedKeys();
+          let n = request.resource.data;
+          let o = resource.data;
+          return o.get('done', false) == true && k.hasOnly(['rw']) && 'rw' in o
+            && n.rw.r.size() >= o.rw.r.size()
+            && 5 * n.rw.r.size() == 4 * o.level + o.level % 5
+            && n.rw.r[0:o.rw.r.size()] == o.rw.r;
+        }
+
+        // Elegir flor cuando el DM lo permite: se gasta el permiso y las estadisticas solo cambian por el bono de la flor
+        function flowerOk() {
+          let k = request.resource.data.diff(resource.data).affectedKeys();
+          let n = request.resource.data;
+          let o = resource.data;
+          return k.hasOnly(['flower','fin','fpick']) && k.hasAny(['fpick'])
+            && o.get('fpick', false) == true && n.fpick == false
+            && n.flower in tnames('flowerNames', ['Sin Flor','Flor Roja','Flor Azul','Flor Verde','Flor Marrón','Flor Blanca','Flor Morada','Flor Amarilla'])
+            && (!k.hasAny(['fin']) || ('fin' in o && n.fin.puntos == o.fin.puntos && n.fin.hp == o.fin.hp
+                  && n.fin.mana == o.fin.mana && n.fin.anima == o.fin.anima
+                  && capOk('Fuerza') && capOk('Constitución') && capOk('Destreza') && capOk('Voluntad')
+                  && capOk('Inteligencia') && capOk('Carisma') && capOk('Sabiduría') && capOk('Suerte')
+                  && dd('Fuerza') >= -6 && dd('Constitución') >= -6 && dd('Destreza') >= -6 && dd('Voluntad') >= -6
+                  && dd('Inteligencia') >= -6 && dd('Carisma') >= -6 && dd('Sabiduría') >= -6 && dd('Suerte') >= -6
+                  && dd('Fuerza') <= 6 && dd('Constitución') <= 6 && dd('Destreza') <= 6 && dd('Voluntad') <= 6
+                  && dd('Inteligencia') <= 6 && dd('Carisma') <= 6 && dd('Sabiduría') <= 6 && dd('Suerte') <= 6
+                  && dd('Fuerza') + dd('Constitución') + dd('Destreza') + dd('Voluntad')
+                     + dd('Inteligencia') + dd('Carisma') + dd('Sabiduría') + dd('Suerte') <= 8));
         }
 
         // Reparto de puntos de estadística: solo subir estadísticas gastando puntos
