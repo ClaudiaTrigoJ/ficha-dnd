@@ -58,7 +58,7 @@ table.rw td.num{width:56px;font-weight:bold}table.rw tr:last-child td{border-bot
 .pts button{background:#fff;color:#111;margin-top:6px;padding:5px 12px}.pts.no{background:var(--ac2);color:var(--mut);font-weight:normal;box-shadow:none;font-size:.9rem}
 label.btn{display:inline-block;cursor:pointer;border-radius:8px;padding:9px 14px;background:var(--ac2);color:var(--tx);border:1px solid var(--bd);font-size:1rem}
 .av{width:44px;height:44px;border-radius:50%;background:var(--ac);color:var(--onac,#fff);display:inline-flex;align-items:center;justify-content:center;overflow:hidden;font-weight:bold;flex:none}
-.ic{width:72px;height:72px;flex:none;object-fit:cover;object-position:center;border-radius:50%;display:block}
+img.ic{width:72px;height:72px;box-sizing:border-box;border:3px solid var(--ac);flex:none;object-fit:cover;object-position:center;border-radius:50%;display:block}
 .hero{width:180px;aspect-ratio:1/1;object-fit:cover;object-position:top;border-radius:12px;flex:none}
 .themed{background:var(--pbg);border-radius:14px;padding:12px;margin-top:8px}
 .themed th{background:var(--ac);color:var(--onac);padding:6px 8px;text-align:left;font-size:.8rem}
@@ -132,6 +132,9 @@ main.wide{max-width:1500px}
 .hc .hn{position:absolute;left:7px;top:6px;color:var(--mut);font-size:.8rem;font-style:italic}
 .hc .hl{position:absolute;right:5px;bottom:4px;font-size:.7rem;background:var(--ac2);border-radius:6px;padding:1px 6px;color:var(--mut)}
 .hc.lk{opacity:.6;background:repeating-linear-gradient(45deg,var(--card) 0 7px,var(--ac2) 7px 14px)}
+.ntc{padding:8px 10px;border-bottom:1px dashed var(--bd);cursor:pointer}.ntc.ed{cursor:default;border:1px solid var(--bd);border-radius:8px;background:var(--bg);margin:6px 0}
+.ntb{white-space:pre-wrap;font-size:.9rem;margin-top:2px}.nti{display:flex;gap:8px;align-items:center;font-size:.9rem;margin:3px 0}.nti.dn .nt2{text-decoration:line-through;opacity:.7}
+.nbx{width:18px;height:18px;box-sizing:border-box;border:2px solid var(--ac);border-radius:5px;display:inline-flex;align-items:center;justify-content:center;flex:none;cursor:pointer}.nbx.on{background:var(--ac);color:var(--onac,#fff)}
 .tgl{display:flex;gap:8px;align-items:center;cursor:pointer}.tgl input{width:auto;margin:0}
 .cpl{padding:6px 4px;border-bottom:1px dashed var(--bd)}.cpl:last-of-type{border-bottom:0}
 @media (max-width:760px){.hg{grid-template-columns:1fr}}
@@ -291,12 +294,13 @@ function cbList(k){
  if(k==='cs')return Object.keys(CLS).filter(n=>n!==((document.getElementById('cc')||document.querySelector('[data-sv="t:cls"],[data-rg="cls"]')||{}).value)).map(n=>({v:n,l:n}));
  if(k==='cr2')return RACES.map(n=>({v:n,l:n}));
  if(k==='cf')return Object.entries(FLO).map(([n,f])=>({v:n,l:n,d:f.t}));
+ if(k==='cl99')return Array.from({length:99},(_,i)=>({v:String(i+1),l:String(i+1)}));
  if(k==='cl')return Array.from({length:cfg.maxLevel||1},(_,i)=>({v:String(i+1),l:String(i+1)}));
  if(k==='profesion')return PROF.map(n=>({v:n,l:n}));
  if(k==='alineamiento')return ALIN.map(n=>({v:n,l:n}));
  return [];}
 const cbox=(key,val,attr,o={})=>{const cu=cbList(key).find(x=>x.v===val);
- return `<div class="cb" data-cb="${key}"${o.empty?' data-empty="1"':''}><input type="hidden" ${attr} value="${esc(val)}"><input class="cbi" type="text" role="combobox" aria-expanded="false" aria-autocomplete="list" autocomplete="off" autocapitalize="off" spellcheck="false"${key==='cl'?' inputmode="numeric"':''} placeholder="${esc(o.ph||'Escribe para buscar')}" value="${esc(cu?cu.l:val)}"><div class="cbl" role="listbox" hidden></div></div>`};
+ return `<div class="cb" data-cb="${key}"${o.empty?' data-empty="1"':''}><input type="hidden" ${attr} value="${esc(val)}"><input class="cbi" type="text" role="combobox" aria-expanded="false" aria-autocomplete="list" autocomplete="off" autocapitalize="off" spellcheck="false"${key==='cl'||key==='cl99'?' inputmode="numeric"':''} placeholder="${esc(o.ph||'Escribe para buscar')}" value="${esc(cu?cu.l:val)}"><div class="cbl" role="listbox" hidden></div></div>`};
 const topF=(c,m)=>{const at=k=>m==='dm'?`data-sv="t:${k}"`:`data-pt="${k}"`;
  return `<div class="g" style="margin-top:8px">${m==='dm'?`<div><label>Raza</label>${cbox('cr2',c.race||'','data-sv="t:race"',{empty:1,ph:'Elige o busca'})}</div><div><label>Clase</label>${cbox('cc',c.cls||'','data-sv="t:cls"')}</div><div><label>Subclase</label>${cbox('cs',c.sub||'','data-sv="t:sub"',{empty:1,ph:'Sin subclase'})}</div><div><label>Flor</label>${cbox('cf',c.flower||'','data-sv="t:flower"')}</div>`:`<div><label>Clase</label><div class="ro">${esc(clsTxt(c))}</div></div>`}
  <div><label>Profesión</label>${cbox('profesion',c.profesion||'',at('profesion'),{empty:1,ph:'Elige o busca'})}</div>
@@ -351,6 +355,11 @@ document.addEventListener('focusout',()=>{if(pend)setTimeout(()=>{if(!typing()){
 const hLv=i=>i<4?0:5*i-19;
 const LOCK='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-1px;margin-right:2px"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
 const placedIds=c=>new Set([...Object.values(c.sh||{}),...Object.values(c.sp||{})]);
+/* cola privada de habilidades/pasivas: qH/qP = ids en orden (publicos), el contenido esta en players/{uid}/chars/{cid}/queue/{id} (solo DM) */
+const qIds=(c,k)=>{const a=k==='h'?c.qH:c.qP;return Array.isArray(a)?a:[]},qD=(c,k)=>+(k==='h'?c.dH:c.dP)||0,qLeft=(c,k)=>Math.max(0,qIds(c,k).length-qD(c,k));
+const unres=(c,k)=>{const o=(k==='h'?c.habs:c.pass)||{},pl=placedIds(c),ds=new Set(c.disc||[]);return Object.keys(o).filter(id=>!pl.has(id)&&!ds.has(id))};
+const qPath=c=>'players/'+(view.mode==='dm'?view.pid:ME.id)+'/chars/'+c.id+'/queue';
+const qLv=id=>{const e=(PV.q||{})[id];return e&&e.it&&e.it.lv!=null?e.it.lv:1e9};
 const CIR=(k,inner,cap)=>`<div class="cw"><div class="circ ${k}">${inner}</div>${cap?`<small>${cap}</small>`:''}</div>`;
 function itHtml(c,id){const h=(c.habs||{})[id],it=h||(c.pass||{})[id]||{n:'?'};
  return `<div class="it${selI===id?' sel':''}" data-iid="${id}"><b>${esc(it.n)}</b>${h&&it.c?`<span class="ic">${esc(it.c)}</span>`:''}${h?(it.e?`<div class="ie">${esc(it.e)}</div>`:''):`${it.e?`<div class="ie pos">+ ${esc(it.e)}</div>`:''}${it.g?`<div class="ie neg">− ${esc(it.g)}</div>`:''}`}</div>`}
@@ -388,14 +397,17 @@ function folios(c,dm,own,ro){
   return `<div class="hc${lk?' lk':''}" data-hs="${i}"${lk?` title="Se desbloquea al nivel ${hLv(i)}"`:''}><span class="hn">${i+1}.-</span>${id&&HB[id]?itHtml(c,id):''}${i>=4?`<span class="hl">${lk?LOCK:''}Nv ${hLv(i)}</span>`:''}</div>`};
  const pcell=i=>{const id=(c.sp||{})[i];return `<div class="hc" data-ps="${i}"><span class="hn">${i+1}.-</span>${id&&PB[id]?itHtml(c,id):''}</div>`};
  let z=`<section><h2>Pasivas</h2><div class="hg">${Array.from({length:6},(_,i)=>pcell(i)).join('')}</div></section>`;
- const stH=Object.keys(HB).filter(id=>!pl.has(id)&&!ds.has(id)),stP=Object.keys(PB).filter(id=>!pl.has(id)&&!ds.has(id));
- const stl=(t,ids)=>ids.length?`<h3>${t}</h3>`+ids.map(id=>`<div class="itw">${itHtml(c,id)}<button class="o" data-act="itdis" data-id="${id}">Descartar</button></div>`).join(''):'';
- if(!ro)z+=`<section><h2>Sin colocar</h2>`+(stH.length||stP.length?`<p class="s">Arrastra una a una casilla (o tócala y toca la casilla) para colocarla. Si la casilla ya está ocupada, la que había pasa a descartadas.</p>${stl('Habilidades',stH)}${stl('Pasivas',stP)}`:'<p class="s">No hay habilidades ni pasivas sin colocar.</p>')+'</section>';
+const ordI=ids=>ids.sort((a,b)=>{const A=(HB[a]||PB[a]||{}).lv,B=(HB[b]||PB[b]||{}).lv,x=A==null?1e9:A,y=B==null?1e9:B;return x-y||(a<b?-1:a>b?1:0)});
+ const stH=ordI(unres(c,'h')),stP=ordI(unres(c,'p'));
+ const pendBox=(t,ids,kk)=>{const sh=ids,q=qLeft(c,kk);
+  return ids.length||q?`<div class="pts"><span>${t} por colocar:</span><b>${ids.length+q}</b>${q>0?`<small>Ves la siguiente; ${q===1?'queda 1 más':'quedan '+q+' más'} en cola.</small>`:''}</div>`+sh.map(id=>`<div class="itw">${itHtml(c,id)}<button class="o" data-act="itdis" data-id="${id}">Descartar</button></div>`).join(''):`<div class="pts no">Sin ${t.toLowerCase()} por colocar.</div>`};
+ if(!ro)z+=`<section><h2>Sin colocar</h2>`+(stH.length||stP.length?`<p class="s">Arrastra una a una casilla (o tócala y toca la casilla) para colocarla. Si la casilla ya está ocupada, la que había pasa a descartadas.</p>`:'')+pendBox('Habilidades',stH,'h')+pendBox('Pasivas',stP,'p')+'</section>';
  z+=`<section><h2>Habilidades</h2><div class="hg">${Array.from({length:24},(_,i)=>hcell(i)).join('')}</div></section>`;
  const NS=ntGet(c),TRI='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>';
  const CP=Array.isArray(c.comps)?c.comps:[];
  z+=`<section><h2>Competencias</h2>`+(CP.length?CP.map((t,k)=>dm?`<div class="bar" style="margin:4px 0"><input data-cp="${k}" maxlength="200" value="${esc(t)}" style="flex:1;min-width:140px"><button class="danger" type="button" data-act="cpdel" data-i="${k}" title="Quitar" aria-label="Quitar competencia">${'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>'}</button></div>`:`<div class="cpl">${esc(t)}</div>`).join(''):'<p class="s">Aún no tienes competencias.</p>')+(dm?`<div class="bar"><input id="cpn" maxlength="200" placeholder="Nueva competencia" style="flex:1;min-width:140px"><button type="button" data-act="cpadd">Añadir</button></div>`:'')+'</section>';
-if(!ro)z+=`<section><h2>Notas</h2>`+(NS.length?NS.map(q=>`<div class="res"><div class="bar" style="margin:0 0 6px"><input data-ntt="${q.id}" maxlength="60" value="${esc(q.t)}" style="flex:1;min-width:120px;font-weight:bold" aria-label="Título de la sección"><button class="danger" type="button" data-act="ntdel" data-s="${q.id}" title="Borrar sección" aria-label="Borrar sección">${TRI}</button></div>`+(q.k==='l'?(q.i||[]).map((it,i)=>`<div class="bar" style="margin:3px 0;flex-wrap:nowrap"><input type="checkbox" data-ntc="${q.id}:${i}" ${it.d?'checked':''} style="width:auto;margin:0" aria-label="Completado"><input data-nti="${q.id}:${i}" maxlength="200" value="${esc(it.t)}" style="flex:1;min-width:0;${it.d?'text-decoration:line-through;opacity:.7':''}"><button class="o" type="button" data-act="ntidel" data-s="${q.id}" data-i="${i}" title="Quitar" aria-label="Quitar">${TRI}</button></div>`).join('')+`<div class="bar" style="margin:6px 0 0"><input data-ntin="${q.id}" maxlength="200" placeholder="Nuevo elemento" style="flex:1;min-width:120px"><button type="button" data-act="ntiadd" data-s="${q.id}">Añadir</button></div>`:`<textarea data-nt="${q.id}" maxlength="5000" style="min-height:110px;resize:vertical;font-family:inherit">${esc(q.b||'')}</textarea>`)+'</div>').join(''):'<p class="s">Aún no tienes notas. Crea una sección para empezar.</p>')+`<h3>Nueva sección</h3><div class="bar"><input id="ntn" maxlength="60" placeholder="Título, por ejemplo Objetos exóticos" style="flex:1;min-width:140px"><select id="ntk" style="width:auto"><option value="t">Texto</option><option value="l">Lista con ticks</option></select><button type="button" data-act="ntadd">Crear sección</button></div></section>`;
+const NSX=ro?ntShared(c):NS;
+if(!ro||NSX.length)z+=`<section><h2>Notas</h2>`+(NSX.length?NSX.map(q=>!ro&&NTO===q.id?ntEdit(q,TRI):ntView(q,ro)).join(''):'<p class="s">Aún no tienes notas. Crea una sección para empezar.</p>')+(ro?'':`<h3>Nueva sección</h3><div class="bar"><input id="ntn" maxlength="60" placeholder="Título de la sección nueva" style="flex:1;min-width:140px"><select id="ntk" style="width:auto"><option value="t">Texto</option><option value="l">Lista con ticks</option></select><button type="button" data-act="ntadd">Crear sección</button></div>`)+`</section>`;
 const RD=c.rwd||{},given=n=>[...Object.values(HB),...Object.values(PB)].filter(x=>x.lv===n).length;
  let ri=0;const rowsAll=Array.from({length:c.level+1},(_,n)=>{const pt=n%5===0;return {n,pt,roll:pt?null:(c.rw?c.rw.r[ri++]:null),dn:!!RD[n]}});
  const vis=dm?rowsAll:rowsAll.filter(r=>!r.pt&&!r.dn),PGN=20,last=Math.max(0,Math.ceil(vis.length/PGN)-1),pg=Math.min(RWPG[c.id]||0,last),part=vis.slice(pg*PGN,pg*PGN+PGN);
@@ -406,8 +418,9 @@ const RD=c.rwd||{},given=n=>[...Object.values(HB),...Object.values(PB)].filter(x
   return `<div class="rwr"><span class="rl">Nivel ${n}:</span><span class="rt">${esc(REW[n%10]||'')}</span><b class="rn">${r.roll!=null?r.roll:'<span class="mut">sin tirar</span>'}</b>${dmc}</div>`};
  if(!ro)z+='<section><h2>Recompensas por nivel</h2>'+(vis.length?'<div class="rws">'+part.map(rrow).join('')+'</div>':'<p class="s">No tienes recompensas pendientes.</p>')
   +(vis.length>PGN?`<div class="bar" style="justify-content:space-between"><span class="mut">${pg*PGN+1}–${Math.min(vis.length,pg*PGN+PGN)} de ${vis.length}</span><span style="display:flex;gap:6px">${pg>0?'<button class="o" data-act="rwpg" data-d="-1">Anteriores 20</button>':''}${pg<last?'<button class="o" data-act="rwpg" data-d="1">Siguientes 20</button>':''}</span></div>`:'')+'</section>';
- if(dm){const all=[...Object.entries(HB).map(([id,it])=>[id,'h',it]),...Object.entries(PB).map(([id,it])=>[id,'p',it])];
-  const est=(id,k)=>{if(ds.has(id))return 'Descartada';const sl=c[k==='h'?'sh':'sp']||{},q=Object.keys(sl).find(x=>sl[x]===id);return q!==undefined?'Casilla '+(+q+1):'Sin colocar'};
+ if(dm){const qx=k=>qIds(c,k).slice(qD(c,k)).filter(id=>(PV.q||{})[id]&&(PV.q[id].it)).map(id=>[id,k,PV.q[id].it]);
+  const all=[...Object.entries(HB).map(([id,it])=>[id,'h',it]),...Object.entries(PB).map(([id,it])=>[id,'p',it]),...qx('h'),...qx('p')];
+  const est=(id,k)=>{if(ds.has(id))return 'Descartada';const sl=c[k==='h'?'sh':'sp']||{},q=Object.keys(sl).find(x=>sl[x]===id);if(!HB[id]&&!PB[id])return 'En cola (el jugador aún no la ve)';return q!==undefined?'Casilla '+(+q+1):'Sin colocar'};
   z+=`<section><h2>Habilidades y pasivas dadas</h2><div class="bar"><button data-act="itnew" data-k="h" data-lv="">Dar habilidad</button><button data-act="itnew" data-k="p" data-lv="">Dar pasiva</button></div>`
    +(all.length?all.map(([id,k,it])=>`<div class="res"><b>${esc(it.n)}</b> <span class="mut">${k==='h'?'Habilidad':'Pasiva'}${it.lv!=null?' · Nivel '+it.lv:''} · ${est(id,k)}</span><div class="bar"><button class="o" data-act="itedit" data-id="${id}">Editar</button>${ds.has(id)?`<button class="o" data-act="itrec" data-id="${id}">Recuperar</button>`:''}<button class="danger" data-act="itdel" data-id="${id}">Eliminar</button></div></div>`).join(''):'<p class="s">Todavía no has dado ninguna.</p>')+'</section>'}
  return `<div class="folios"><div class="folio">${a}</div><div class="folio">${z}</div></div>`;
@@ -432,7 +445,7 @@ function vReg(c,dm){const f=c.fin||{stats:{}},ST=n=>f.stats&&f.stats[n]!=null?f.
  <div><label>Clase</label>${cbox('cc',c.cls||'','data-rg="cls"')}</div>
  <div><label>Subclase</label>${cbox('cs',c.sub||'','data-rg="sub"',{empty:1,ph:'Sin subclase'})}</div>
  <div><label>Flor</label>${cbox('cf',c.flower||'','data-rg="flower"')}</div>
- <div><label>Nivel</label>${cbox('cl',String(c.level||1),'data-rg="level"')}</div>
+ <div><label>Nivel</label>${cbox('cl99',String(c.level||1),'data-rg="level"')}</div>
  <div><label>Profesión</label>${cbox('profesion',c.profesion||'','data-rg="profesion"',{empty:1,ph:'Elige o busca'})}</div>
  <div><label>Alineamiento</label>${cbox('alineamiento',c.alineamiento||'','data-rg="alineamiento"',{empty:1,ph:'Elige o busca'})}</div>
  <div><label>Trasfondo</label><input data-rg="trasfondo" maxlength="40" value="${esc(c.trasfondo||'')}" placeholder="Una palabra"></div></div></section>
@@ -444,7 +457,7 @@ function vReg(c,dm){const f=c.fin||{stats:{}},ST=n=>f.stats&&f.stats[n]!=null?f.
 function rgSave(t){const x=iconTarget();if(!x)return;const {c,ref}=x;if(!ME.dm&&c.reg!=='draft')return;const k=t.dataset.rg,upd={};
  if(k.startsWith('s:')||k.startsWith('f:')){const fin=c.fin?{...c.fin,stats:{...c.fin.stats}}:{stats:{},hp:0,mana:0,anima:0,puntos:0},n=Math.max(0,Math.floor(+t.value)||0);
   if(k[0]==='s')fin.stats[k.slice(2)]=Math.min(20,n);else fin[k.slice(2)]=Math.min(9999,n);upd.fin=fin}
- else if(k==='level')upd.level=Math.max(1,Math.min(cfg.maxLevel||1,Math.floor(+t.value)||1))
+ else if(k==='level')upd.level=Math.max(1,Math.min(99,Math.floor(+t.value)||1))
  else if(k==='name')upd.name=t.value.trim().slice(0,60)
  else if(k==='cls'){if(!(t.value in CLS))return;upd.cls=t.value;if(c.sub===t.value)upd.sub=''}
  else if(k==='sub'){upd.sub=(t.value&&t.value in CLS&&t.value!==c.cls)?t.value:''}
@@ -537,7 +550,7 @@ function alertNt(d){if(d.read)return;const m=d.type==='new_player'?`Nuevo jugado
 function vDM(){
  if(view.cid){const p=DM[view.pid],c=p&&p.chars.find(x=>x.id===view.cid);
   if(c)return `<div class="bar" style="margin:8px 0 16px"><button class="o" data-act="back" style="display:inline-flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Volver a todos los jugadores</button><button data-act="save">Guardar cambios</button>${c.done?`<label class="sw" style="margin-left:auto" title="Si lo activas, los demás jugadores verán tu ficha (sin background ni notas)"><input type="checkbox" data-vis ${c.vis?'checked':''}><span class="trk"><span class="knb"></span></span>Visible para otros jugadores</label>`:''}<button class="danger" data-act="delc" data-p="${view.pid}" data-c="${c.id}">Eliminar personaje</button></div><p class="mut">Jugador: ${esc(p.prof.name)}</p>${c.reg==='draft'||c.reg==='pending'?`<section><h2>Registro de personaje existente</h2><p class="s">Estado: ${c.reg==='draft'?'el jugador aún lo está rellenando':'enviado, pendiente de tu confirmación'}.</p><div class="bar"><button data-act="regok">Aprobar y guardar la ficha</button>${c.reg==='pending'?'<button class="o" data-act="regback">Devolver al jugador</button>':''}</div></section>${vReg(c,true)}`:folios(c,true,false)+'<div class="bar"><button data-act="save">Guardar cambios</button></div>'}`;}
- let h=ntSection()+`<section><h2>Ajustes</h2><div class="g"><div><label>Nivel máximo que pueden elegir los jugadores</label><input id="ml" type="number" min="1" max="99" value="${cfg.maxLevel||1}"></div></div><div class="bar"><button data-act="ml">Guardar</button></div></section>`;
+ let h=ntSection()+`<section><h2>Ajustes</h2><div class="g"><div><label>Nivel máximo al crear un personaje nuevo (subir de nivel y registrar personajes llega hasta 99)</label><input id="ml" type="number" min="1" max="99" value="${cfg.maxLevel||1}"></div></div><div class="bar"><button data-act="ml">Guardar</button></div></section>`;
  const ps=Object.values(DM).sort((a,b)=>String(a.prof.name).localeCompare(b.prof.name));
  if(!ps.length)h+='<section><p class="s">Aún no hay jugadores. Aparecerán aquí cuando abran la página y escriban su nombre.</p></section>';
  ps.forEach(p=>{const used=new Set(p.chars.map(c=>c.grant)),free=p.grants.filter(g=>!used.has(g.id));
@@ -546,6 +559,19 @@ function vDM(){
   ${free.map(g=>`<div class="mut">Permiso sin usar (${g.reg?'registro de personaje existente':`+${g.extra||0} dados${g.rb?', bono de recursos':''}`}) <button class="o" data-act="rev" data-p="${p.id}" data-g="${g.id}">Revocar</button></div>`).join('')}${files(p.chars,p.id)}</section>`;});
  return h;
 }
+const REVQ=new Set(),MIG=new Set();
+function autoReveal(c){if(!c||!c.done||view.oth||view.mode!=='player'||!ME.id)return;
+ for(const k of ['h','p']){const q=qIds(c,k),d=qD(c,k);if(q.length<=d||unres(c,k).length)continue;const id=q[d],key=c.id+':'+id+':'+d;if(REVQ.has(key))continue;REVQ.add(key);
+  const mk=k==='h'?'habs':'pass',dk=k==='h'?'dH':'dP',cid=c.id;
+  W(async()=>{try{const x=iconTarget();if(!x||x.c.id!==cid)throw 0;const sn=await DB.doc(`players/${ME.id}/chars/${cid}/queue/${id}`).get();if(!sn.exists)return;
+   const it=sn.data().it,m={...(x.c[mk]||{}),[id]:it};await x.ref.update({[mk]:m,[dk]:d+1})}catch(e){REVQ.delete(key)}})}}
+function dmMig(){if(!ME.dm)return;
+ for(const pid in DM)for(const c of (DM[pid].chars||[])){if(!c.done||c.reg==='draft'||c.qv)continue;const key=pid+'/'+c.id;if(MIG.has(key))continue;MIG.add(key);
+  const base='players/'+pid+'/chars/'+c.id,upd={qv:1},docs=[];
+  for(const k of ['h','p']){const mk=k==='h'?'habs':'pass',qk=k==='h'?'qH':'qP',o=c[mk]||{},d=qD(c,k),q=qIds(c,k),keep=new Set(q.slice(0,d)),leg=unres(c,k).filter(id=>!keep.has(id));
+   leg.sort((a,b)=>{const A=o[a].lv==null?1e9:o[a].lv,B=o[b].lv==null?1e9:o[b].lv;return A-B||(a<b?-1:a>b?1:0)});
+   if(leg.length){const no={...o};leg.forEach(id=>{delete no[id];docs.push([id,k,o[id]])});upd[mk]=no;upd[qk]=[...q.slice(0,d),...leg,...q.slice(d)]}}
+  W(async()=>{for(const [id,k,it] of docs)await DB.doc(base+'/queue/'+id).set({k,it});await DB.doc(base).update(upd)})}}
 function render(){
  if(HOLD)return;
  const A=$('app');if(!DB)return;
@@ -555,6 +581,7 @@ function render(){
  const body=ME.dm&&view.mode==='dm'?vDM():ME.dm&&view.mode==='tables'?vTables():vPlayer();
  const cc=view.mode==='tables'?null:view.oth?(OTH[view.oth]||{}).c:view.mode==='player'?curChar():(DM[view.pid]&&view.cid?DM[view.pid].chars.find(x=>x.id===view.cid):null);
  pvSync(cc,view.mode==='dm'?view.pid:ME.id);
+ dmMig();if(view.mode==='player')autoReveal(cc);
  document.querySelector('main').classList.toggle('wide',!!cc&&(view.mode==='player'||view.mode==='dm'));
  const tv=themeVars(cc);A.innerHTML=h+(tv?`<div class="themed" style="${tv}">${body}</div>`:`<div>${body}</div>`);
  if(view.oth||(view.mode==='player'&&cc&&cc.reg==='pending'))A.querySelectorAll('input,textarea,select,button').forEach(e=>{if(!e.matches('[data-act="back"],[data-act="out"]'))e.disabled=true});
@@ -732,23 +759,34 @@ function setVis(v){const x=iconTarget();if(!x||!x.c.done)return;const {c,ref}=x,
  c.vis=v;W(()=>ref.update({vis:v}));
  if(v)W(()=>DB.doc('pub/'+c.id).set({pid,pname:String(pname).slice(0,40),cid:c.id,at:Date.now()}));else W(()=>DB.doc('pub/'+c.id).delete());
  toast(v?'Tu ficha es visible para los demás jugadores.':'Tu ficha ya no es visible para los demás.');render()}
-function pvSync(c,pid){const key=c&&pid&&view.cid&&!view.oth?pid+'/'+c.id:'';if(key===PV.key)return;PV.un.forEach(f=>f&&f());PV={key,bg:'',nt:'',un:[]};if(!key)return;
+function pvSync(c,pid){const key=c&&pid&&view.cid&&!view.oth?pid+'/'+c.id:'';if(key===PV.key)return;PV.un.forEach(f=>f&&f());PV={key,bg:'',nt:'',un:[],q:{}};if(!key)return;
  const base=`players/${pid}/chars/${c.id}/priv/`,cur=()=>{const x=iconTarget();return x&&x.c.id===c.id?x:null};
+ if(ME.dm)PV.un.push(DB.collection(`players/${pid}/chars/${c.id}/queue`).onSnapshot(sn=>{if(PV.key!==key)return;const m={};sn.docs.forEach(d=>m[d.id]=d.data());PV.q=m;schedule()},()=>{}));
  PV.un.push(DB.doc(base+'bg').onSnapshot(sn=>{if(PV.key!==key)return;PV.bg=sn.exists?(sn.data().t||''):'';const x=cur();
   if(x&&x.c.background){if(!sn.exists){const v=x.c.background;W(()=>DB.doc(base+'bg').set({t:v}))}x.c.background='';W(()=>x.ref.update({background:''}))}schedule()},()=>{}));
  PV.un.push(DB.doc(base+'notes').onSnapshot(sn=>{if(PV.key!==key)return;PV.nt=sn.exists?(sn.data().j||''):'';const x=cur();
   if(x&&x.c.notes){if(!sn.exists){const v=x.c.notes;W(()=>DB.doc(base+'notes').set({j:v}))}x.c.notes='';W(()=>x.ref.update({notes:''}))}schedule()},()=>{}))}
+let NTO=null;
+const CHK='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><polyline points="20 6 9 17 4 12"/></svg>';
+const ntView=(q,ro)=>`<div class="ntc"${ro?'':` data-act="ntopen" data-s="${q.id}" role="button" tabindex="0"`}><div><b>${esc(q.t)}</b>${q.sh&&!ro?'<span class="mut"> · visible para otros</span>':''}</div>`+(q.k==='l'?((q.i||[]).length?q.i.map((it,i)=>`<div class="nti${it.d?' dn':''}"><span class="nbx${it.d?' on':''}" ${ro?'':`data-act="nttog" data-s="${q.id}" data-i="${i}" role="checkbox" aria-checked="${!!it.d}" tabindex="0"`}>${it.d?CHK:''}</span><span class="nt2">${esc(it.t)}</span></div>`).join(''):'<div class="mut">Sin elementos</div>'):(q.b?`<div class="ntb">${esc(q.b)}</div>`:'<div class="mut">Sin texto</div>'))+'</div>';
+const ntEdit=(q,TRI)=>`<div class="ntc ed"><div class="bar" style="margin:0 0 6px"><input data-ntt="${q.id}" maxlength="60" value="${esc(q.t)}" style="flex:1;min-width:120px;font-weight:bold" aria-label="Título de la sección"><button class="danger" type="button" data-act="ntdel" data-s="${q.id}" title="Borrar sección" aria-label="Borrar sección">${TRI}</button></div>`
+ +(q.k==='l'?(q.i||[]).map((it,i)=>`<div class="bar" style="margin:3px 0;flex-wrap:nowrap"><input type="checkbox" data-ntc="${q.id}:${i}" ${it.d?'checked':''} style="width:auto;margin:0" aria-label="Completado"><input data-nti="${q.id}:${i}" maxlength="200" value="${esc(it.t)}" style="flex:1;min-width:0"><button class="o" type="button" data-act="ntidel" data-s="${q.id}" data-i="${i}" title="Quitar" aria-label="Quitar">${TRI}</button></div>`).join('')+`<div class="bar" style="margin:6px 0 0"><input data-ntin="${q.id}" maxlength="200" placeholder="Nuevo elemento" style="flex:1;min-width:120px"><button type="button" data-act="ntiadd" data-s="${q.id}">Añadir</button></div>`:`<textarea data-nt="${q.id}" maxlength="5000" style="min-height:110px;resize:vertical;font-family:inherit">${esc(q.b||'')}</textarea>`)
+ +`<div class="bar"><label class="sw"><input type="checkbox" data-ntsh="${q.id}" ${q.sh?'checked':''}><span class="trk"><span class="knb"></span></span>Visible si comparto la ficha</label><button type="button" data-act="ntclose" style="margin-left:auto">Hecho</button></div></div>`;
+function ntShared(c){try{const a=JSON.parse(c.snotes||'[]');return Array.isArray(a)?a:[]}catch(e){return []}}
 const NID=()=>'n'+Date.now().toString(36)+rnd(1296).toString(36);
 function ntGet(c){try{const a=JSON.parse(PV.nt||'[]');return Array.isArray(a)?a:[]}catch(e){return []}}
 function ntPut(m,quiet){const x=iconTarget();if(!x)return false;const a=ntGet(x.c);m(a);const j=JSON.stringify(a);if(j.length>20000){toast('Las notas son demasiado largas (máximo 20 000 caracteres en total).');render();return false}
- PV.nt=j;W(()=>DB.doc(pvPath('notes')).set({j}));toast('Guardado');if(!quiet)render();return true}
+ PV.nt=j;W(()=>DB.doc(pvPath('notes')).set({j}));
+ const sn=JSON.stringify(a.filter(q=>q.sh)),prev=x.c.snotes||'[]';if(sn!==prev){x.c.snotes=sn;W(()=>x.ref.update({snotes:sn}))}
+ toast('Guardado');if(!quiet)render();return true}
 function ntChange(t){const d=t.dataset;
  if(d.nt!==undefined){ntPut(a=>{const q=a.find(z=>z.id===d.nt);if(q)q.b=t.value.slice(0,5000)},true)}
  else if(d.ntt!==undefined){ntPut(a=>{const q=a.find(z=>z.id===d.ntt);if(q)q.t=(t.value.trim()||'Sin título').slice(0,60)},true)}
  else if(d.nti!==undefined){const [sid,i]=d.nti.split(':');ntPut(a=>{const q=a.find(z=>z.id===sid);if(q&&q.i&&q.i[+i])q.i[+i].t=t.value.slice(0,200)},true)}
+ else if(d.ntsh!==undefined){const v=t.checked;ntPut(a=>{const q=a.find(z=>z.id===d.ntsh);if(q)q.sh=v})}
  else if(d.ntc!==undefined){const [sid,i]=d.ntc.split(':'),v=t.checked;ntPut(a=>{const q=a.find(z=>z.id===sid);if(q&&q.i&&q.i[+i])q.i[+i].d=v})}}
-function ntAdd(){const t=($('ntn').value.trim()||'Sin título').slice(0,60),k=$('ntk').value==='l'?'l':'t';ntPut(a=>{if(a.length>=30)return;a.push(k==='l'?{id:NID(),t,k,i:[]}:{id:NID(),t,k,b:''})})}
-function ntDel(sid){if(!confirm('¿Borrar esta sección de notas y todo lo que contiene?'))return;ntPut(a=>{const i=a.findIndex(z=>z.id===sid);if(i>=0)a.splice(i,1)})}
+function ntAdd(){const t=($('ntn').value.trim()||'Sin título').slice(0,60),k=$('ntk').value==='l'?'l':'t',id=NID();if(ntPut(a=>{if(a.length>=30)return;a.push(k==='l'?{id,t,k,i:[]}:{id,t,k,b:''})}))NTO=id;render()}
+function ntDel(sid){if(!confirm('¿Borrar esta sección de notas y todo lo que contiene?'))return;NTO=null;ntPut(a=>{const i=a.findIndex(z=>z.id===sid);if(i>=0)a.splice(i,1)})}
 function ntIAdd(sid){const inp=document.querySelector(`#app [data-ntin="${sid}"]`),v=inp?inp.value.trim().slice(0,200):'';if(!v)return;ntPut(a=>{const q=a.find(z=>z.id===sid);if(q&&q.i&&q.i.length<100)q.i.push({t:v,d:false})})}
 function ntIDel(sid,i){ntPut(a=>{const q=a.find(z=>z.id===sid);if(q&&q.i)q.i.splice(i,1)})}
 function cpSave(t){if(!ME.dm)return;const x=iconTarget();if(!x)return;const {c,ref}=x,a=[...(c.comps||[])],k=+t.dataset.cp;if(!(k>=0&&k<a.length))return;const v=t.value.trim().slice(0,200);if(v)a[k]=v;else a.splice(k,1);c.comps=a;W(()=>ref.update({comps:a}));toast('Guardado');render()}
@@ -766,11 +804,13 @@ function discardItem(id){const x=iconTarget();if(!x)return;const {c,ref}=x,it=(c
  if(!confirm(`¿Descartar "${it.n}"?\n\nYa no podrás colocarla en tu ficha. El DM puede recuperarla.`))return;
  const disc=[...(c.disc||[]),id];c.disc=disc;W(()=>ref.update({disc}));toast('Descartada');render()}
 function recItem(id){const x=iconTarget();if(!x||!ME.dm)return;const {c,ref}=x,disc=(c.disc||[]).filter(q=>q!==id);c.disc=disc;W(()=>ref.update({disc}));toast('Recuperada: queda sin colocar');render()}
-function delItem(id){const x=iconTarget();if(!x||!(ME.dm||x.c.reg==='draft'))return;const {c,ref}=x,it=(c.habs||{})[id]||(c.pass||{})[id];if(!it||!confirm(`¿Eliminar "${it.n}" para siempre?`))return;
+function delItem(id){const x=iconTarget();if(!x||!(ME.dm||x.c.reg==='draft'))return;const {c,ref}=x,it=(c.habs||{})[id]||(c.pass||{})[id]||((PV.q||{})[id]||{}).it;if(!it||!confirm(`¿Eliminar "${it.n}" para siempre?`))return;
  const habs={...(c.habs||{})},pass={...(c.pass||{})};delete habs[id];delete pass[id];
  const cl=o=>Object.fromEntries(Object.entries(o||{}).filter(([,v])=>v!==id)),sh=cl(c.sh),sp=cl(c.sp),disc=(c.disc||[]).filter(q=>q!==id);
- Object.assign(c,{habs,pass,sh,sp,disc});W(()=>ref.update({habs,pass,sh,sp,disc}));toast('Eliminada');render()}
-function itOpen(k,id,lv){const x=iconTarget();if(!x||!(ME.dm||x.c.reg==='draft'))return;const it=id&&k!=='c'?((k==='h'?x.c.habs:x.c.pass)||{})[id]||{}:{};IT={k,id,lv};
+ Object.assign(c,{habs,pass,sh,sp,disc});const upd={habs,pass,sh,sp,disc},kk=id[0]==='h'?'h':'p',qa=qIds(c,kk),ix=qa.indexOf(id);
+ if(ix>=0&&ME.dm){const qk=kk==='h'?'qH':'qP',dk=kk==='h'?'dH':'dP',nq=qa.filter(v=>v!==id);upd[qk]=nq;c[qk]=nq;if(ix<qD(c,kk)){upd[dk]=qD(c,kk)-1;c[dk]=upd[dk]}const qp=qPath(c)+'/'+id;if(PV.q)delete PV.q[id];W(async()=>{await ref.update(upd);await DB.doc(qp).delete()})}
+ else W(()=>ref.update(upd));toast('Eliminada');render()}
+function itOpen(k,id,lv){const x=iconTarget();if(!x||!(ME.dm||x.c.reg==='draft'))return;const it=id&&k!=='c'?((k==='h'?x.c.habs:x.c.pass)||{})[id]||((PV.q||{})[id]||{}).it||{}:{};IT={k,id,lv};
  $('itt').textContent=(id?'Editar ':'Dar ')+(k==='h'?'habilidad':k==='c'?'competencia':'pasiva')+(lv!==''&&lv!=null&&!id?' (recompensa del nivel '+lv+')':'');
  if(k==='c'){$('itf').innerHTML='<label>Competencia</label><input id="itn" maxlength="200" value="">';$('itm').style.display='flex';$('itn').focus();return}
  $('itf').innerHTML=`<label>Nombre</label><input id="itn" maxlength="60" value="${esc(it.n||'')}">`+(k==='h'?`<label style="margin-top:8px">Coste</label><input id="itc" maxlength="40" value="${esc(it.c||'')}"><label style="margin-top:8px">Efecto</label><textarea id="ite" maxlength="600">${esc(it.e||'')}</textarea>`:`<label style="margin-top:8px">Efecto positivo</label><textarea id="ite" maxlength="400">${esc(it.e||'')}</textarea><label style="margin-top:8px">Efecto negativo (opcional)</label><textarea id="itg" maxlength="400">${esc(it.g||'')}</textarea>`);
@@ -780,9 +820,13 @@ function itSave(){const x=iconTarget();if(!x||!IT||!(ME.dm||x.c.reg==='draft'))r
  if(IT.k==='c'){const v=g('itn').slice(0,200);if(!v){toast('Escribe la competencia.');return}const a=[...(c.comps||[]),v];if(a.length>60){toast('Máximo 60 competencias.');return}c.comps=a;W(()=>ref.update({comps:a}));itClose();toast('Guardado');render();return}
  if(!n){toast('Escribe el nombre.');return}
  const it=IT.k==='h'?{n,c:g('itc').slice(0,40),e:g('ite').slice(0,600)}:{n,e:g('ite').slice(0,400),g:g('itg').slice(0,400)},mk=IT.k==='h'?'habs':'pass',sk=IT.k==='h'?'sh':'sp',m={...(c[mk]||{})};
- if(IT.id){const old=m[IT.id];if(old&&old.lv!=null)it.lv=old.lv;m[IT.id]=it;c[mk]=m;W(()=>ref.update({[mk]:m}))}
+ if(IT.id&&!m[IT.id]&&(PV.q||{})[IT.id]&&ME.dm){const old=PV.q[IT.id].it||{};if(old.lv!=null)it.lv=old.lv;PV.q[IT.id]={k:IT.k,it};const qp=qPath(c)+'/'+IT.id,qv={k:IT.k,it};W(()=>DB.doc(qp).set(qv))}
+ else if(IT.id){const old=m[IT.id];if(old&&old.lv!=null)it.lv=old.lv;m[IT.id]=it;c[mk]=m;W(()=>ref.update({[mk]:m}))}
  else{if(IT.lv!==''&&IT.lv!=null)it.lv=+IT.lv;const id=IT.k+Date.now().toString(36)+rnd(1296).toString(36),sl={...(c[sk]||{})},cnt=IT.k==='h'?24:6;let i=0;
   for(;i<cnt;i++){if(sl[i]===undefined&&(IT.k==='p'||c.level>=hLv(i)))break}
+  const useQ=ME.dm&&c.done&&c.reg!=='draft'&&(i>=cnt||unres(c,IT.k).length>0||qLeft(c,IT.k)>0);
+  if(useQ){const qk=IT.k==='h'?'qH':'qP',arr=qIds(c,IT.k),d=qD(c,IT.k),rest=arr.slice(d),lvN=it.lv!=null?it.lv:1e9;let at=rest.findIndex(v=>qLv(v)>lvN);if(at<0)at=rest.length;rest.splice(at,0,id);
+   const nq=[...arr.slice(0,d),...rest],qp=qPath(c)+'/'+id,qv={k:IT.k,it};c[qk]=nq;PV.q=PV.q||{};PV.q[id]=qv;W(async()=>{await DB.doc(qp).set(qv);await ref.update({[qk]:nq})});itClose();toast('Guardado en la cola (privada)');render();return}
   if(i<cnt)sl[i]=id;m[id]=it;c[mk]=m;c[sk]=sl;c.sh=c.sh||{};c.sp=c.sp||{};c.disc=c.disc||[];
   const upd={[mk]:m,sh:c.sh,sp:c.sp,disc:c.disc};W(()=>ref.update(upd))}
  itClose();toast('Guardado');render()}
@@ -809,10 +853,10 @@ $('app').addEventListener('change',e=>{const t=e.target;if(t.id==='csub'||t.id==
  if(t.dataset.vis!==undefined){setVis(t.checked);return}
  if(t.dataset.cp!==undefined){cpSave(t);return}
  if(t.dataset.tg!==undefined){if(!ME.dm)return;const x=iconTarget();if(!x)return;x.c[t.dataset.tg]=t.checked;const v=t.checked,k=t.dataset.tg;W(()=>x.ref.update({[k]:v}));toast('Guardado');render();return}
- if(t.dataset.ntt!==undefined||t.dataset.nt!==undefined||t.dataset.nti!==undefined||t.dataset.ntc!==undefined){ntChange(t);return}
+ if(t.dataset.ntt!==undefined||t.dataset.nt!==undefined||t.dataset.nti!==undefined||t.dataset.ntc!==undefined||t.dataset.ntsh!==undefined){ntChange(t);return}
  if(t.dataset.sv)saveSheet();else if(t.dataset.icon!==undefined&&t.files&&t.files[0]){const f=t.files[0];t.value='';readIcon(f)}else if(t.closest('#tbl'))grab();
  else if(t.dataset.pt){const c=curChar();if(c){const k=t.dataset.pt,v=t.value.slice(0,3000);c[k]=v;W(()=>chRef(c).update({[k]:v}));toast('Guardado')}}});
-$('app').addEventListener('keydown',e=>{const t=e.target;if(t&&t.dataset&&t.dataset.act==='phbig'&&(e.key==='Enter'||e.key===' ')){e.preventDefault();phOpen()}});
+$('app').addEventListener('keydown',e=>{const t=e.target;if(t&&t.dataset&&(e.key==='Enter'||e.key===' ')){if(t.dataset.act==='phbig'){e.preventDefault();phOpen()}else if(t.dataset.act==='ntopen'||t.dataset.act==='nttog'){e.preventDefault();t.click()}}});
 $('app').addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b||b.disabled)return;const a=b.dataset.act,d=b.dataset;toast('');
  if(a==='google')signInWithPopup(auth,new GoogleAuthProvider()).catch(e=>toast(authMsg(e)));
  else if(a==='login')signInWithEmailAndPassword(auth,$('le').value.trim(),$('lp').value).catch(e=>toast(authMsg(e)));
@@ -859,7 +903,7 @@ $('app').addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
  else if(a==='treset'){if(confirm('¿Restaurar las tablas iniciales? Se perderán los cambios sin guardar.')){TD=clone(DEF);render()}}
  else if(a==='tsave'){grab();const cn=TD.classes.map(c=>c.n),fn=TD.flowers.map(f=>f.n),rn=TD.races;
   if(!cn.length||!fn.length||cn.some(x=>!x)||fn.some(x=>!x)||new Set(cn).size!==cn.length||new Set(fn).size!==fn.length||!rn.length||rn.some(x=>!x)||new Set(rn).size!==rn.length){toast('Revisa los nombres: no pueden estar vacíos ni repetidos.');return}
-  const doc={classes:TD.classes.map(c=>({n:c.n,h:c.h,m:c.m,a:c.a})),flowers:TD.flowers.map(f=>({n:f.n,res:f.res||'',d:f.d||4,b:f.b||{},col:f.col||guessCol(f.n)})),rewards:TD.rewards.slice(0,10),resBonus:TD.resBonus,classNames:cn,flowerNames:fn,races:rn,raceNames:rn};
+  const doc={classes:TD.classes.map(c=>({n:c.n,h:c.h,m:c.m,a:c.a})),flowers:TD.flowers.map(f=>({n:f.n,res:f.res||'',d:f.d||4,b:f.b||{},col:f.col||guessCol(f.n)})),rewards:TD.rewards.slice(0,10),resBonus:TD.resBonus,flowerBonus:Object.fromEntries(TD.flowers.map(f=>[f.n,f.b||{}])),classNames:cn,flowerNames:fn,races:rn,raceNames:rn};
   TBL=doc;applyTables(doc);W(()=>DB.doc('config/tables').set(doc));toast('Tablas guardadas');render()}
  else if(a==='pp'){const c=curChar();if(!c||!c.fin)return;const dl=+d.d,n=d.n;if(dl>0&&(c.fin.puntos-sum(Object.values(DR))<=0||c.fin.stats[n]+(DR[n]||0)>=20))return;if(dl<0&&!(DR[n]>0))return;DR[n]=(DR[n]||0)+dl;render()}
  else if(a==='pc'){const c=curChar();if(!c||!c.fin)return;const fin={...c.fin,stats:{...c.fin.stats}};let g=0;STATS.forEach(n=>{const v=DR[n]||0;fin.stats[n]+=v;g+=v});
@@ -871,11 +915,14 @@ $('app').addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
  else if(a==='rev'){DM[d.p].grants=DM[d.p].grants.filter(g=>g.id!==d.g);W(()=>DB.doc(`permits/${d.p}/grants/${d.g}`).delete());render()}
  else if(a==='phbig')phOpen()
  else if(a==='bgbig')bgOpen(d.k||'background')
- else if(a==='lvup'){const x=iconTarget();if(!x||!ME.dm)return;const {c,ref}=x;if(!c.done||!c.fin)return;const n=Math.max(1,Math.floor(+$('lun').value)||1),ml=cfg.maxLevel||1,nl=Math.min(ml,c.level+n);if(nl<=c.level){toast('Ya está en el nivel máximo ('+ml+').');return}
+ else if(a==='lvup'){const x=iconTarget();if(!x||!ME.dm)return;const {c,ref}=x;if(!c.done||!c.fin)return;const n=Math.max(1,Math.floor(+$('lun').value)||1),ml=99,nl=Math.min(ml,c.level+n);if(nl<=c.level){toast('Ya está en el nivel 99, el máximo.');return}
   const fin={...c.fin,puntos:c.fin.puntos+pts(nl)-pts(c.level)};c.level=nl;c.fin=fin;W(()=>ref.update({level:nl,fin}));toast('Nivel '+nl);render()}
  else if(a==='fpick'){const c=curChar();if(!c||!c.fpick||!c.fin)return;const nf=($('pfl')||{}).value;if(!(nf in FLO))return;const ob=bon(c),nb=(FLO[nf]||{}).b||{},stats={...c.fin.stats};STATS.forEach(n=>{stats[n]=Math.max(0,Math.min(20,stats[n]-(ob[n]||0)+(nb[n]||0)))});
   const fin={...c.fin,stats};c.flower=nf;c.fin=fin;c.fpick=false;W(()=>chRef(c).update({flower:nf,fin,fpick:false}));toast('Flor aplicada');render()}
  else if(a==='ntadd')ntAdd()
+ else if(a==='ntopen'){NTO=d.s;render()}
+ else if(a==='ntclose'){NTO=null;render()}
+ else if(a==='nttog'){const i=+d.i;ntPut(q=>{const z=q.find(w=>w.id===d.s);if(z&&z.i&&z.i[i])z.i[i].d=!z.i[i].d})}
  else if(a==='ntdel')ntDel(d.s)
  else if(a==='ntiadd')ntIAdd(d.s)
  else if(a==='ntidel')ntIDel(d.s,+d.i)
@@ -887,7 +934,7 @@ $('app').addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
   let m;if(d.s==='1'){m=moneyNorm({...base,[d.k]:base[d.k]+n})}else{m=moneySub(base,i,n);if(!m){toast('No tienes suficiente dinero.');return}m=moneyNorm(m)}
   c.money=m;W(()=>ref.update({money:m}));toast('Guardado');render()}
  else if(a==='itnew')itOpen(d.k,'',d.lv===undefined?'':d.lv)
- else if(a==='itedit'){const x=iconTarget();if(x)itOpen((x.c.habs||{})[d.id]?'h':'p',d.id,'')}
+ else if(a==='itedit'){const x=iconTarget();if(x)itOpen((x.c.habs||{})[d.id]||d.id[0]==='h'?'h':'p',d.id,'')}
  else if(a==='itdel')delItem(d.id)
  else if(a==='itrec')recItem(d.id)
  else if(a==='itdis')discardItem(d.id)
@@ -901,7 +948,7 @@ const unsubAll=()=>{subs.forEach(f=>f());subs=[]};
 (function boot(){
  if(firebaseConfig.apiKey.startsWith('PEGA')){$('app').innerHTML='<section><h2>Falta configurar Firebase</h2><p>Abre index.html y pega tu configuración de Firebase (mira la guía LEEME.md).</p></section>';return}
  const app=initializeApp(firebaseConfig);auth=getAuth(app);db=getFirestore(app);
- DB={doc:p=>{const r=doc(db,p);return {set:d=>setDoc(r,d),update:d=>updateDoc(r,d),delete:()=>deleteDoc(r),onSnapshot:(f,e)=>{const u=onSnapshot(r,s=>f({exists:s.exists(),data:()=>s.data()}),e);subs.push(u);return u}}},
+ DB={doc:p=>{const r=doc(db,p);return {set:d=>setDoc(r,d),update:d=>updateDoc(r,d),delete:()=>deleteDoc(r),get:async()=>{const g=await getDoc(r);return {exists:g.exists(),data:()=>g.data()}},onSnapshot:(f,e)=>{const u=onSnapshot(r,s=>f({exists:s.exists(),data:()=>s.data()}),e);subs.push(u);return u}}},
   collection:p=>({onSnapshot:(f,e)=>{const u=onSnapshot(collection(db,p),q=>f({docs:q.docs.map(d=>({id:d.id,data:()=>d.data()})),changes:q.docChanges().map(c=>({type:c.type,data:()=>c.doc.data()}))}),e);subs.push(u);return u}})};
  onAuthStateChanged(auth,async u=>{
   unsubAll();PV={key:'',bg:'',nt:'',un:[]};OTH={};P={prof:null,grants:[],chars:[]};DM={};cfg={maxLevel:1};view={mode:'player',pid:null,cid:null};

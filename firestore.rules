@@ -84,6 +84,14 @@ service cloud.firestore {
           allow delete: if isDM() || me(uid);
         }
 
+        // Cola privada de habilidades y pasivas aun no reveladas: solo el DM la lee entera.
+        // El jugador solo puede leer (get) el elemento que le toca revelar ahora, nunca listar.
+        match /queue/{qid} {
+          allow list: if isDM();
+          allow get: if isDM() || (me(uid) && qOpen(qid));
+          allow write: if isDM();
+        }
+
         // Un personaje por permiso: el id del personaje es el id del permiso
         allow create: if me(uid)
           && exists(/databases/$(database)/documents/permits/$(uid)/grants/$(cid))
@@ -110,7 +118,40 @@ service cloud.firestore {
           && request.resource.data.pool.size() == 0
           && request.resource.data.done == false;
 
-        allow update: if isDM() || (me(uid) && (ownerOk() || textOk() || iconOk() || spendOk() || nameOk() || gearOk() || slotsOk() || notesOk() || lvRollOk() || lvRwOk() || flowerOk() || visOk() || regOk()));
+        allow update: if isDM() || (me(uid) && (ownerOk() || textOk() || iconOk() || spendOk() || nameOk() || gearOk() || slotsOk() || notesOk() || lvRollOk() || lvRwOk() || flowerOk() || visOk() || regOk() || revealOk()));
+
+        // Cola privada: ids en qH/qP (orden), dH/dP = cuantos se han revelado ya.
+        // Se puede revelar el siguiente solo si el anterior ya esta colocado o descartado.
+        function qPrev(ch, qk, dk, sk) {
+          let q = ch.get(qk, []);
+          let d = ch.get(dk, 0);
+          return d == 0 || ch.get(sk, {}).values().hasAny([q[d - 1]]) || ch.get('disc', []).hasAny([q[d - 1]]);
+        }
+        function qOk(ch, qk, dk, sk, qid) {
+          return ch.get(qk, []).size() > ch.get(dk, 0) && ch.get(qk, [])[ch.get(dk, 0)] == qid && qPrev(ch, qk, dk, sk);
+        }
+        function qOpen(qid) {
+          let ch = get(/databases/$(database)/documents/players/$(uid)/chars/$(cid)).data;
+          return qOk(ch, 'qH', 'dH', 'sh', qid) || qOk(ch, 'qP', 'dP', 'sp', qid);
+        }
+        function rev(hk, dk, qk, sk) {
+          let k = request.resource.data.diff(resource.data).affectedKeys();
+          let n = request.resource.data;
+          let o = resource.data;
+          let q = o.get(qk, []);
+          let d = o.get(dk, 0);
+          return k.hasOnly([hk, dk]) && k.hasAll([hk, dk])
+            && q.size() > d && n[dk] == d + 1
+            && qPrev(o, qk, dk, sk)
+            && n[hk].diff(o.get(hk, {})).addedKeys().hasOnly([q[d]])
+            && n[hk].diff(o.get(hk, {})).addedKeys().size() == 1
+            && n[hk].diff(o.get(hk, {})).changedKeys().size() == 0
+            && n[hk].diff(o.get(hk, {})).removedKeys().size() == 0
+            && n[hk][q[d]] == get(/databases/$(database)/documents/players/$(uid)/chars/$(cid)/queue/$(q[d])).data.it;
+        }
+        function revealOk() {
+          return rev('habs', 'dH', 'qH', 'sh') || rev('pass', 'dP', 'qP', 'sp');
+        }
 
         // Equipamiento, inventario y dinero: el jugador y el DM pueden escribirlos cuando quieran
         function gearOk() {
@@ -246,7 +287,9 @@ service cloud.firestore {
         // Notas del jugador (texto JSON con las secciones)
         function notesOk() {
           let k = request.resource.data.diff(resource.data).affectedKeys();
-          return k.hasOnly(['notes']) && request.resource.data.notes is string && request.resource.data.notes.size() <= 20000;
+          return k.hasOnly(['notes','snotes'])
+            && (!k.hasAny(['notes']) || (request.resource.data.notes is string && request.resource.data.notes.size() <= 20000))
+            && (!k.hasAny(['snotes']) || (request.resource.data.snotes is string && request.resource.data.snotes.size() <= 20000));
         }
 
         // Despues de terminar la ficha: dados de recursos de una subida de nivel (nunca mas que el nivel, solo anadir)
@@ -271,6 +314,19 @@ service cloud.firestore {
             && n.rw.r[0:o.rw.r.size()] == o.rw.r;
         }
 
+        // Bono de estadistica de una flor, tal y como lo guardo el DM en las tablas
+        function fbonus(fl, s) {
+          return exists(/databases/$(database)/documents/config/tables)
+            ? get(/databases/$(database)/documents/config/tables).data.get('flowerBonus', {}).get(fl, {}).get(s, 0) : 0;
+        }
+        // El cambio de una estadistica no puede salirse del que produce el cambio de flor (puede quedarse corto por el tope de 20)
+        function flDd(s) {
+          let e = fbonus(request.resource.data.flower, s) - fbonus(resource.data.flower, s);
+          let guardado = exists(/databases/$(database)/documents/config/tables)
+            && 'flowerBonus' in get(/databases/$(database)/documents/config/tables).data;
+          return guardado ? (dd(s) >= (e < 0 ? e : 0) && dd(s) <= (e > 0 ? e : 0)) : (dd(s) >= -6 && dd(s) <= 6);
+        }
+
         // Elegir flor cuando el DM lo permite: se gasta el permiso y las estadisticas solo cambian por el bono de la flor
         function flowerOk() {
           let k = request.resource.data.diff(resource.data).affectedKeys();
@@ -283,12 +339,8 @@ service cloud.firestore {
                   && n.fin.mana == o.fin.mana && n.fin.anima == o.fin.anima
                   && capOk('Fuerza') && capOk('Constitución') && capOk('Destreza') && capOk('Voluntad')
                   && capOk('Inteligencia') && capOk('Carisma') && capOk('Sabiduría') && capOk('Suerte')
-                  && dd('Fuerza') >= -6 && dd('Constitución') >= -6 && dd('Destreza') >= -6 && dd('Voluntad') >= -6
-                  && dd('Inteligencia') >= -6 && dd('Carisma') >= -6 && dd('Sabiduría') >= -6 && dd('Suerte') >= -6
-                  && dd('Fuerza') <= 6 && dd('Constitución') <= 6 && dd('Destreza') <= 6 && dd('Voluntad') <= 6
-                  && dd('Inteligencia') <= 6 && dd('Carisma') <= 6 && dd('Sabiduría') <= 6 && dd('Suerte') <= 6
-                  && dd('Fuerza') + dd('Constitución') + dd('Destreza') + dd('Voluntad')
-                     + dd('Inteligencia') + dd('Carisma') + dd('Sabiduría') + dd('Suerte') <= 8));
+                  && flDd('Fuerza') && flDd('Constitución') && flDd('Destreza') && flDd('Voluntad')
+                  && flDd('Inteligencia') && flDd('Carisma') && flDd('Sabiduría') && flDd('Suerte')));
         }
 
 
@@ -307,7 +359,7 @@ service cloud.firestore {
             && k.hasOnly(['name','cls','sub','race','flower','level','profesion','alineamiento','trasfondo','armF','armM','fin','habs','pass','sh','sp','disc','comps','reg'])
             && (!k.hasAny(['name']) || (n.name is string && n.name.size() <= 60))
             && (!k.hasAny(['reg']) || n.reg in ['draft','pending'])
-            && (!k.hasAny(['level']) || (n.level is int && n.level >= 1 && n.level <= maxLevel()))
+            && (!k.hasAny(['level']) || (n.level is int && n.level >= 1 && n.level <= 99))
             && (!k.hasAny(['cls']) || n.cls in tnames('classNames', ['Guerrero','Monje','Clérigo','Bardo','Druida','Tirador','Asesino','Hechicero','Warlock','Mago']))
             && (!k.hasAny(['sub']) || (n.sub is string && (n.sub == '' || (n.sub != n.cls
                   && n.sub in tnames('classNames', ['Guerrero','Monje','Clérigo','Bardo','Druida','Tirador','Asesino','Hechicero','Warlock','Mago'])))))
