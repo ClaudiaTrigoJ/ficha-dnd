@@ -58,7 +58,7 @@ table.rw td.num{width:56px;font-weight:bold}table.rw tr:last-child td{border-bot
 .pts button{background:#fff;color:#111;margin-top:6px;padding:5px 12px}.pts.no{background:var(--ac2);color:var(--mut);font-weight:normal;box-shadow:none;font-size:.9rem}
 label.btn{display:inline-block;cursor:pointer;border-radius:8px;padding:9px 14px;background:var(--ac2);color:var(--tx);border:1px solid var(--bd);font-size:1rem}
 .av{width:44px;height:44px;border-radius:50%;background:var(--ac);color:var(--onac,#fff);display:inline-flex;align-items:center;justify-content:center;overflow:hidden;font-weight:bold;flex:none}
-.ic{width:72px;height:72px;flex:none;object-fit:cover;object-position:center;border-radius:10px;display:block}
+.ic{width:72px;height:72px;flex:none;object-fit:cover;object-position:center;border-radius:50%;display:block}
 .hero{width:180px;aspect-ratio:1/1;object-fit:cover;object-position:top;border-radius:12px;flex:none}
 .themed{background:var(--pbg);border-radius:14px;padding:12px;margin-top:8px}
 .themed th{background:var(--ac);color:var(--onac);padding:6px 8px;text-align:left;font-size:.8rem}
@@ -109,8 +109,8 @@ main.wide{max-width:1500px}
 .circ.b{width:56px;height:56px;font-size:1.3rem}
 .circ.s{width:38px;height:38px;font-size:.95rem;border-color:var(--bd);color:var(--mut)}
 .circ.x{width:88px;height:88px;font-size:1.1rem}
-.circ.n{font-size:1.8rem}
-.circ.a{font-size:1.15rem;line-height:1.1;padding:4px;word-break:break-all}
+.circ.n{font-size:1.45rem}
+.circ.a{font-size:1.45rem;line-height:1.1;padding:4px;word-break:break-all}
 .circ.t{font-size:.78rem;line-height:1.15;padding:6px;font-weight:600;word-break:break-word}
 .circ input{width:100%;height:100%;border:0;background:transparent;padding:0;border-radius:50%;text-align:center;font:inherit;-moz-appearance:textfield}
 .circ input::-webkit-inner-spin-button,.circ input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
@@ -287,7 +287,8 @@ const clsD=c=>{const a=CLS[c.cls]||[0,0,0],b=c.sub&&CLS[c.sub];if(!b)return a;
 function cbList(k){
  if(k==='cc')return Object.keys(CLS).map(n=>({v:n,l:n}));
  if(k==='cr')return [...RACES.map(n=>({v:n,l:n})),{v:'__rand',l:'Aleatoria (ruleta)'}];
- if(k==='cs')return Object.keys(CLS).filter(n=>n!==(($('cc')||{}).value)).map(n=>({v:n,l:n}));
+ if(k==='cs')return Object.keys(CLS).filter(n=>n!==((document.getElementById('cc')||document.querySelector('[data-sv="t:cls"]')||{}).value)).map(n=>({v:n,l:n}));
+ if(k==='cr2')return RACES.map(n=>({v:n,l:n}));
  if(k==='cf')return Object.entries(FLO).map(([n,f])=>({v:n,l:n,d:f.t}));
  if(k==='cl')return Array.from({length:cfg.maxLevel||1},(_,i)=>({v:String(i+1),l:String(i+1)}));
  if(k==='profesion')return PROF.map(n=>({v:n,l:n}));
@@ -296,7 +297,7 @@ function cbList(k){
 const cbox=(key,val,attr,o={})=>{const cu=cbList(key).find(x=>x.v===val);
  return `<div class="cb" data-cb="${key}"${o.empty?' data-empty="1"':''}><input type="hidden" ${attr} value="${esc(val)}"><input class="cbi" type="text" role="combobox" aria-expanded="false" aria-autocomplete="list" autocomplete="off" autocapitalize="off" spellcheck="false"${key==='cl'?' inputmode="numeric"':''} placeholder="${esc(o.ph||'Escribe para buscar')}" value="${esc(cu?cu.l:val)}"><div class="cbl" role="listbox" hidden></div></div>`};
 const topF=(c,m)=>{const at=k=>m==='dm'?`data-sv="t:${k}"`:`data-pt="${k}"`;
- return `<div class="g" style="margin-top:8px"><div><label>Clase</label><div class="ro">${esc(clsTxt(c))}</div></div>
+ return `<div class="g" style="margin-top:8px">${m==='dm'?`<div><label>Raza</label>${cbox('cr2',c.race||'','data-sv="t:race"',{empty:1,ph:'Elige o busca'})}</div><div><label>Clase</label>${cbox('cc',c.cls||'','data-sv="t:cls"')}</div><div><label>Subclase</label>${cbox('cs',c.sub||'','data-sv="t:sub"',{empty:1,ph:'Sin subclase'})}</div>`:`<div><label>Clase</label><div class="ro">${esc(clsTxt(c))}</div></div>`}
  <div><label>Profesión</label>${cbox('profesion',c.profesion||'',at('profesion'),{empty:1,ph:'Elige o busca'})}</div>
  <div><label>Alineamiento</label>${cbox('alineamiento',c.alineamiento||'',at('alineamiento'),{empty:1,ph:'Elige o busca'})}</div>
  <div><label>Trasfondo</label><input type="text" maxlength="40" ${at('trasfondo')} value="${esc(c.trasfondo||'')}" placeholder="Una palabra"></div></div>`};
@@ -326,7 +327,7 @@ const finOf=c=>({stats:Object.fromEntries(STATS.map((n,i)=>[n,total(c,i)])),hp:h
 
 /* ---------- estado ---------- */
 let DB=null,U=null,ME={id:null,dm:false},cfg={maxLevel:1},P={prof:null,grants:[],chars:[]},DM={},view={mode:'player',pid:null,cid:null},sel=null,busy=false,pend=false,wq=Promise.resolve();
-let DR={},NT=[],selI=null,IT=null,FX=null,HOLD=0,RWV=null;
+let DR={},NT=[],selI=null,IT=null,FX=null,HOLD=0,RWV=null,RWPG={};
 const COINS=[['cobre','Cobre'],['plata','Plata'],['electrum','Electrum'],['oro','Oro'],['platino','Platino']],COIN=COINS.map(x=>x[0]),MAXM=999999999;
 function calcExp(t,cur){t=String(t).replace(/\s+/g,'').replace(/,/g,'');if(!/^[+-]?\d+([+-]\d+)*$/.test(t))return null;const rel=/^[+-]/.test(t);const n=(t.match(/[+-]?\d+/g)||[]).reduce((a,x)=>a+parseInt(x,10),0);return rel?(cur||0)+n:n}
 function moneyNorm(m){m={...m};COIN.forEach(k=>{m[k]=Math.max(0,Math.min(MAXM,Math.floor(+m[k])||0))});for(let j=0;j<4;j++){const v=m[COIN[j]];if(v>=100){m[COIN[j+1]]+=Math.floor(v/100);m[COIN[j]]=v%100}}m.platino=Math.min(MAXM,m.platino);return m}
@@ -365,15 +366,15 @@ function folios(c,dm,own){
  const ban=own&&fi?(free>0||sum(Object.values(DR))?`<div class="pts">Puntos de estadística por repartir:<b>${free}</b><small>Pulsa + junto a la estadística donde quieras sumarlos (máximo 20 en cada una) y luego confirma.</small><button data-act="pc" ${sum(Object.values(DR))?'':'disabled'}>Confirmar reparto</button></div>`:'<div class="pts no">Sin puntos de estadística por repartir.</div>'):'';
  const pu=fi?fi.puntos:pts(c.level);
  a+=`<section><h2>Estadísticas</h2>${ban}<div class="sg"><div>${STATS.slice(0,4).map((n,i)=>row(n,i)).join('')}</div><div>${STATS.slice(4).map((n,i)=>row(n,i+4)).join('')}</div></div>`
-  +(pool.length?`<p class="mut">Dados tirados: ${chips(pool)}<br>${c.hp?'Descartados':'Sin colocar'}: ${chips(pool.filter((_,k)=>!used.has(k)))||'ninguno'}</p>`:'')
+  +(dm&&pool.length?`<p class="mut">Dados tirados: ${chips(pool)}<br>${c.hp?'Descartados':'Sin colocar'}: ${chips(pool.filter((_,k)=>!used.has(k)))||'ninguno'}</p>`:'')
   +(own?'':`<p>Puntos de estadística por repartir: ${dm&&fi?`<input type="number" data-sv="f:puntos" value="${pu}" style="width:90px">`:`<b>${pu}</b>`}</p>`)+'</section>';
  const rc=key=>(FLO[c.flower]||{}).k===({hp:'hp',mana:'ma',anima:'an'}[key])?fcol(c):'';
  const res=(t,o,die,key,ex)=>{if(!die)return `<p>${t}: esta clase no tira dado.</p>`;if(!o||!o.r.length)return `<p class="mut">${t}: sin tirar</p>`;
   return `<p><b>${t}</b> (d${die}): ${chipsC(o.r,'',true)}${o.f.length?' + flor '+chipsC(o.f,rc(key)):''}${c.rb&&RESB?` · bono ${sg(RESB)} por dado`:''}${ex||''} → ${dm&&fi?`<input type="number" data-sv="f:${key}" value="${fi[key]}" style="width:90px">`:`<b>${fi?fi[key]:(key==='hp'?hpTot(c):sTot(o,c))}</b>`}</p>`};
  const vid=c.hp?(fi?fi.hp:hpTot(c)):'—',man=c.ma&&cl[1]?(fi?fi.mana:sTot(c.ma,c)):'—',ani=c.an&&cl[2]?(fi?fi.anima:sTot(c.an,c)):'—';
  const arm=(k,l)=>CIR('x a',dm?`<input data-sv="t:${k}" maxlength="20" value="${esc(c[k]||'')}" placeholder="12+2">`:esc(c[k]||'—'),l);
- a+=`<section><h2>Defensas y recursos</h2><div class="pjr">${arm('armF','Armadura física')}${CIR('x n',ani,'Ánima')}${CIR('x n',vid,'Vida')}${CIR('x n',man,'Maná')}${arm('armM','Armadura mágica')}</div><h3>Detalle de tiradas</h3>`
-  +res('Vida',c.hp,cl[0],'hp',c.hp?` · Con ${c.hp.con} (${sg(c.hp.mod)} por dado)`:'')+res('Maná',c.ma,cl[1],'mana')+res('Ánima',c.an,cl[2],'anima')+'</section>';
+ a+=`<section><h2>Defensas y recursos</h2><div class="pjr">${arm('armF','Armadura física')}${CIR('x n',ani,'Ánima')}${CIR('x n',vid,'Vida')}${CIR('x n',man,'Maná')}${arm('armM','Armadura mágica')}</div>`
+  +(dm?'<h3>Detalle de tiradas</h3>'+res('Vida',c.hp,cl[0],'hp',c.hp?` · Con ${c.hp.con} (${sg(c.hp.mod)} por dado)`:'')+res('Maná',c.ma,cl[1],'mana')+res('Ánima',c.an,cl[2],'anima'):'')+'</section>';
  const eq=c.eq||{},mo=c.money||{};
  const eqf=(k,l)=>`<div class="el">${l?`<label>${l}</label>`:''}<input data-eq="${k}" maxlength="60" value="${esc(eq[k]||'')}"${l?'':' placeholder="Arma equipada"'}></div>`;
  a+=`<div class="g2"><section><h2>Equipamiento</h2>${[['casco','Casco'],['pechera','Pechera'],['guantes','Guantes'],['grebas','Grebas'],['botas','Botas']].map(([k,l])=>eqf(k,l)).join('')}<div style="height:10px"></div><label>Armas</label>${['a1','a2','a3'].map(k=>eqf(k,'')).join('')}</section>
@@ -390,10 +391,16 @@ function folios(c,dm,own){
  z+=`<section><h2>Habilidades</h2><div class="hg">${Array.from({length:24},(_,i)=>hcell(i)).join('')}</div></section>`;
  const CP=Array.isArray(c.comps)?c.comps:[];
  z+=`<section><h2>Competencias</h2>`+(CP.length?CP.map((t,k)=>dm?`<div class="bar" style="margin:4px 0"><input data-cp="${k}" maxlength="200" value="${esc(t)}" style="flex:1;min-width:140px"><button class="danger" type="button" data-act="cpdel" data-i="${k}" title="Quitar" aria-label="Quitar competencia">${'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>'}</button></div>`:`<div class="cpl">${esc(t)}</div>`).join(''):'<p class="s">Aún no tienes competencias.</p>')+(dm?`<div class="bar"><input id="cpn" maxlength="200" placeholder="Nueva competencia" style="flex:1;min-width:140px"><button type="button" data-act="cpadd">Añadir</button></div>`:'')+'</section>';
- let ri=0;const given=n=>[...Object.values(HB),...Object.values(PB)].filter(x=>x.lv===n).length;
- z+='<section><h2>Recompensas por nivel</h2><div class="rws">'+Array.from({length:c.level+1},(_,i)=>i).map(n=>{const pt=n%5===0,
-  dmc=dm&&!pt?`<div class="rwb"><button class="o" data-act="itnew" data-k="h" data-lv="${n}">Dar habilidad</button><button class="o" data-act="itnew" data-k="p" data-lv="${n}">Dar pasiva</button>${given(n)?`<span class="mut">(${given(n)})</span>`:''}</div>`:'';
-  return pt?`<div class="rwr"><span class="rl">Nivel ${n}:</span><span class="rt">+2 puntos de estadísticas</span><span class="rn mut">—</span></div>`:`<div class="rwr"><span class="rl">Nivel ${n}:</span><span class="rt">${esc(REW[n%10]||'')}</span><b class="rn">${c.rw?c.rw.r[ri++]:'<span class="mut">sin tirar</span>'}</b>${dmc}</div>`}).join('')+'</div></section>';
+const RD=c.rwd||{},given=n=>[...Object.values(HB),...Object.values(PB)].filter(x=>x.lv===n).length;
+ let ri=0;const rowsAll=Array.from({length:c.level+1},(_,n)=>{const pt=n%5===0;return {n,pt,roll:pt?null:(c.rw?c.rw.r[ri++]:null),dn:!!RD[n]}});
+ const vis=dm?rowsAll:rowsAll.filter(r=>!r.pt&&!r.dn),PGN=20,last=Math.max(0,Math.ceil(vis.length/PGN)-1),pg=Math.min(RWPG[c.id]||0,last),part=vis.slice(pg*PGN,pg*PGN+PGN);
+ const rrow=r=>{const n=r.n;
+  if(r.pt)return `<div class="rwr"><span class="rl">Nivel ${n}:</span><span class="rt">+2 puntos de estadísticas</span><span class="rn mut">—</span></div>`;
+  if(r.dn)return `<div class="rwr dn"><span class="rl">Nivel ${n}:</span><span class="rt mut">Recompensa entregada</span><button type="button" class="o" data-act="rwund" data-lv="${n}" title="Reabrir" aria-label="Reabrir recompensa"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button></div>`;
+  const dmc=dm?`<div class="rwb"><button class="o" data-act="itnew" data-k="h" data-lv="${n}">Dar habilidad</button><button class="o" data-act="itnew" data-k="p" data-lv="${n}">Dar pasiva</button><button class="o" data-act="itnew" data-k="c" data-lv="${n}">Dar competencia</button><button type="button" data-act="rwok" data-lv="${n}" title="Marcar como entregada" aria-label="Marcar como entregada" style="padding:6px 10px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><polyline points="20 6 9 17 4 12"/></svg></button>${given(n)?`<span class="mut">(${given(n)})</span>`:''}</div>`:'';
+  return `<div class="rwr"><span class="rl">Nivel ${n}:</span><span class="rt">${esc(REW[n%10]||'')}</span><b class="rn">${r.roll!=null?r.roll:'<span class="mut">sin tirar</span>'}</b>${dmc}</div>`};
+ z+='<section><h2>Recompensas por nivel</h2>'+(vis.length?'<div class="rws">'+part.map(rrow).join('')+'</div>':'<p class="s">No tienes recompensas pendientes.</p>')
+  +(vis.length>PGN?`<div class="bar" style="justify-content:space-between"><span class="mut">${pg*PGN+1}–${Math.min(vis.length,pg*PGN+PGN)} de ${vis.length}</span><span style="display:flex;gap:6px">${pg>0?'<button class="o" data-act="rwpg" data-d="-1">Anteriores 20</button>':''}${pg<last?'<button class="o" data-act="rwpg" data-d="1">Siguientes 20</button>':''}</span></div>`:'')+'</section>';
  if(dm){const all=[...Object.entries(HB).map(([id,it])=>[id,'h',it]),...Object.entries(PB).map(([id,it])=>[id,'p',it])];
   const est=(id,k)=>{if(ds.has(id))return 'Descartada';const sl=c[k==='h'?'sh':'sp']||{},q=Object.keys(sl).find(x=>sl[x]===id);return q!==undefined?'Casilla '+(+q+1):'Sin colocar'};
   z+=`<section><h2>Habilidades y pasivas dadas</h2><div class="bar"><button data-act="itnew" data-k="h" data-lv="">Dar habilidad</button><button data-act="itnew" data-k="p" data-lv="">Dar pasiva</button></div>`
@@ -582,6 +589,8 @@ function themeVars(c){if(!c||!c.icon)return '';const p=PAL.get(c.icon);if(p===un
 function saveSheet(){const p=DM[view.pid],c=p&&p.chars.find(x=>x.id===view.cid);if(!c)return;const o={},fin=c.fin?{...c.fin,stats:{...c.fin.stats}}:null;
  document.querySelectorAll('#app [data-sv]').forEach(el=>{const k=el.dataset.sv;
   if(k[0]==='s'){if(fin)fin.stats[k.slice(2)]=+el.value||0}else if(k[0]==='f'){if(fin)fin[k.slice(2)]=+el.value||0}else{const f=k.slice(2);o[f]=f==='name'?el.value.trim().slice(0,60):el.value}});
+ if(o.cls!==undefined&&!(o.cls in CLS))delete o.cls;
+ if(o.sub!==undefined&&(!(o.sub in CLS)||o.sub===(o.cls!==undefined?o.cls:c.cls)))o.sub='';
  if(fin){o.fin=fin;c.fin=fin;}
  W(()=>DB.doc(`players/${view.pid}/chars/${c.id}`).update(o));toast('Guardado');}
 /* ---------- listas con buscador ---------- */
@@ -647,6 +656,7 @@ function gearSave(t){const x=iconTarget();if(!x)return;const {c,ref}=x;
  else if(t.dataset.inv!==undefined){const v=t.value.slice(0,3000);c.inv=v;W(()=>ref.update({inv:v}))}
  else{const cur=(c.money||{})[t.dataset.mo]||0,val=calcExp(t.value,cur);if(val===null){toast('Escribe un número o una suma, como 10+5.');render();return}const money=moneyNorm({...(c.money||{}),[t.dataset.mo]:val});c.money=money;W(()=>ref.update({money}));toast('Guardado');render();return}
  toast('Guardado')}
+const curSheet=()=>{const x=iconTarget();return x&&x.c};
 function cpSave(t){if(!ME.dm)return;const x=iconTarget();if(!x)return;const {c,ref}=x,a=[...(c.comps||[])],k=+t.dataset.cp;if(!(k>=0&&k<a.length))return;const v=t.value.trim().slice(0,200);if(v)a[k]=v;else a.splice(k,1);c.comps=a;W(()=>ref.update({comps:a}));toast('Guardado');render()}
 function cpAdd(){if(!ME.dm)return;const x=iconTarget(),inp=$('app').querySelector('#cpn');if(!x||!inp)return;const v=inp.value.trim().slice(0,200);if(!v)return;const a=[...(x.c.comps||[]),v];if(a.length>60){toast('Máximo 60 competencias.');return}x.c.comps=a;W(()=>x.ref.update({comps:a}));toast('Guardado');render()}
 function cpDel(i){if(!ME.dm)return;const x=iconTarget();if(!x)return;const a=[...(x.c.comps||[])];if(!(i>=0&&i<a.length))return;if(!confirm(`¿Quitar la competencia "${a[i]}"?`))return;a.splice(i,1);x.c.comps=a;W(()=>x.ref.update({comps:a}));toast('Guardado');render()}
@@ -666,12 +676,14 @@ function delItem(id){const x=iconTarget();if(!x||!ME.dm)return;const {c,ref}=x,i
  const habs={...(c.habs||{})},pass={...(c.pass||{})};delete habs[id];delete pass[id];
  const cl=o=>Object.fromEntries(Object.entries(o||{}).filter(([,v])=>v!==id)),sh=cl(c.sh),sp=cl(c.sp),disc=(c.disc||[]).filter(q=>q!==id);
  Object.assign(c,{habs,pass,sh,sp,disc});W(()=>ref.update({habs,pass,sh,sp,disc}));toast('Eliminada');render()}
-function itOpen(k,id,lv){const x=iconTarget();if(!x||!ME.dm)return;const it=id?((k==='h'?x.c.habs:x.c.pass)||{})[id]||{}:{};IT={k,id,lv};
- $('itt').textContent=(id?'Editar ':'Dar ')+(k==='h'?'habilidad':'pasiva')+(lv!==''&&lv!=null&&!id?' (recompensa del nivel '+lv+')':'');
+function itOpen(k,id,lv){const x=iconTarget();if(!x||!ME.dm)return;const it=id&&k!=='c'?((k==='h'?x.c.habs:x.c.pass)||{})[id]||{}:{};IT={k,id,lv};
+ $('itt').textContent=(id?'Editar ':'Dar ')+(k==='h'?'habilidad':k==='c'?'competencia':'pasiva')+(lv!==''&&lv!=null&&!id?' (recompensa del nivel '+lv+')':'');
+ if(k==='c'){$('itf').innerHTML='<label>Competencia</label><input id="itn" maxlength="200" value="">';$('itm').style.display='flex';$('itn').focus();return}
  $('itf').innerHTML=`<label>Nombre</label><input id="itn" maxlength="60" value="${esc(it.n||'')}">`+(k==='h'?`<label style="margin-top:8px">Coste</label><input id="itc" maxlength="40" value="${esc(it.c||'')}"><label style="margin-top:8px">Efecto</label><textarea id="ite" maxlength="600">${esc(it.e||'')}</textarea>`:`<label style="margin-top:8px">Efecto positivo</label><textarea id="ite" maxlength="400">${esc(it.e||'')}</textarea><label style="margin-top:8px">Efecto negativo (opcional)</label><textarea id="itg" maxlength="400">${esc(it.g||'')}</textarea>`);
  $('itm').style.display='flex';$('itn').focus()}
 function itClose(){$('itm').style.display='none';IT=null}
 function itSave(){const x=iconTarget();if(!x||!IT||!ME.dm)return;const {c,ref}=x,g=q=>(($(q)||{}).value||'').trim(),n=g('itn').slice(0,60);
+ if(IT.k==='c'){const v=g('itn').slice(0,200);if(!v){toast('Escribe la competencia.');return}const a=[...(c.comps||[]),v];if(a.length>60){toast('Máximo 60 competencias.');return}c.comps=a;W(()=>ref.update({comps:a}));itClose();toast('Guardado');render();return}
  if(!n){toast('Escribe el nombre.');return}
  const it=IT.k==='h'?{n,c:g('itc').slice(0,40),e:g('ite').slice(0,600)}:{n,e:g('ite').slice(0,400),g:g('itg').slice(0,400)},mk=IT.k==='h'?'habs':'pass',sk=IT.k==='h'?'sh':'sp',m={...(c[mk]||{})};
  if(IT.id){const old=m[IT.id];if(old&&old.lv!=null)it.lv=old.lv;m[IT.id]=it;c[mk]=m;W(()=>ref.update({[mk]:m}))}
@@ -753,6 +765,8 @@ $('app').addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
  else if(a==='rev'){DM[d.p].grants=DM[d.p].grants.filter(g=>g.id!==d.g);W(()=>DB.doc(`permits/${d.p}/grants/${d.g}`).delete());render()}
  else if(a==='phbig')phOpen()
  else if(a==='bgbig')bgOpen(d.k||'background')
+ else if(a==='rwpg'){const c=curSheet();if(c){RWPG[c.id]=Math.max(0,(RWPG[c.id]||0)+(+d.d));render()}}
+ else if(a==='rwok'||a==='rwund'){const x=iconTarget();if(!x||!ME.dm)return;const {c,ref}=x,rwd={...(c.rwd||{})};if(a==='rwok')rwd[d.lv]=true;else delete rwd[d.lv];c.rwd=rwd;W(()=>ref.update({rwd}));toast('Guardado');render()}
  else if(a==='cpadd')cpAdd()
  else if(a==='cpdel')cpDel(+d.i)
  else if(a==='mm'){const x=iconTarget();if(!x)return;const {c,ref}=x,inp=document.querySelector(`#app input[data-amt="${d.k}"]`),n=Math.max(1,Math.min(MAXM,inp&&inp.value.trim()?(calcExp(inp.value,0)??1):1)),i=COIN.indexOf(d.k),base=moneyNorm(c.money||{});
