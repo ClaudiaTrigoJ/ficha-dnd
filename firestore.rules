@@ -39,7 +39,20 @@ service cloud.firestore {
         && request.resource.data.cname is string && request.resource.data.cname.size() <= 60
         && ((request.resource.data.type == 'new_player' && nid == 'reg_' + request.auth.uid)
             || (request.resource.data.type == 'char_done' && nid == 'done_' + request.resource.data.cid
-                && get(/databases/$(database)/documents/players/$(request.auth.uid)/chars/$(request.resource.data.cid)).data.done == true));
+                && get(/databases/$(database)/documents/players/$(request.auth.uid)/chars/$(request.resource.data.cid)).data.done == true)
+            || (request.resource.data.type == 'char_reg' && nid == 'regc_' + request.resource.data.cid
+                && get(/databases/$(database)/documents/players/$(request.auth.uid)/chars/$(request.resource.data.cid)).data.get('reg', '') == 'pending'));
+    }
+
+    // Lista publica de fichas visibles (solo punteros: la ficha en si sigue protegida por su campo vis)
+    match /pub/{cid} {
+      allow read: if request.auth != null;
+      allow create, update: if isDM() || (request.auth != null
+        && request.resource.data.keys().hasOnly(['pid','pname','cid','at'])
+        && request.resource.data.pid == request.auth.uid && request.resource.data.cid == cid
+        && request.resource.data.pname is string && request.resource.data.pname.size() <= 40
+        && get(/databases/$(database)/documents/players/$(request.auth.uid)/chars/$(cid)).data.get('vis', false) == true);
+      allow delete: if isDM() || (request.auth != null && resource.data.pid == request.auth.uid);
     }
 
     match /permits/{uid}/grants/{gid} {
@@ -56,17 +69,30 @@ service cloud.firestore {
       allow delete: if isDM();
 
       match /chars/{cid} {
-        allow read: if me(uid) || isDM();
+        // Una ficha es legible por otros jugadores solo si su dueño la ha hecho visible
+        allow read: if me(uid) || isDM() || (request.auth != null && resource.data.get('vis', false) == true);
         allow delete: if isDM();
+
+        // Background y notas: solo el dueño y el DM
+        match /priv/{d} {
+          allow read: if me(uid) || isDM();
+          allow create, update: if isDM() || (me(uid)
+            && ((d == 'bg' && request.resource.data.keys().hasOnly(['t'])
+                  && request.resource.data.t is string && request.resource.data.t.size() <= 3000)
+                || (d == 'notes' && request.resource.data.keys().hasOnly(['j'])
+                  && request.resource.data.j is string && request.resource.data.j.size() <= 20000)));
+          allow delete: if isDM() || me(uid);
+        }
 
         // Un personaje por permiso: el id del personaje es el id del permiso
         allow create: if me(uid)
           && exists(/databases/$(database)/documents/permits/$(uid)/grants/$(cid))
           && request.resource.data.grant == cid
-          && request.resource.data.keys().hasOnly(['name','cls','sub','race','rand','flower','level','grant','extra','created','pool','sl','done','rb'])
+          && request.resource.data.keys().hasOnly(['name','cls','sub','race','rand','flower','level','grant','extra','created','pool','sl','done','rb','reg'])
           && request.resource.data.name is string && request.resource.data.name.size() <= 60
           && request.resource.data.extra == get(/databases/$(database)/documents/permits/$(uid)/grants/$(cid)).data.extra
           && request.resource.data.get('rb', false) == get(/databases/$(database)/documents/permits/$(uid)/grants/$(cid)).data.get('rb', false)
+          && request.resource.data.get('reg', '') == (get(/databases/$(database)/documents/permits/$(uid)/grants/$(cid)).data.get('reg', false) ? 'draft' : '')
           && request.resource.data.level is int
           && request.resource.data.level >= 1
           && request.resource.data.level <= maxLevel()
@@ -84,7 +110,7 @@ service cloud.firestore {
           && request.resource.data.pool.size() == 0
           && request.resource.data.done == false;
 
-        allow update: if isDM() || (me(uid) && (ownerOk() || textOk() || iconOk() || spendOk() || nameOk() || gearOk() || slotsOk() || notesOk() || lvRollOk() || lvRwOk() || flowerOk()));
+        allow update: if isDM() || (me(uid) && (ownerOk() || textOk() || iconOk() || spendOk() || nameOk() || gearOk() || slotsOk() || notesOk() || lvRollOk() || lvRwOk() || flowerOk() || visOk() || regOk()));
 
         // Equipamiento, inventario y dinero: el jugador y el DM pueden escribirlos cuando quieran
         function gearOk() {
@@ -263,6 +289,40 @@ service cloud.firestore {
                   && dd('Inteligencia') <= 6 && dd('Carisma') <= 6 && dd('Sabiduría') <= 6 && dd('Suerte') <= 6
                   && dd('Fuerza') + dd('Constitución') + dd('Destreza') + dd('Voluntad')
                      + dd('Inteligencia') + dd('Carisma') + dd('Sabiduría') + dd('Suerte') <= 8));
+        }
+
+
+        // Hacer visible la ficha para los demas jugadores (solo fichas terminadas)
+        function visOk() {
+          let k = request.resource.data.diff(resource.data).affectedKeys();
+          return k.hasOnly(['vis']) && request.resource.data.vis is bool && resource.data.get('done', false) == true;
+        }
+
+        // Registro de un personaje ya existente: mientras esta en borrador el jugador rellena los datos; el DM los aprueba
+        function regOk() {
+          let k = request.resource.data.diff(resource.data).affectedKeys();
+          let n = request.resource.data;
+          let o = resource.data;
+          return o.get('reg', '') == 'draft'
+            && k.hasOnly(['name','cls','sub','race','flower','level','profesion','alineamiento','trasfondo','armF','armM','fin','habs','pass','sh','sp','disc','comps','reg'])
+            && (!k.hasAny(['name']) || (n.name is string && n.name.size() <= 60))
+            && (!k.hasAny(['reg']) || n.reg in ['draft','pending'])
+            && (!k.hasAny(['level']) || (n.level is int && n.level >= 1 && n.level <= maxLevel()))
+            && (!k.hasAny(['cls']) || n.cls in tnames('classNames', ['Guerrero','Monje','Clérigo','Bardo','Druida','Tirador','Asesino','Hechicero','Warlock','Mago']))
+            && (!k.hasAny(['sub']) || (n.sub is string && (n.sub == '' || (n.sub != n.cls
+                  && n.sub in tnames('classNames', ['Guerrero','Monje','Clérigo','Bardo','Druida','Tirador','Asesino','Hechicero','Warlock','Mago'])))))
+            && (!k.hasAny(['race']) || n.race in tnames('raceNames', ['Humano','Ángel','Demonio','Vampiro','Dracónido']))
+            && (!k.hasAny(['flower']) || n.flower in tnames('flowerNames', ['Sin Flor','Flor Roja','Flor Azul','Flor Verde','Flor Marrón','Flor Blanca','Flor Morada','Flor Amarilla']))
+            && (!k.hasAny(['armF']) || (n.armF is string && n.armF.size() <= 20))
+            && (!k.hasAny(['armM']) || (n.armM is string && n.armM.size() <= 20))
+            && (!k.hasAny(['fin']) || (n.fin.stats is map && st20(n.fin)
+                  && n.fin.puntos is int && n.fin.puntos >= 0 && n.fin.puntos <= 9999
+                  && n.fin.hp is int && n.fin.hp >= 0 && n.fin.hp <= 9999
+                  && n.fin.mana is int && n.fin.mana >= 0 && n.fin.mana <= 9999
+                  && n.fin.anima is int && n.fin.anima >= 0 && n.fin.anima <= 9999))
+            && (!k.hasAny(['habs']) || (n.habs is map && n.habs.size() <= 60))
+            && (!k.hasAny(['pass']) || (n.pass is map && n.pass.size() <= 60))
+            && (!k.hasAny(['comps']) || (n.comps is list && n.comps.size() <= 60));
         }
 
         // Reparto de puntos de estadística: solo subir estadísticas gastando puntos

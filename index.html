@@ -288,7 +288,7 @@ const clsD=c=>{const a=CLS[c.cls]||[0,0,0],b=c.sub&&CLS[c.sub];if(!b)return a;
 function cbList(k){
  if(k==='cc')return Object.keys(CLS).map(n=>({v:n,l:n}));
  if(k==='cr')return [...RACES.map(n=>({v:n,l:n})),{v:'__rand',l:'Aleatoria (ruleta)'}];
- if(k==='cs')return Object.keys(CLS).filter(n=>n!==((document.getElementById('cc')||document.querySelector('[data-sv="t:cls"]')||{}).value)).map(n=>({v:n,l:n}));
+ if(k==='cs')return Object.keys(CLS).filter(n=>n!==((document.getElementById('cc')||document.querySelector('[data-sv="t:cls"],[data-rg="cls"]')||{}).value)).map(n=>({v:n,l:n}));
  if(k==='cr2')return RACES.map(n=>({v:n,l:n}));
  if(k==='cf')return Object.entries(FLO).map(([n,f])=>({v:n,l:n,d:f.t}));
  if(k==='cl')return Array.from({length:cfg.maxLevel||1},(_,i)=>({v:String(i+1),l:String(i+1)}));
@@ -303,8 +303,8 @@ const topF=(c,m)=>{const at=k=>m==='dm'?`data-sv="t:${k}"`:`data-pt="${k}"`;
  <div><label>Alineamiento</label>${cbox('alineamiento',c.alineamiento||'',at('alineamiento'),{empty:1,ph:'Elige o busca'})}</div>
  <div><label>Trasfondo</label><input type="text" maxlength="40" ${at('trasfondo')} value="${esc(c.trasfondo||'')}" placeholder="Una palabra"></div></div>`};
 const expBtn=(k,t)=>`<div class="bar" style="justify-content:space-between;margin:0 0 6px"><h2 style="margin:0">${t}</h2><button type="button" class="o" data-act="bgbig" data-k="${k}" aria-label="Ampliar" title="Ampliar" style="padding:4px 7px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button></div>`;
-const bgBox=(c,m)=>{const at=m==='dm'?'data-sv="t:background"':'data-pt="background"';
- return expBtn('background','Background')+`<textarea ${at} data-bigk="background" style="min-height:90px;height:90px;resize:none">${esc(c.background||'')}</textarea>`};
+const bgBox=(c,m)=>{const at='data-bg';
+ return expBtn('background','Background')+`<textarea ${at} data-bigk="background" maxlength="3000" style="min-height:90px;height:90px;resize:none">${esc(PV.bg)}</textarea>`};
 const nameCtl=c=>c.name?'':`<div class="res"><label>Nombre del personaje</label><div class="bar" style="margin-top:4px"><input id="pnm" maxlength="60" placeholder="Escribe el nombre" style="flex:1;min-width:160px"><button data-act="pname">Guardar nombre</button></div><p class="mut" style="margin:4px 0 0">Una vez guardado, solo el DM podrá cambiarlo.</p></div>`;
 const rwLv=L=>Array.from({length:L},(_,i)=>i+1).filter(n=>n%5!==0);
 const chipsB=a=>a.map((v,i)=>`<span class="d${i===0?' base':''}">${v}</span>`).join('');
@@ -327,7 +327,8 @@ const usedDice=c=>(c.hp?c.hp.r.length:0)+(c.ma?c.ma.r.length:0)+(c.an?c.an.r.len
 const finOf=c=>({stats:Object.fromEntries(STATS.map((n,i)=>[n,total(c,i)])),hp:hpTot(c),mana:sTot(c.ma,c),anima:sTot(c.an,c),puntos:pts(c.level)});
 
 /* ---------- estado ---------- */
-let DB=null,U=null,ME={id:null,dm:false},cfg={maxLevel:1},P={prof:null,grants:[],chars:[]},DM={},view={mode:'player',pid:null,cid:null},sel=null,busy=false,pend=false,wq=Promise.resolve();
+let OTH={},PV={key:'',bg:'',nt:'',un:[]};
+let DB=null,U=null,ME={id:null,dm:false},cfg={maxLevel:1},P={prof:null,grants:[],chars:[]},DM={},view={mode:'player',pid:null,cid:null,oth:null},sel=null,busy=false,pend=false,wq=Promise.resolve();
 let DR={},NT=[],selI=null,IT=null,FX=null,HOLD=0,RWV=null,RWPG={};
 const COINS=[['cobre','Cobre'],['plata','Plata'],['electrum','Electrum'],['oro','Oro'],['platino','Platino']],COIN=COINS.map(x=>x[0]),MAXM=999999999;
 function calcExp(t,cur){t=String(t).replace(/\s+/g,'').replace(/,/g,'');if(!/^[+-]?\d+([+-]\d+)*$/.test(t))return null;const rel=/^[+-]/.test(t);const n=(t.match(/[+-]?\d+/g)||[]).reduce((a,x)=>a+parseInt(x,10),0);return rel?(cur||0)+n:n}
@@ -353,7 +354,7 @@ const placedIds=c=>new Set([...Object.values(c.sh||{}),...Object.values(c.sp||{}
 const CIR=(k,inner,cap)=>`<div class="cw"><div class="circ ${k}">${inner}</div>${cap?`<small>${cap}</small>`:''}</div>`;
 function itHtml(c,id){const h=(c.habs||{})[id],it=h||(c.pass||{})[id]||{n:'?'};
  return `<div class="it${selI===id?' sel':''}" data-iid="${id}"><b>${esc(it.n)}</b>${h&&it.c?`<span class="ic">${esc(it.c)}</span>`:''}${h?(it.e?`<div class="ie">${esc(it.e)}</div>`:''):`${it.e?`<div class="ie pos">+ ${esc(it.e)}</div>`:''}${it.g?`<div class="ie neg">− ${esc(it.g)}</div>`:''}`}</div>`}
-function folios(c,dm,own){
+function folios(c,dm,own,ro){
  const cl=clsD(c),fi=c.fin,b=bon(c),pool=c.pool||[],used=new Set(c.sl||[]),free=own&&fi?fi.puntos-sum(Object.values(DR)):0,
   HB=c.habs||{},PB=c.pass||{},pl=placedIds(c),ds=new Set(c.disc||[]);
  /* ----- folio 1 ----- */
@@ -369,7 +370,7 @@ function folios(c,dm,own){
  const pu=fi?fi.puntos:pts(c.level);
  a+=`<section><h2>Estadísticas</h2>${ban}<div class="sg"><div>${STATS.slice(0,4).map((n,i)=>row(n,i)).join('')}</div><div>${STATS.slice(4).map((n,i)=>row(n,i+4)).join('')}</div></div>`
   +(dm&&pool.length?`<p class="mut">Dados tirados: ${chips(pool)}<br>${c.hp?'Descartados':'Sin colocar'}: ${chips(pool.filter((_,k)=>!used.has(k)))||'ninguno'}</p>`:'')
-  +(own?'':`<p>Puntos de estadística por repartir: ${dm&&fi?`<input type="number" data-sv="f:puntos" value="${pu}" style="width:90px">`:`<b>${pu}</b>`}</p>`)+'</section>';
+  +(own||ro?'':`<p>Puntos de estadística por repartir: ${dm&&fi?`<input type="number" data-sv="f:puntos" value="${pu}" style="width:90px">`:`<b>${pu}</b>`}</p>`)+'</section>';
  const rc=key=>(FLO[c.flower]||{}).k===({hp:'hp',mana:'ma',anima:'an'}[key])?fcol(c):'';
  const res=(t,o,die,key,ex)=>{if(!die)return `<p>${t}: esta clase no tira dado.</p>`;if(!o||!o.r.length)return `<p class="mut">${t}: sin tirar</p>`;
   return `<p><b>${t}</b> (d${die}): ${chipsC(o.r,'',true)}${o.f.length?' + flor '+chipsC(o.f,rc(key)):''}${c.rb&&RESB?` · bono ${sg(RESB)} por dado`:''}${ex||''} → ${dm&&fi?`<input type="number" data-sv="f:${key}" value="${fi[key]}" style="width:90px">`:`<b>${fi?fi[key]:(key==='hp'?hpTot(c):sTot(o,c))}</b>`}</p>`};
@@ -381,7 +382,7 @@ function folios(c,dm,own){
  const eqf=(k,l)=>`<div class="el">${l?`<label>${l}</label>`:''}<input data-eq="${k}" maxlength="60" value="${esc(eq[k]||'')}"${l?'':' placeholder="Arma equipada"'}></div>`;
  a+=`<div class="g2"><section><h2>Equipamiento</h2>${[['casco','Casco'],['pechera','Pechera'],['guantes','Guantes'],['grebas','Grebas'],['botas','Botas']].map(([k,l])=>eqf(k,l)).join('')}<div style="height:10px"></div><label>Armas</label>${['a1','a2','a3'].map(k=>eqf(k,'')).join('')}</section>
   <section>${expBtn('inv','Inventario')}<textarea data-inv data-bigk="inv" maxlength="3000" style="min-height:220px;height:220px;resize:none;font-family:inherit">${esc(c.inv||'')}</textarea><h3>Dinero</h3><div class="mo">${COINS.map(([k,l])=>`<div class="mc"><label>${l}</label><input type="text" inputmode="tel" autocomplete="off" data-mo="${k}" value="${mo[k]??0}"></div>`).join('')}</div><p class="mut" style="margin:6px 0 0">Al llegar a 100 se pasa a la siguiente moneda. Puedes escribir sumas y si empiezas con + o − se aplica al valor actual.</p></section></div>`;
- a+=`<section>${bgBox(c,dm?'dm':'me')}</section>`;
+ if(!ro)a+=`<section>${bgBox(c,dm?'dm':'me')}</section>`;
  /* ----- folio 2 ----- */
  const hcell=i=>{const id=(c.sh||{})[i],lk=i>=4&&c.level<hLv(i);
   return `<div class="hc${lk?' lk':''}" data-hs="${i}"${lk?` title="Se desbloquea al nivel ${hLv(i)}"`:''}><span class="hn">${i+1}.-</span>${id&&HB[id]?itHtml(c,id):''}${i>=4?`<span class="hl">${lk?LOCK:''}Nv ${hLv(i)}</span>`:''}</div>`};
@@ -389,12 +390,12 @@ function folios(c,dm,own){
  let z=`<section><h2>Pasivas</h2><div class="hg">${Array.from({length:6},(_,i)=>pcell(i)).join('')}</div></section>`;
  const stH=Object.keys(HB).filter(id=>!pl.has(id)&&!ds.has(id)),stP=Object.keys(PB).filter(id=>!pl.has(id)&&!ds.has(id));
  const stl=(t,ids)=>ids.length?`<h3>${t}</h3>`+ids.map(id=>`<div class="itw">${itHtml(c,id)}<button class="o" data-act="itdis" data-id="${id}">Descartar</button></div>`).join(''):'';
- z+=`<section><h2>Sin colocar</h2>`+(stH.length||stP.length?`<p class="s">Arrastra una a una casilla (o tócala y toca la casilla) para colocarla. Si la casilla ya está ocupada, la que había pasa a descartadas.</p>${stl('Habilidades',stH)}${stl('Pasivas',stP)}`:'<p class="s">No hay habilidades ni pasivas sin colocar.</p>')+'</section>';
+ if(!ro)z+=`<section><h2>Sin colocar</h2>`+(stH.length||stP.length?`<p class="s">Arrastra una a una casilla (o tócala y toca la casilla) para colocarla. Si la casilla ya está ocupada, la que había pasa a descartadas.</p>${stl('Habilidades',stH)}${stl('Pasivas',stP)}`:'<p class="s">No hay habilidades ni pasivas sin colocar.</p>')+'</section>';
  z+=`<section><h2>Habilidades</h2><div class="hg">${Array.from({length:24},(_,i)=>hcell(i)).join('')}</div></section>`;
  const NS=ntGet(c),TRI='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>';
  const CP=Array.isArray(c.comps)?c.comps:[];
  z+=`<section><h2>Competencias</h2>`+(CP.length?CP.map((t,k)=>dm?`<div class="bar" style="margin:4px 0"><input data-cp="${k}" maxlength="200" value="${esc(t)}" style="flex:1;min-width:140px"><button class="danger" type="button" data-act="cpdel" data-i="${k}" title="Quitar" aria-label="Quitar competencia">${'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>'}</button></div>`:`<div class="cpl">${esc(t)}</div>`).join(''):'<p class="s">Aún no tienes competencias.</p>')+(dm?`<div class="bar"><input id="cpn" maxlength="200" placeholder="Nueva competencia" style="flex:1;min-width:140px"><button type="button" data-act="cpadd">Añadir</button></div>`:'')+'</section>';
-z+=`<section><h2>Notas</h2>`+(NS.length?NS.map(q=>`<div class="res"><div class="bar" style="margin:0 0 6px"><input data-ntt="${q.id}" maxlength="60" value="${esc(q.t)}" style="flex:1;min-width:120px;font-weight:bold" aria-label="Título de la sección"><button class="danger" type="button" data-act="ntdel" data-s="${q.id}" title="Borrar sección" aria-label="Borrar sección">${TRI}</button></div>`+(q.k==='l'?(q.i||[]).map((it,i)=>`<div class="bar" style="margin:3px 0;flex-wrap:nowrap"><input type="checkbox" data-ntc="${q.id}:${i}" ${it.d?'checked':''} style="width:auto;margin:0" aria-label="Completado"><input data-nti="${q.id}:${i}" maxlength="200" value="${esc(it.t)}" style="flex:1;min-width:0;${it.d?'text-decoration:line-through;opacity:.7':''}"><button class="o" type="button" data-act="ntidel" data-s="${q.id}" data-i="${i}" title="Quitar" aria-label="Quitar">${TRI}</button></div>`).join('')+`<div class="bar" style="margin:6px 0 0"><input data-ntin="${q.id}" maxlength="200" placeholder="Nuevo elemento" style="flex:1;min-width:120px"><button type="button" data-act="ntiadd" data-s="${q.id}">Añadir</button></div>`:`<textarea data-nt="${q.id}" maxlength="5000" style="min-height:110px;resize:vertical;font-family:inherit">${esc(q.b||'')}</textarea>`)+'</div>').join(''):'<p class="s">Aún no tienes notas. Crea una sección para empezar.</p>')+`<h3>Nueva sección</h3><div class="bar"><input id="ntn" maxlength="60" placeholder="Título, por ejemplo Objetos exóticos" style="flex:1;min-width:140px"><select id="ntk" style="width:auto"><option value="t">Texto</option><option value="l">Lista con ticks</option></select><button type="button" data-act="ntadd">Crear sección</button></div></section>`;
+if(!ro)z+=`<section><h2>Notas</h2>`+(NS.length?NS.map(q=>`<div class="res"><div class="bar" style="margin:0 0 6px"><input data-ntt="${q.id}" maxlength="60" value="${esc(q.t)}" style="flex:1;min-width:120px;font-weight:bold" aria-label="Título de la sección"><button class="danger" type="button" data-act="ntdel" data-s="${q.id}" title="Borrar sección" aria-label="Borrar sección">${TRI}</button></div>`+(q.k==='l'?(q.i||[]).map((it,i)=>`<div class="bar" style="margin:3px 0;flex-wrap:nowrap"><input type="checkbox" data-ntc="${q.id}:${i}" ${it.d?'checked':''} style="width:auto;margin:0" aria-label="Completado"><input data-nti="${q.id}:${i}" maxlength="200" value="${esc(it.t)}" style="flex:1;min-width:0;${it.d?'text-decoration:line-through;opacity:.7':''}"><button class="o" type="button" data-act="ntidel" data-s="${q.id}" data-i="${i}" title="Quitar" aria-label="Quitar">${TRI}</button></div>`).join('')+`<div class="bar" style="margin:6px 0 0"><input data-ntin="${q.id}" maxlength="200" placeholder="Nuevo elemento" style="flex:1;min-width:120px"><button type="button" data-act="ntiadd" data-s="${q.id}">Añadir</button></div>`:`<textarea data-nt="${q.id}" maxlength="5000" style="min-height:110px;resize:vertical;font-family:inherit">${esc(q.b||'')}</textarea>`)+'</div>').join(''):'<p class="s">Aún no tienes notas. Crea una sección para empezar.</p>')+`<h3>Nueva sección</h3><div class="bar"><input id="ntn" maxlength="60" placeholder="Título, por ejemplo Objetos exóticos" style="flex:1;min-width:140px"><select id="ntk" style="width:auto"><option value="t">Texto</option><option value="l">Lista con ticks</option></select><button type="button" data-act="ntadd">Crear sección</button></div></section>`;
 const RD=c.rwd||{},given=n=>[...Object.values(HB),...Object.values(PB)].filter(x=>x.lv===n).length;
  let ri=0;const rowsAll=Array.from({length:c.level+1},(_,n)=>{const pt=n%5===0;return {n,pt,roll:pt?null:(c.rw?c.rw.r[ri++]:null),dn:!!RD[n]}});
  const vis=dm?rowsAll:rowsAll.filter(r=>!r.pt&&!r.dn),PGN=20,last=Math.max(0,Math.ceil(vis.length/PGN)-1),pg=Math.min(RWPG[c.id]||0,last),part=vis.slice(pg*PGN,pg*PGN+PGN);
@@ -403,7 +404,7 @@ const RD=c.rwd||{},given=n=>[...Object.values(HB),...Object.values(PB)].filter(x
   if(r.dn)return `<div class="rwr dn"><span class="rl">Nivel ${n}:</span><span class="rt mut">Recompensa entregada</span><button type="button" class="o" data-act="rwund" data-lv="${n}" title="Reabrir" aria-label="Reabrir recompensa"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button></div>`;
   const dmc=dm?`<div class="rwb"><button class="o" data-act="itnew" data-k="h" data-lv="${n}">Dar habilidad</button><button class="o" data-act="itnew" data-k="p" data-lv="${n}">Dar pasiva</button><button class="o" data-act="itnew" data-k="c" data-lv="${n}">Dar competencia</button><button type="button" data-act="rwok" data-lv="${n}" title="Marcar como entregada" aria-label="Marcar como entregada" style="padding:6px 10px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><polyline points="20 6 9 17 4 12"/></svg></button>${given(n)?`<span class="mut">(${given(n)})</span>`:''}</div>`:'';
   return `<div class="rwr"><span class="rl">Nivel ${n}:</span><span class="rt">${esc(REW[n%10]||'')}</span><b class="rn">${r.roll!=null?r.roll:'<span class="mut">sin tirar</span>'}</b>${dmc}</div>`};
- z+='<section><h2>Recompensas por nivel</h2>'+(vis.length?'<div class="rws">'+part.map(rrow).join('')+'</div>':'<p class="s">No tienes recompensas pendientes.</p>')
+ if(!ro)z+='<section><h2>Recompensas por nivel</h2>'+(vis.length?'<div class="rws">'+part.map(rrow).join('')+'</div>':'<p class="s">No tienes recompensas pendientes.</p>')
   +(vis.length>PGN?`<div class="bar" style="justify-content:space-between"><span class="mut">${pg*PGN+1}–${Math.min(vis.length,pg*PGN+PGN)} de ${vis.length}</span><span style="display:flex;gap:6px">${pg>0?'<button class="o" data-act="rwpg" data-d="-1">Anteriores 20</button>':''}${pg<last?'<button class="o" data-act="rwpg" data-d="1">Siguientes 20</button>':''}</span></div>`:'')+'</section>';
  if(dm){const all=[...Object.entries(HB).map(([id,it])=>[id,'h',it]),...Object.entries(PB).map(([id,it])=>[id,'p',it])];
   const est=(id,k)=>{if(ds.has(id))return 'Descartada';const sl=c[k==='h'?'sh':'sp']||{},q=Object.keys(sl).find(x=>sl[x]===id);return q!==undefined?'Casilla '+(+q+1):'Sin colocar'};
@@ -411,7 +412,7 @@ const RD=c.rwd||{},given=n=>[...Object.values(HB),...Object.values(PB)].filter(x
    +(all.length?all.map(([id,k,it])=>`<div class="res"><b>${esc(it.n)}</b> <span class="mut">${k==='h'?'Habilidad':'Pasiva'}${it.lv!=null?' · Nivel '+it.lv:''} · ${est(id,k)}</span><div class="bar"><button class="o" data-act="itedit" data-id="${id}">Editar</button>${ds.has(id)?`<button class="o" data-act="itrec" data-id="${id}">Recuperar</button>`:''}<button class="danger" data-act="itdel" data-id="${id}">Eliminar</button></div></div>`).join(''):'<p class="s">Todavía no has dado ninguna.</p>')+'</section>'}
  return `<div class="folios"><div class="folio">${a}</div><div class="folio">${z}</div></div>`;
 }
-const files=(cs,p)=>cs.length?`<div class="files">${cs.map(c=>`<button class="file${c.icon?' has':''}" ${c.icon&&themeVars(c)?`style="${themeVars(c)}"`:''} data-act="open" data-p="${p}" data-c="${c.id}">${av(c,'card')}<span>${esc(cnm(c))}<small>${rtxt(c)}${esc(clsTxt(c))} · Nv ${c.level} · ${c.done?'completa':'en curso'}${c.fin&&c.fin.puntos>0?' · '+c.fin.puntos+' pts por repartir':''}</small></span></button>`).join('')}</div>`:'';
+const files=(cs,p,act='open')=>cs.length?`<div class="files">${cs.map(c=>`<button class="file${c.icon?' has':''}" ${c.icon&&themeVars(c)?`style="${themeVars(c)}"`:''} data-act="${act}" data-p="${p}" data-c="${c.id}">${av(c,'card')}<span>${esc(cnm(c))}<small>${rtxt(c)}${esc(clsTxt(c))} · Nv ${c.level} · ${c.reg==='draft'?'registro en curso':c.reg==='pending'?'pendiente del DM':c.done?'completa':'en curso'}${act==='open'&&c.fin&&c.fin.puntos>0?' · '+c.fin.puntos+' pts por repartir':''}</small></span></button>`).join('')}</div>`:'';
 
 function lvPanel(c){if(!c.hp||!c.done)return '';
  const cl=clsD(c),left=c.level-(usedDice(c)-c.hp.nb),rl=rwLv(c.level).length-(c.rw?c.rw.r.length:0);
@@ -421,7 +422,50 @@ function lvPanel(c){if(!c.hp||!c.done)return '';
   +(left>0?`<p class="s">Tienes <b>${left}</b> dado${left>1?'s':''} para repartir entre tus recursos${c.rb&&RESB?` (cada dado suma ${sg(RESB)})`:''}. Puedes tirar de uno en uno.</p>${row('hp','Vida',cl[0])}${row('ma','Maná',cl[1])}${row('an','Ánima',cl[2])}`:'')
   +(rl>0?`<p class="s">Tienes ${rl} tirada${rl>1?'s':''} de recompensa.</p><div class="bar"><button data-act="rw">Tirar recompensas</button></div>`:'')
   +(c.fpick?`<h3>Elegir flor</h3><p class="s">El DM te permite elegir una flor. Sus bonos se aplican ahora a tus estadísticas y a las próximas tiradas.</p><div class="g"><div>${cbox('cf',c.flower||'','id="pfl"')}</div></div><div class="bar"><button data-act="fpick">Aplicar flor</button></div>`:'')+'</section>'}
+function vReg(c,dm){const f=c.fin||{stats:{}},ST=n=>f.stats&&f.stats[n]!=null?f.stats[n]:'',HB=c.habs||{},PB=c.pass||{},CP=Array.isArray(c.comps)?c.comps:[];
+ const num=(k,v,mx)=>`<input type="number" inputmode="numeric" min="0" max="${mx}" data-rg="${k}" value="${v}">`;
+ const lst=(M)=>Object.entries(M).map(([id,it])=>`<div class="res"><b>${esc(it.n)}</b><div class="bar"><button class="o" data-act="itedit" data-id="${id}">Editar</button><button class="danger" data-act="itdel" data-id="${id}">Eliminar</button></div></div>`).join('')||'<p class="s">Ninguna todavía.</p>';
+ const rr=[['hp','Vida'],['mana','Maná'],['anima','Ánima']];
+ return `<section><h2>Registrar personaje existente</h2><p class="s">${dm?'Revisa los datos. Si todo es correcto, apruébalo para que se convierta en una ficha normal.':c.reg==='pending'?'Enviado. El DM tiene que confirmarlo; mientras tanto no puedes cambiar nada.':'Escribe los datos de tu personaje tal y como están ahora. Todo se guarda solo. Cuando termines, pulsa Finalizar y el DM lo revisará.'}</p></section>
+ <section><h2>Datos</h2><div class="g"><div><label>Nombre</label><input data-rg="name" maxlength="60" value="${esc(c.name||'')}"></div>
+ <div><label>Raza</label>${cbox('cr2',c.race||'','data-rg="race"')}</div>
+ <div><label>Clase</label>${cbox('cc',c.cls||'','data-rg="cls"')}</div>
+ <div><label>Subclase</label>${cbox('cs',c.sub||'','data-rg="sub"',{empty:1,ph:'Sin subclase'})}</div>
+ <div><label>Flor</label>${cbox('cf',c.flower||'','data-rg="flower"')}</div>
+ <div><label>Nivel</label>${cbox('cl',String(c.level||1),'data-rg="level"')}</div>
+ <div><label>Profesión</label>${cbox('profesion',c.profesion||'','data-rg="profesion"',{empty:1,ph:'Elige o busca'})}</div>
+ <div><label>Alineamiento</label>${cbox('alineamiento',c.alineamiento||'','data-rg="alineamiento"',{empty:1,ph:'Elige o busca'})}</div>
+ <div><label>Trasfondo</label><input data-rg="trasfondo" maxlength="40" value="${esc(c.trasfondo||'')}" placeholder="Una palabra"></div></div></section>
+ <section><h2>Estadísticas (máximo 20)</h2><div class="g">${STATS.map(n=>`<div><label>${n}</label>${num('s:'+n,ST(n),20)}</div>`).join('')}<div><label>Puntos por repartir</label>${num('f:puntos',f.puntos??0,9999)}</div></div></section>
+ <section><h2>Recursos y armaduras</h2><div class="g">${rr.map(([k,t])=>`<div><label>${t}</label>${num('f:'+k,f[k]??0,9999)}</div>`).join('')}<div><label>Armadura física</label><input data-rg="armF" maxlength="20" value="${esc(c.armF||'')}" placeholder="12+2"></div><div><label>Armadura mágica</label><input data-rg="armM" maxlength="20" value="${esc(c.armM||'')}" placeholder="12+2"></div></div></section>
+ <section><h2>Pasivas</h2>${lst(PB)}<div class="bar"><button class="o" data-act="itnew" data-k="p" data-lv="">Añadir pasiva</button></div></section>
+ <section><h2>Habilidades</h2>${lst(HB)}<div class="bar"><button class="o" data-act="itnew" data-k="h" data-lv="">Añadir habilidad</button></div></section>
+ <section><h2>Competencias</h2>${CP.map((t,k)=>`<div class="bar" style="margin:4px 0"><span style="flex:1">${esc(t)}</span><button class="danger" type="button" data-act="cpdel" data-i="${k}" title="Quitar" aria-label="Quitar competencia">&times;</button></div>`).join('')||'<p class="s">Ninguna todavía.</p>'}<div class="bar"><input id="cpn" maxlength="200" placeholder="Nueva competencia" style="flex:1;min-width:140px"><button type="button" data-act="cpadd">Añadir</button></div></section>`+(dm||c.reg==='pending'?'':'<section><button data-act="regsend">Finalizar y enviar al DM</button></section>')}
+function rgSave(t){const x=iconTarget();if(!x)return;const {c,ref}=x;if(!ME.dm&&c.reg!=='draft')return;const k=t.dataset.rg,upd={};
+ if(k.startsWith('s:')||k.startsWith('f:')){const fin=c.fin?{...c.fin,stats:{...c.fin.stats}}:{stats:{},hp:0,mana:0,anima:0,puntos:0},n=Math.max(0,Math.floor(+t.value)||0);
+  if(k[0]==='s')fin.stats[k.slice(2)]=Math.min(20,n);else fin[k.slice(2)]=Math.min(9999,n);upd.fin=fin}
+ else if(k==='level')upd.level=Math.max(1,Math.min(cfg.maxLevel||1,Math.floor(+t.value)||1))
+ else if(k==='name')upd.name=t.value.trim().slice(0,60)
+ else if(k==='cls'){if(!(t.value in CLS))return;upd.cls=t.value;if(c.sub===t.value)upd.sub=''}
+ else if(k==='sub'){upd.sub=(t.value&&t.value in CLS&&t.value!==c.cls)?t.value:''}
+ else if(k==='race'){if(!RACES.includes(t.value))return;upd.race=t.value}
+ else if(k==='flower'){if(!(t.value in FLO))return;upd.flower=t.value}
+ else if(k==='armF'||k==='armM')upd[k]=t.value.trim().slice(0,20)
+ else upd[k]=t.value.slice(0,40);
+ Object.assign(c,upd);W(()=>ref.update(upd));toast('Guardado');if(k==='cls'||k==='level')render()}
+function regMissing(c){const f=c.fin,m=[];if(!c.name)m.push('el nombre');if(!f||STATS.some(n=>!(f.stats&&Number.isFinite(f.stats[n]))))m.push('las 8 estadísticas');return m}
+function regSend(){const c=curChar();if(!c||c.reg!=='draft')return;const m=regMissing(c);if(m.length){toast('Falta: '+m.join(' y ')+'.');return}
+ if(!confirm('¿Finalizar el registro? Se enviará al DM y no podrás cambiar nada hasta que lo revise.'))return;
+ c.reg='pending';W(()=>chRef(c).update({reg:'pending'}));
+ WS(async()=>{try{await DB.doc('notifs/regc_'+c.id).set({type:'char_reg',pid:ME.id,name:(P.prof&&P.prof.name)||'',cname:c.name,cid:c.id,at:Date.now(),read:false})}catch(e){}discord('registro_pj',{cid:c.id})});
+ toast('Registro enviado al DM');render()}
+function regOk(){const x=iconTarget();if(!x||!ME.dm)return;const {c,ref}=x;if(c.reg!=='draft'&&c.reg!=='pending')return;const m=regMissing(c);if(m.length){toast('Falta: '+m.join(' y ')+'.');return}
+ if(!confirm('¿Aprobar este registro? La ficha pasará a ser una ficha normal.'))return;
+ const f=c.fin,L=c.level,con=f.stats['Constitución'],upd={done:true,reg:'ok',pool:[],sl:[],hp:{r:[],f:[],con,mod:mod(con),nb:-L},ma:{r:[],f:[]},an:{r:[],f:[]},
+  rw:{r:Array(rwLv(L).length).fill(0)},rwd:Object.fromEntries(Array.from({length:L+1},(_,i)=>[String(i),true])),fin:{stats:f.stats,hp:+f.hp||0,mana:+f.mana||0,anima:+f.anima||0,puntos:+f.puntos||0}};
+ Object.assign(c,upd);W(()=>ref.update(upd));toast('Registro aprobado');render()}
 function vFlow(c){
+ if(c.reg==='draft'||c.reg==='pending')return vReg(c,false);
  const cl=clsD(c),lk=!!c.hp,placed=!!c.sl.length&&c.sl.every(x=>x>=0),b=bon(c),used=new Set(c.sl),n=8+(+c.extra||0)+(c.rand?1:0),
   raceSec=c.rand?`<section><h2>Raza</h2>${c.race?`<p>Raza aleatoria: <b>${esc(c.race)}</b>. Te da 1 dado extra de estadística.</p>`:`<p class="s">Has elegido raza aleatoria. Gira la ruleta: la raza que salga queda fijada y recibes 1 dado extra de estadística.</p><div class="bar"><button data-act="race">Girar ruleta</button></div>`}</section>`:'';
  if(c.done)return `<div${FX===c.id?' class="fx-in"':''}>`+lvPanel(c)+folios(c,false,true)+'<p class="mut">Ficha completa y enviada automáticamente al DM.</p></div>';
@@ -440,14 +484,17 @@ function vFlow(c){
  h+=`<section><h2>4 · Recompensas por nivel</h2><p class="s">Hay ${nr} tirada${nr>1?'s':''} de recompensa. El nivel 0 y los niveles terminados en 0 o 5 dan 2 puntos de estadística y no tiran. Al terminar, la ficha se envía sola al DM.</p><div class="bar"><button data-act="rw" ${base&&left===0&&!RWV?'':'disabled'}>Tirar recompensas</button></div>${RWV?`<p>Recompensas tiradas: ${chips(RWV)}</p><p class="mut">Un momento: se está preparando tu ficha…</p>`:''}${base&&left>0?'<p class="mut">Reparte antes todos tus dados.</p>':''}</section>`;
  return h;
 }
+function othHtml(){const gr={};Object.values(OTH).forEach(o=>{if(o.c&&o.c.done&&o.c.vis)(gr[o.pid]=gr[o.pid]||{name:o.pname,cs:[]}).cs.push(o.c)});
+ return Object.entries(gr).sort((a,b)=>String(a[1].name).localeCompare(b[1].name)).map(([pid,g])=>`<section><h2>${esc(g.name||'Jugador')}</h2>${files(g.cs,pid,'openo')}</section>`).join('')}
 function vPlayer(){
+ if(view.oth){const o=OTH[view.oth];if(o&&o.c)return '<div class="bar" style="margin:8px 0 16px"><button class="o" data-act="back" style="display:inline-flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Volver a mis personajes</button></div><p class="mut">Jugador: '+esc(o.pname||'')+'</p>'+folios(o.c,false,false,true);view.oth=null}
  if(!P.prof)return '<section><h2>Bienvenido</h2><p class="s">Escribe tu nombre para que el DM te reconozca.</p><div class="g"><div><label>Tu nombre</label><input id="pn"></div></div><div class="bar"><button data-act="prof">Continuar</button></div></section>';
  const c=view.cid&&P.chars.find(x=>x.id===view.cid);
- if(c)return '<div class="bar" style="margin:8px 0 16px"><button class="o" data-act="back" style="display:inline-flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Volver a mis personajes</button></div>'+vFlow(c);
- const used=new Set(P.chars.map(x=>x.grant)),free=P.grants.filter(g=>!used.has(g.id)),ml=cfg.maxLevel||1;
+ if(c)return '<div class="bar" style="margin:8px 0 16px"><button class="o" data-act="back" style="display:inline-flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Volver a mis personajes</button>'+(c.done?`<label class="sw" style="margin-left:auto" title="Si lo activas, los demás jugadores verán tu ficha (sin background ni notas)"><input type="checkbox" data-vis ${c.vis?'checked':''}><span class="trk"><span class="knb"></span></span>Visible para otros jugadores</label>`:'')+'</div>'+vFlow(c);
+ const used=new Set(P.chars.map(x=>x.grant)),freeAll=P.grants.filter(g=>!used.has(g.id)),free=freeAll.filter(g=>!g.reg),freeR=freeAll.filter(g=>g.reg),ml=cfg.maxLevel||1,OH=othHtml(),RH=freeR.length?'<section><h2>Registrar personaje existente</h2><p class="s">El DM te ha dado permiso para registrar un personaje que ya tenías. Escribirás todos sus datos y el DM los confirmará.</p><div class="bar"><button data-act="createreg">Registrar personaje existente</button></div></section>':'';
  let h=`<section><h2>Hola, ${esc(P.prof.name)}</h2>${P.chars.length?files(P.chars,ME.id):'<p class="s">Aún no tienes personajes.</p>'}</section>`;
- if(!free.length)return h+'<section><p class="s">El DM aún no te ha permitido crear un personaje nuevo.</p></section>';
- return h+`<section><h2>Nuevo personaje</h2>${free[0].extra?`<p class="s">Bono: ${free[0].extra} dado(s) d20 extra en estadísticas.</p>`:''}<div class="g"><div><label>Nombre (opcional)</label><input id="cn" maxlength="60"></div>
+ if(!free.length)return h+RH+(freeR.length?'':'<section><p class="s">El DM aún no te ha permitido crear un personaje nuevo.</p></section>')+OH;
+ return h+RH+`<section><h2>Nuevo personaje</h2>${free[0].extra?`<p class="s">Bono: ${free[0].extra} dado(s) d20 extra en estadísticas.</p>`:''}<div class="g"><div><label>Nombre (opcional)</label><input id="cn" maxlength="60"></div>
  <div><label>Clase</label>${cbox('cc',Object.keys(CLS)[0]||'','id="cc"')}</div>
  <div><label>Raza</label>${cbox('cr',RACES[0]||'__rand','id="cr"')}</div>
  <div><label>Flor</label>${cbox('cf',Object.keys(FLO)[0]||'','id="cf"')}</div>
@@ -455,7 +502,7 @@ function vPlayer(){
  ${Object.keys(CLS).length>1?`<div class="bar" style="margin:10px 0 4px"><label class="sw"><input type="checkbox" id="csub"><span class="trk"><span class="knb"></span></span>Subclase</label></div>
  <div class="g" id="csubw" style="display:none"><div><label>Subclase</label>${cbox('cs',Object.keys(CLS)[1],'id="cs"')}</div></div>
  <p class="mut" style="margin-top:4px">Con subclase, la vida sale de la clase principal; el maná y el ánima dependen de las dos clases.</p>`:''}
- <p class="mut">Después de crear el personaje, estos datos no se pueden cambiar. Si eliges raza aleatoria, la ruleta se gira dentro de la ficha y te da 1 dado extra de estadística. El nombre puedes dejarlo en blanco y ponerlo cuando termines la ficha; una vez guardado, solo el DM podrá cambiarlo.</p><div class="bar"><button data-act="create">Crear y empezar tiradas</button></div></section>`;
+ <p class="mut">Después de crear el personaje, estos datos no se pueden cambiar. Si eliges raza aleatoria, la ruleta se gira dentro de la ficha y te da 1 dado extra de estadística. El nombre puedes dejarlo en blanco y ponerlo cuando termines la ficha; una vez guardado, solo el DM podrá cambiarlo.</p><div class="bar"><button data-act="create">Crear y empezar tiradas</button></div></section>`+OH;
 }
 const sOpt=v=>'<option value="">—</option>'+STATS.map(n=>`<option ${n===v?'selected':''}>${n}</option>`).join('');
 function vTables(){
@@ -483,20 +530,20 @@ function grab(){if(!TD)return;
  document.querySelectorAll('#tbl [data-ra]').forEach(e=>{TD.races[+e.dataset.ra]=e.value.trim()});
  document.querySelectorAll('#tbl [data-r]').forEach(e=>{TD.rewards[+e.dataset.r]=e.value.trim()});}
 function ntSection(){const u=NT.filter(n=>!n.read);
- return `<section><h2>Avisos${u.length?' ('+u.length+')':''}</h2>`+(u.length?u.slice(0,15).map(n=>`<div class="res"><b>${n.type==='new_player'?'Nuevo jugador':'Personaje terminado'}</b>: ${esc(n.type==='new_player'?n.name:`${n.name} ha terminado ${n.cname?`"${n.cname}"`:'un personaje sin nombre'}`)}<div class="bar">${n.type==='char_done'?`<button data-act="nview" data-id="${n.id}" data-p="${n.pid}" data-c="${n.cid}">Ver ficha</button>`:''}<button class="o" data-act="nread" data-id="${n.id}">Marcar como leído</button></div></div>`).join('')+'<div class="bar"><button class="o" data-act="nall">Marcar todo como leído</button></div>':'<p class="s">Sin avisos nuevos.</p>')
+ return `<section><h2>Avisos${u.length?' ('+u.length+')':''}</h2>`+(u.length?u.slice(0,15).map(n=>`<div class="res"><b>${n.type==='new_player'?'Nuevo jugador':n.type==='char_reg'?'Personaje registrado':'Personaje terminado'}</b>: ${esc(n.type==='new_player'?n.name:n.type==='char_reg'?`${n.name} ha registrado ${n.cname?`"${n.cname}"`:'un personaje'} y espera tu confirmación`:`${n.name} ha terminado ${n.cname?`"${n.cname}"`:'un personaje sin nombre'}`)}<div class="bar">${n.type==='char_done'||n.type==='char_reg'?`<button data-act="nview" data-id="${n.id}" data-p="${n.pid}" data-c="${n.cid}">Ver ficha</button>`:''}<button class="o" data-act="nread" data-id="${n.id}">Marcar como leído</button></div></div>`).join('')+'<div class="bar"><button class="o" data-act="nall">Marcar todo como leído</button></div>':'<p class="s">Sin avisos nuevos.</p>')
   +(('Notification' in window&&Notification.permission==='default')?'<div class="bar"><button class="o" data-act="nperm">Activar avisos del navegador</button></div><p class="mut">Con los avisos activados, el navegador te avisa mientras la app esté abierta.</p>':'')+'</section>'}
-function alertNt(d){if(d.read)return;const m=d.type==='new_player'?`Nuevo jugador: ${d.name}`:`${d.name} ha terminado ${d.cname?'el personaje '+d.cname:'un personaje sin nombre'}`;toast(m);
+function alertNt(d){if(d.read)return;const m=d.type==='new_player'?`Nuevo jugador: ${d.name}`:d.type==='char_reg'?`${d.name} ha registrado ${d.cname||'un personaje'}`:`${d.name} ha terminado ${d.cname?'el personaje '+d.cname:'un personaje sin nombre'}`;toast(m);
  try{if('Notification' in window&&Notification.permission==='granted')new Notification('Fichas de personaje',{body:m})}catch(e){}}
 function vDM(){
  if(view.cid){const p=DM[view.pid],c=p&&p.chars.find(x=>x.id===view.cid);
-  if(c)return `<div class="bar" style="margin:8px 0 16px"><button class="o" data-act="back" style="display:inline-flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Volver a todos los jugadores</button><button data-act="save">Guardar cambios</button><button class="danger" data-act="delc" data-p="${view.pid}" data-c="${c.id}">Eliminar personaje</button></div><p class="mut">Jugador: ${esc(p.prof.name)}</p>${folios(c,true,false)}<div class="bar"><button data-act="save">Guardar cambios</button></div>`;}
+  if(c)return `<div class="bar" style="margin:8px 0 16px"><button class="o" data-act="back" style="display:inline-flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Volver a todos los jugadores</button><button data-act="save">Guardar cambios</button>${c.done?`<label class="sw" style="margin-left:auto" title="Si lo activas, los demás jugadores verán tu ficha (sin background ni notas)"><input type="checkbox" data-vis ${c.vis?'checked':''}><span class="trk"><span class="knb"></span></span>Visible para otros jugadores</label>`:''}<button class="danger" data-act="delc" data-p="${view.pid}" data-c="${c.id}">Eliminar personaje</button></div><p class="mut">Jugador: ${esc(p.prof.name)}</p>${c.reg==='draft'||c.reg==='pending'?`<section><h2>Registro de personaje existente</h2><p class="s">Estado: ${c.reg==='draft'?'el jugador aún lo está rellenando':'enviado, pendiente de tu confirmación'}.</p><div class="bar"><button data-act="regok">Aprobar y guardar la ficha</button>${c.reg==='pending'?'<button class="o" data-act="regback">Devolver al jugador</button>':''}</div></section>${vReg(c,true)}`:folios(c,true,false)+'<div class="bar"><button data-act="save">Guardar cambios</button></div>'}`;}
  let h=ntSection()+`<section><h2>Ajustes</h2><div class="g"><div><label>Nivel máximo que pueden elegir los jugadores</label><input id="ml" type="number" min="1" max="99" value="${cfg.maxLevel||1}"></div></div><div class="bar"><button data-act="ml">Guardar</button></div></section>`;
  const ps=Object.values(DM).sort((a,b)=>String(a.prof.name).localeCompare(b.prof.name));
  if(!ps.length)h+='<section><p class="s">Aún no hay jugadores. Aparecerán aquí cuando abran la página y escriban su nombre.</p></section>';
  ps.forEach(p=>{const used=new Set(p.chars.map(c=>c.grant)),free=p.grants.filter(g=>!used.has(g.id));
   h+=`<section><h2>${esc(p.prof.name)}</h2><p class="mut">${p.chars.length} personaje(s) · ${free.length} permiso(s) sin usar</p>
-  <div class="bar"><label>Dados extra de bono <input data-xin="${p.id}" type="number" min="0" value="0" style="width:70px"></label><label style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-rbin="${p.id}" style="width:auto">Bono de recursos</label><button data-act="grant" data-p="${p.id}">Permitir nuevo personaje</button><button class="danger" data-act="delp" data-p="${p.id}">Eliminar jugador</button></div>
-  ${free.map(g=>`<div class="mut">Permiso sin usar (+${g.extra||0} dados${g.rb?', bono de recursos':''}) <button class="o" data-act="rev" data-p="${p.id}" data-g="${g.id}">Revocar</button></div>`).join('')}${files(p.chars,p.id)}</section>`;});
+  <div class="bar"><label>Dados extra de bono <input data-xin="${p.id}" type="number" min="0" value="0" style="width:70px"></label><label style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-rbin="${p.id}" style="width:auto">Bono de recursos</label><button data-act="grant" data-p="${p.id}">Permitir nuevo personaje</button><button class="o" data-act="grantreg" data-p="${p.id}">Permitir registrar personaje existente</button><button class="danger" data-act="delp" data-p="${p.id}">Eliminar jugador</button></div>
+  ${free.map(g=>`<div class="mut">Permiso sin usar (${g.reg?'registro de personaje existente':`+${g.extra||0} dados${g.rb?', bono de recursos':''}`}) <button class="o" data-act="rev" data-p="${p.id}" data-g="${g.id}">Revocar</button></div>`).join('')}${files(p.chars,p.id)}</section>`;});
  return h;
 }
 function render(){
@@ -506,9 +553,11 @@ function render(){
  let h=`<div class="bar"><span class="mut">${esc(ME.email||'')}</span><button class="o" data-act="out">Salir</button></div>`;
  if(ME.dm)h+=`<div class="bar">${[['dm','Panel del DM'+(NT.some(n=>!n.read)?' ('+NT.filter(n=>!n.read).length+')':'')],['tables','Tablas'],['player','Mis personajes']].map(([v,t])=>`<button class="${view.mode===v?'':'o'}" data-act="mode" data-v="${v}">${t}</button>`).join('')}</div>`;
  const body=ME.dm&&view.mode==='dm'?vDM():ME.dm&&view.mode==='tables'?vTables():vPlayer();
- const cc=view.mode==='tables'?null:view.mode==='player'?curChar():(DM[view.pid]&&view.cid?DM[view.pid].chars.find(x=>x.id===view.cid):null);
+ const cc=view.mode==='tables'?null:view.oth?(OTH[view.oth]||{}).c:view.mode==='player'?curChar():(DM[view.pid]&&view.cid?DM[view.pid].chars.find(x=>x.id===view.cid):null);
+ pvSync(cc,view.mode==='dm'?view.pid:ME.id);
  document.querySelector('main').classList.toggle('wide',!!cc&&(view.mode==='player'||view.mode==='dm'));
  const tv=themeVars(cc);A.innerHTML=h+(tv?`<div class="themed" style="${tv}">${body}</div>`:`<div>${body}</div>`);
+ if(view.oth||(view.mode==='player'&&cc&&cc.reg==='pending'))A.querySelectorAll('input,textarea,select,button').forEach(e=>{if(!e.matches('[data-act="back"],[data-act="out"]'))e.disabled=true});
 }
 
 /* ---------- tiradas ---------- */
@@ -676,10 +725,23 @@ function gearSave(t){const x=iconTarget();if(!x)return;const {c,ref}=x;
  toast('Guardado')}
 const curSheet=()=>{const x=iconTarget();return x&&x.c};
 /* ---------- notas ---------- */
+function pvPath(n){const pid=view.mode==='dm'?view.pid:ME.id;return `players/${pid}/chars/${view.cid}/priv/${n}`}
+function bgWrite(v){if(!iconTarget())return;v=v.slice(0,3000);PV.bg=v;W(()=>DB.doc(pvPath('bg')).set({t:v}));toast('Guardado')}
+/* background y notas viven en un documento aparte, que solo leen el dueño y el DM */
+function setVis(v){const x=iconTarget();if(!x||!x.c.done)return;const {c,ref}=x,pid=view.mode==='dm'?view.pid:ME.id,pname=((view.mode==='dm'?(DM[pid]||{}).prof:P.prof)||{}).name||'';
+ c.vis=v;W(()=>ref.update({vis:v}));
+ if(v)W(()=>DB.doc('pub/'+c.id).set({pid,pname:String(pname).slice(0,40),cid:c.id,at:Date.now()}));else W(()=>DB.doc('pub/'+c.id).delete());
+ toast(v?'Tu ficha es visible para los demás jugadores.':'Tu ficha ya no es visible para los demás.');render()}
+function pvSync(c,pid){const key=c&&pid&&view.cid&&!view.oth?pid+'/'+c.id:'';if(key===PV.key)return;PV.un.forEach(f=>f&&f());PV={key,bg:'',nt:'',un:[]};if(!key)return;
+ const base=`players/${pid}/chars/${c.id}/priv/`,cur=()=>{const x=iconTarget();return x&&x.c.id===c.id?x:null};
+ PV.un.push(DB.doc(base+'bg').onSnapshot(sn=>{if(PV.key!==key)return;PV.bg=sn.exists?(sn.data().t||''):'';const x=cur();
+  if(x&&x.c.background){if(!sn.exists){const v=x.c.background;W(()=>DB.doc(base+'bg').set({t:v}))}x.c.background='';W(()=>x.ref.update({background:''}))}schedule()},()=>{}));
+ PV.un.push(DB.doc(base+'notes').onSnapshot(sn=>{if(PV.key!==key)return;PV.nt=sn.exists?(sn.data().j||''):'';const x=cur();
+  if(x&&x.c.notes){if(!sn.exists){const v=x.c.notes;W(()=>DB.doc(base+'notes').set({j:v}))}x.c.notes='';W(()=>x.ref.update({notes:''}))}schedule()},()=>{}))}
 const NID=()=>'n'+Date.now().toString(36)+rnd(1296).toString(36);
-function ntGet(c){try{const a=JSON.parse(c.notes||'[]');return Array.isArray(a)?a:[]}catch(e){return []}}
+function ntGet(c){try{const a=JSON.parse(PV.nt||'[]');return Array.isArray(a)?a:[]}catch(e){return []}}
 function ntPut(m,quiet){const x=iconTarget();if(!x)return false;const a=ntGet(x.c);m(a);const j=JSON.stringify(a);if(j.length>20000){toast('Las notas son demasiado largas (máximo 20 000 caracteres en total).');render();return false}
- x.c.notes=j;W(()=>x.ref.update({notes:j}));toast('Guardado');if(!quiet)render();return true}
+ PV.nt=j;W(()=>DB.doc(pvPath('notes')).set({j}));toast('Guardado');if(!quiet)render();return true}
 function ntChange(t){const d=t.dataset;
  if(d.nt!==undefined){ntPut(a=>{const q=a.find(z=>z.id===d.nt);if(q)q.b=t.value.slice(0,5000)},true)}
  else if(d.ntt!==undefined){ntPut(a=>{const q=a.find(z=>z.id===d.ntt);if(q)q.t=(t.value.trim()||'Sin título').slice(0,60)},true)}
@@ -690,8 +752,8 @@ function ntDel(sid){if(!confirm('¿Borrar esta sección de notas y todo lo que c
 function ntIAdd(sid){const inp=document.querySelector(`#app [data-ntin="${sid}"]`),v=inp?inp.value.trim().slice(0,200):'';if(!v)return;ntPut(a=>{const q=a.find(z=>z.id===sid);if(q&&q.i&&q.i.length<100)q.i.push({t:v,d:false})})}
 function ntIDel(sid,i){ntPut(a=>{const q=a.find(z=>z.id===sid);if(q&&q.i)q.i.splice(i,1)})}
 function cpSave(t){if(!ME.dm)return;const x=iconTarget();if(!x)return;const {c,ref}=x,a=[...(c.comps||[])],k=+t.dataset.cp;if(!(k>=0&&k<a.length))return;const v=t.value.trim().slice(0,200);if(v)a[k]=v;else a.splice(k,1);c.comps=a;W(()=>ref.update({comps:a}));toast('Guardado');render()}
-function cpAdd(){if(!ME.dm)return;const x=iconTarget(),inp=$('app').querySelector('#cpn');if(!x||!inp)return;const v=inp.value.trim().slice(0,200);if(!v)return;const a=[...(x.c.comps||[]),v];if(a.length>60){toast('Máximo 60 competencias.');return}x.c.comps=a;W(()=>x.ref.update({comps:a}));toast('Guardado');render()}
-function cpDel(i){if(!ME.dm)return;const x=iconTarget();if(!x)return;const a=[...(x.c.comps||[])];if(!(i>=0&&i<a.length))return;if(!confirm(`¿Quitar la competencia "${a[i]}"?`))return;a.splice(i,1);x.c.comps=a;W(()=>x.ref.update({comps:a}));toast('Guardado');render()}
+function cpAdd(){const x=iconTarget(),inp=$('app').querySelector('#cpn');if(!x||!inp||!(ME.dm||x.c.reg==='draft'))return;const v=inp.value.trim().slice(0,200);if(!v)return;const a=[...(x.c.comps||[]),v];if(a.length>60){toast('Máximo 60 competencias.');return}x.c.comps=a;W(()=>x.ref.update({comps:a}));toast('Guardado');render()}
+function cpDel(i){const x=iconTarget();if(!x||!(ME.dm||x.c.reg==='draft'))return;const a=[...(x.c.comps||[])];if(!(i>=0&&i<a.length))return;if(!confirm(`¿Quitar la competencia "${a[i]}"?`))return;a.splice(i,1);x.c.comps=a;W(()=>x.ref.update({comps:a}));toast('Guardado');render()}
 function slotAt(el){const q=el&&el.closest&&el.closest('[data-hs],[data-ps]');return q?(q.dataset.hs!==undefined?{k:'h',i:+q.dataset.hs}:{k:'p',i:+q.dataset.ps}):null}
 function tryMove(id,k,i){const x=iconTarget();if(!x)return;const {c,ref}=x,M=(c.habs||{})[id]?'h':(c.pass||{})[id]?'p':null;if(!M||M!==k)return;
  if(k==='h'&&c.level<hLv(i)){toast('Esa casilla se desbloquea al nivel '+hLv(i)+'.');return}
@@ -704,17 +766,17 @@ function discardItem(id){const x=iconTarget();if(!x)return;const {c,ref}=x,it=(c
  if(!confirm(`¿Descartar "${it.n}"?\n\nYa no podrás colocarla en tu ficha. El DM puede recuperarla.`))return;
  const disc=[...(c.disc||[]),id];c.disc=disc;W(()=>ref.update({disc}));toast('Descartada');render()}
 function recItem(id){const x=iconTarget();if(!x||!ME.dm)return;const {c,ref}=x,disc=(c.disc||[]).filter(q=>q!==id);c.disc=disc;W(()=>ref.update({disc}));toast('Recuperada: queda sin colocar');render()}
-function delItem(id){const x=iconTarget();if(!x||!ME.dm)return;const {c,ref}=x,it=(c.habs||{})[id]||(c.pass||{})[id];if(!it||!confirm(`¿Eliminar "${it.n}" para siempre?`))return;
+function delItem(id){const x=iconTarget();if(!x||!(ME.dm||x.c.reg==='draft'))return;const {c,ref}=x,it=(c.habs||{})[id]||(c.pass||{})[id];if(!it||!confirm(`¿Eliminar "${it.n}" para siempre?`))return;
  const habs={...(c.habs||{})},pass={...(c.pass||{})};delete habs[id];delete pass[id];
  const cl=o=>Object.fromEntries(Object.entries(o||{}).filter(([,v])=>v!==id)),sh=cl(c.sh),sp=cl(c.sp),disc=(c.disc||[]).filter(q=>q!==id);
  Object.assign(c,{habs,pass,sh,sp,disc});W(()=>ref.update({habs,pass,sh,sp,disc}));toast('Eliminada');render()}
-function itOpen(k,id,lv){const x=iconTarget();if(!x||!ME.dm)return;const it=id&&k!=='c'?((k==='h'?x.c.habs:x.c.pass)||{})[id]||{}:{};IT={k,id,lv};
+function itOpen(k,id,lv){const x=iconTarget();if(!x||!(ME.dm||x.c.reg==='draft'))return;const it=id&&k!=='c'?((k==='h'?x.c.habs:x.c.pass)||{})[id]||{}:{};IT={k,id,lv};
  $('itt').textContent=(id?'Editar ':'Dar ')+(k==='h'?'habilidad':k==='c'?'competencia':'pasiva')+(lv!==''&&lv!=null&&!id?' (recompensa del nivel '+lv+')':'');
  if(k==='c'){$('itf').innerHTML='<label>Competencia</label><input id="itn" maxlength="200" value="">';$('itm').style.display='flex';$('itn').focus();return}
  $('itf').innerHTML=`<label>Nombre</label><input id="itn" maxlength="60" value="${esc(it.n||'')}">`+(k==='h'?`<label style="margin-top:8px">Coste</label><input id="itc" maxlength="40" value="${esc(it.c||'')}"><label style="margin-top:8px">Efecto</label><textarea id="ite" maxlength="600">${esc(it.e||'')}</textarea>`:`<label style="margin-top:8px">Efecto positivo</label><textarea id="ite" maxlength="400">${esc(it.e||'')}</textarea><label style="margin-top:8px">Efecto negativo (opcional)</label><textarea id="itg" maxlength="400">${esc(it.g||'')}</textarea>`);
  $('itm').style.display='flex';$('itn').focus()}
 function itClose(){$('itm').style.display='none';IT=null}
-function itSave(){const x=iconTarget();if(!x||!IT||!ME.dm)return;const {c,ref}=x,g=q=>(($(q)||{}).value||'').trim(),n=g('itn').slice(0,60);
+function itSave(){const x=iconTarget();if(!x||!IT||!(ME.dm||x.c.reg==='draft'))return;const {c,ref}=x,g=q=>(($(q)||{}).value||'').trim(),n=g('itn').slice(0,60);
  if(IT.k==='c'){const v=g('itn').slice(0,200);if(!v){toast('Escribe la competencia.');return}const a=[...(c.comps||[]),v];if(a.length>60){toast('Máximo 60 competencias.');return}c.comps=a;W(()=>ref.update({comps:a}));itClose();toast('Guardado');render();return}
  if(!n){toast('Escribe el nombre.');return}
  const it=IT.k==='h'?{n,c:g('itc').slice(0,40),e:g('ite').slice(0,600)}:{n,e:g('ite').slice(0,400),g:g('itg').slice(0,400)},mk=IT.k==='h'?'habs':'pass',sk=IT.k==='h'?'sh':'sp',m={...(c[mk]||{})};
@@ -742,6 +804,9 @@ function syncSub(){const cc=$('cc'),cs=$('cs');if(!cc||!cs)return;const L=Object
  if(!L.includes(cs.value)){cs.value=L[0]||'';cs.closest('.cb').querySelector('.cbi').value=cs.value}}
 $('app').addEventListener('change',e=>{const t=e.target;if(t.id==='csub'||t.id==='cc'){if(t.id==='csub')$('csubw').style.display=t.checked?'':'none';syncSub();return}
  if(t.dataset.eq!==undefined||t.dataset.inv!==undefined||t.dataset.mo!==undefined){gearSave(t);return}
+ if(t.dataset.bg!==undefined){bgWrite(t.value);return}
+ if(t.dataset.rg!==undefined){rgSave(t);return}
+ if(t.dataset.vis!==undefined){setVis(t.checked);return}
  if(t.dataset.cp!==undefined){cpSave(t);return}
  if(t.dataset.tg!==undefined){if(!ME.dm)return;const x=iconTarget();if(!x)return;x.c[t.dataset.tg]=t.checked;const v=t.checked,k=t.dataset.tg;W(()=>x.ref.update({[k]:v}));toast('Guardado');render();return}
  if(t.dataset.ntt!==undefined||t.dataset.nt!==undefined||t.dataset.nti!==undefined||t.dataset.ntc!==undefined){ntChange(t);return}
@@ -754,14 +819,20 @@ $('app').addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
  else if(a==='register')createUserWithEmailAndPassword(auth,$('le').value.trim(),$('lp').value).catch(e=>toast(authMsg(e)));
  else if(a==='out')signOut(auth);
  else if(a==='mode'){DR={};if(d.v==='tables')TD=mkTD();view.mode=d.v;view.cid=view.pid=null;render()}
- else if(a==='back'){DR={};view.cid=view.pid=null;render()}
- else if(a==='open'){DR={};view.pid=d.p;view.cid=d.c;render()}
+ else if(a==='back'){DR={};view.cid=view.pid=view.oth=null;render()}
+ else if(a==='open'){DR={};view.oth=null;view.pid=d.p;view.cid=d.c;render()}
+ else if(a==='openo'){DR={};view.oth=d.c;view.pid=null;view.cid=null;render()}
  else if(a==='prof'){const n=$('pn').value.trim();if(!n)return;P.prof={name:n};W(()=>DB.doc('players/'+ME.id).set({name:n,email:ME.email||''}));if(!ME.dm)WS(async()=>{try{await DB.doc('notifs/reg_'+ME.id).set({type:'new_player',pid:ME.id,name:n,cname:'',cid:'',at:Date.now(),read:false})}catch(e){}discord('registro',{})});render()}
  else if(a==='create'){const n=$('cn').value.trim().slice(0,60);
-  const used=new Set(P.chars.map(x=>x.grant)),g=P.grants.find(x=>!used.has(x.id));if(!g)return;
+  const used=new Set(P.chars.map(x=>x.grant)),g=P.grants.find(x=>!used.has(x.id)&&!x.reg);if(!g)return;
   const sb=$('csub')&&$('csub').checked?$('cs').value:'';if(sb&&(sb===$('cc').value||!(sb in CLS))){toast('Elige una subclase distinta de la clase principal.');return}
   const rv=$('cr').value,cid=g.id,doc={name:n,cls:$('cc').value,sub:sb,race:rv==='__rand'?'':rv,rand:rv==='__rand',flower:$('cf').value,level:Math.min(+$('cl').value||1,cfg.maxLevel||1),grant:g.id,extra:+g.extra||0,rb:!!g.rb,created:Date.now(),pool:[],sl:[],done:false};
   P.chars.push({id:cid,...doc});view.cid=cid;view.pid=ME.id;W(()=>DB.doc(`players/${ME.id}/chars/${cid}`).set(doc));render()}
+ else if(a==='createreg'){const used=new Set(P.chars.map(x=>x.grant)),g=P.grants.find(x=>!used.has(x.id)&&x.reg);if(!g)return;const cid=g.id,doc={name:'',cls:Object.keys(CLS)[0],sub:'',race:RACES[0],rand:false,flower:Object.keys(FLO)[0],level:1,grant:g.id,extra:0,created:Date.now(),pool:[],sl:[],done:false,reg:'draft'};
+  P.chars.push({id:cid,...doc});view.cid=cid;view.pid=ME.id;W(()=>DB.doc(`players/${ME.id}/chars/${cid}`).set(doc));render()}
+ else if(a==='regsend')regSend()
+ else if(a==='regok')regOk()
+ else if(a==='regback'){const x=iconTarget();if(!x||!ME.dm)return;x.c.reg='draft';W(()=>x.ref.update({reg:'draft'}));toast('Devuelto al jugador');render()}
  else if(a==='st'||a==='rw'||a==='race')run(()=>roll[a]());
  else if(a==='rd')run(()=>roll.rd(d.res));
  else if(a==='base')run(()=>roll.base());
@@ -770,7 +841,7 @@ $('app').addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
   if(!confirm(`¿Guardar "${n}" como nombre del personaje?\n\nDespués solo el DM podrá cambiarlo.`))return;
   c.name=n;W(()=>chRef(c).update({name:n}));toast('Nombre guardado');render()}
  else if(a==='delc'){const pl=DM[d.p],c=pl&&pl.chars.find(x=>x.id===d.c);if(!c||!confirm(`¿Eliminar el personaje "${cnm(c)}"?\n\nSe borrará su ficha y no se podrá recuperar. El jugador recuperará el permiso para crear otro (puedes revocarlo después).`))return;
-  pl.chars=pl.chars.filter(x=>x.id!==d.c);view.cid=view.pid=null;W(()=>DB.doc(`players/${d.p}/chars/${d.c}`).delete());toast('Personaje eliminado');render()}
+  pl.chars=pl.chars.filter(x=>x.id!==d.c);view.cid=view.pid=null;W(()=>DB.doc(`players/${d.p}/chars/${d.c}`).delete());W(()=>DB.doc('pub/'+d.c).delete());W(()=>DB.doc(`players/${d.p}/chars/${d.c}/priv/bg`).delete());W(()=>DB.doc(`players/${d.p}/chars/${d.c}/priv/notes`).delete());toast('Personaje eliminado');render()}
  else if(a==='delp'){const pl=DM[d.p];if(!pl||!confirm(`¿Eliminar al jugador "${pl.prof.name}"?\n\nSe borrarán también todos sus personajes y permisos. Esta acción no se puede deshacer.`))return;
   const cs=[...pl.chars],gs=[...pl.grants];delete DM[d.p];
   cs.forEach(c=>W(()=>DB.doc(`players/${d.p}/chars/${c.id}`).delete()));gs.forEach(g=>W(()=>DB.doc(`permits/${d.p}/grants/${g.id}`).delete()));
@@ -796,6 +867,7 @@ $('app').addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
  else if(a==='ml'){const n=Math.max(1,Math.min(99,+$('ml').value||1));cfg.maxLevel=n;W(()=>DB.doc('config/main').set({maxLevel:n}));toast('Nivel máximo guardado: '+n)}
  else if(a==='grant'){const x=Math.max(0,+document.querySelector(`[data-xin="${d.p}"]`).value||0),gid='g'+Date.now().toString(36);
   const rb=!!document.querySelector(`[data-rbin="${d.p}"]`).checked;DM[d.p].grants.push({id:gid,extra:x,rb});W(()=>DB.doc(`permits/${d.p}/grants/${gid}`).set({extra:x,rb,at:Date.now()}));render()}
+ else if(a==='grantreg'){const gid='g'+Date.now().toString(36);DM[d.p].grants.push({id:gid,extra:0,reg:true});W(()=>DB.doc(`permits/${d.p}/grants/${gid}`).set({extra:0,reg:true,at:Date.now()}));render()}
  else if(a==='rev'){DM[d.p].grants=DM[d.p].grants.filter(g=>g.id!==d.g);W(()=>DB.doc(`permits/${d.p}/grants/${d.g}`).delete());render()}
  else if(a==='phbig')phOpen()
  else if(a==='bgbig')bgOpen(d.k||'background')
@@ -829,10 +901,10 @@ const unsubAll=()=>{subs.forEach(f=>f());subs=[]};
 (function boot(){
  if(firebaseConfig.apiKey.startsWith('PEGA')){$('app').innerHTML='<section><h2>Falta configurar Firebase</h2><p>Abre index.html y pega tu configuración de Firebase (mira la guía LEEME.md).</p></section>';return}
  const app=initializeApp(firebaseConfig);auth=getAuth(app);db=getFirestore(app);
- DB={doc:p=>{const r=doc(db,p);return {set:d=>setDoc(r,d),update:d=>updateDoc(r,d),delete:()=>deleteDoc(r),onSnapshot:(f,e)=>{subs.push(onSnapshot(r,s=>f({exists:s.exists(),data:()=>s.data()}),e))}}},
-  collection:p=>({onSnapshot:(f,e)=>{subs.push(onSnapshot(collection(db,p),q=>f({docs:q.docs.map(d=>({id:d.id,data:()=>d.data()})),changes:q.docChanges().map(c=>({type:c.type,data:()=>c.doc.data()}))}),e))}})};
+ DB={doc:p=>{const r=doc(db,p);return {set:d=>setDoc(r,d),update:d=>updateDoc(r,d),delete:()=>deleteDoc(r),onSnapshot:(f,e)=>{const u=onSnapshot(r,s=>f({exists:s.exists(),data:()=>s.data()}),e);subs.push(u);return u}}},
+  collection:p=>({onSnapshot:(f,e)=>{const u=onSnapshot(collection(db,p),q=>f({docs:q.docs.map(d=>({id:d.id,data:()=>d.data()})),changes:q.docChanges().map(c=>({type:c.type,data:()=>c.doc.data()}))}),e);subs.push(u);return u}})};
  onAuthStateChanged(auth,async u=>{
-  unsubAll();P={prof:null,grants:[],chars:[]};DM={};cfg={maxLevel:1};view={mode:'player',pid:null,cid:null};
+  unsubAll();PV={key:'',bg:'',nt:'',un:[]};OTH={};P={prof:null,grants:[],chars:[]};DM={};cfg={maxLevel:1};view={mode:'player',pid:null,cid:null};
   if(!u){ME={id:null,dm:false};render();return}
   ME={id:u.uid,email:u.email,dm:false};
   try{await getDoc(doc(db,'dmcheck/x'));ME.dm=true}catch(e){}
@@ -843,6 +915,10 @@ const unsubAll=()=>{subs.forEach(f=>f());subs=[]};
   DB.doc('players/'+ME.id).onSnapshot(s=>{P.prof=s.exists?s.data():null;schedule()},er);
   DB.collection(`permits/${ME.id}/grants`).onSnapshot(q=>{P.grants=arr(q);schedule()},er);
   DB.collection(`players/${ME.id}/chars`).onSnapshot(q=>{P.chars=arr(q);schedule()},er);
+  DB.collection('pub').onSnapshot(q=>{const list=arr(q).filter(p=>p.pid!==ME.id),keep=new Set(list.map(p=>p.id));
+   Object.keys(OTH).forEach(id=>{if(!keep.has(id)){if(OTH[id].un)OTH[id].un();delete OTH[id]}});
+   list.forEach(p=>{if(OTH[p.id]){OTH[p.id].pname=p.pname;return}const o=OTH[p.id]={pid:p.pid,pname:p.pname,c:null,un:null};
+    o.un=DB.doc(`players/${p.pid}/chars/${p.id}`).onSnapshot(sn=>{o.c=sn.exists?{id:p.id,...sn.data()}:null;schedule()},()=>{o.c=null;schedule()})});schedule()},er);
   if(ME.dm){let first=true;DB.collection('notifs').onSnapshot(q=>{NT=arr(q).sort((a,b)=>b.at-a.at);if(!first)q.changes.filter(c=>c.type==='added').forEach(c=>alertNt(c.data()));first=false;schedule()},er)}
   if(ME.dm)DB.collection('players').onSnapshot(q=>{q.docs.forEach(d=>{const id=d.id;let p=DM[id];
    if(!p){p=DM[id]={id,prof:d.data(),grants:[],chars:[]};
