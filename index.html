@@ -381,9 +381,9 @@ function folios(c,dm,own,ro){
   +(dm&&pool.length?`<p class="mut">Dados tirados: ${chips(pool)}<br>${c.hp?'Descartados':'Sin colocar'}: ${chips(pool.filter((_,k)=>!used.has(k)))||'ninguno'}</p>`:'')
   +(own||ro?'':`<p>Puntos de estadística por repartir: ${dm&&fi?`<input type="number" data-sv="f:puntos" value="${pu}" style="width:90px">`:`<b>${pu}</b>`}</p>`)+'</section>';
  const rc=key=>(FLO[c.flower]||{}).k===({hp:'hp',mana:'ma',anima:'an'}[key])?fcol(c):'';
- const res=(t,o,die,key,ex)=>{if(!die)return `<p>${t}: esta clase no tira dado.</p>`;if(!o||!o.r.length)return `<p class="mut">${t}: sin tirar</p>`;
+ const res=(t,o,die,key,ex)=>{if(!die)return dm&&fi&&key!=='hp'?`<p>${t}: sin dado de clase. Recurso extra (manual) → <input type="number" data-sv="f:${key}" value="${fi[key]||0}" style="width:90px"></p>`:`<p>${t}: esta clase no tira dado.</p>`;if(!o||!o.r.length)return `<p class="mut">${t}: sin tirar</p>`;
   return `<p><b>${t}</b> (d${die}): ${chipsC(o.r,'',true)}${o.f.length?' + flor '+chipsC(o.f,rc(key)):''}${c.rb&&RESB?` · bono ${sg(RESB)} por dado`:''}${ex||''} → ${dm&&fi?`<input type="number" data-sv="f:${key}" value="${fi[key]}" style="width:90px">`:`<b>${fi?fi[key]:(key==='hp'?hpTot(c):sTot(o,c))}</b>`}</p>`};
- const vid=c.hp?(fi?fi.hp:hpTot(c)):'—',man=c.ma&&cl[1]?(fi?fi.mana:sTot(c.ma,c)):'—',ani=c.an&&cl[2]?(fi?fi.anima:sTot(c.an,c)):'—';
+ const vid=c.hp?(fi?fi.hp:hpTot(c)):'—',man=fi&&(fi.mana>0||(c.ma&&cl[1]))?fi.mana:(c.ma&&cl[1]?sTot(c.ma,c):'—'),ani=fi&&(fi.anima>0||(c.an&&cl[2]))?fi.anima:(c.an&&cl[2]?sTot(c.an,c):'—');
  const arm=(k,l)=>CIR('x a',dm?`<input data-sv="t:${k}" maxlength="20" value="${esc(c[k]||'')}" placeholder="12+2">`:esc(c[k]||'—'),l);
  a+=`<section><h2>Defensas y recursos</h2><div class="pjr">${arm('armF','Armadura física')}${CIR('x n',ani,'Ánima')}${CIR('x n',vid,'Vida')}${CIR('x n',man,'Maná')}${arm('armM','Armadura mágica')}</div>`
   +(dm?'<h3>Detalle de tiradas</h3>'+res('Vida',c.hp,cl[0],'hp',c.hp?` · Con ${c.hp.con} (${sg(c.hp.mod)} por dado)`:'')+res('Maná',c.ma,cl[1],'mana')+res('Ánima',c.an,cl[2],'anima'):'')+'</section>';
@@ -468,7 +468,9 @@ function rgSave(t){const x=iconTarget();if(!x)return;const {c,ref}=x;if(!ME.dm&&
 function regMissing(c){const f=c.fin,m=[];if(!c.name)m.push('el nombre');if(!f||STATS.some(n=>!(f.stats&&Number.isFinite(f.stats[n]))))m.push('las 8 estadísticas');return m}
 function regSend(){const c=curChar();if(!c||c.reg!=='draft')return;const m=regMissing(c);if(m.length){toast('Falta: '+m.join(' y ')+'.');return}
  if(!confirm('¿Finalizar el registro? Se enviará al DM y no podrás cambiar nada hasta que lo revise.'))return;
- c.reg='pending';W(()=>chRef(c).update({reg:'pending'}));
+ const nf={stats:{...c.fin.stats},hp:+c.fin.hp||0,mana:+c.fin.mana||0,anima:+c.fin.anima||0,puntos:+c.fin.puntos||0},up={reg:'pending'};c.fin=nf;
+ ['name','cls','sub','race','flower','level','profesion','alineamiento','trasfondo','armF','armM','comps','habs','pass','sh','sp','disc'].forEach(k=>{if(c[k]!==undefined)up[k]=c[k]});up.fin=nf;
+ c.reg='pending';W(()=>chRef(c).update(up));
  WS(async()=>{try{await DB.doc('notifs/regc_'+c.id).set({type:'char_reg',pid:ME.id,name:(P.prof&&P.prof.name)||'',cname:c.name,cid:c.id,at:Date.now(),read:false})}catch(e){}discord('registro_pj',{cid:c.id})});
  toast('Registro enviado al DM');render()}
 function regOk(){const x=iconTarget();if(!x||!ME.dm)return;const {c,ref}=x;if(c.reg!=='draft'&&c.reg!=='pending')return;const m=regMissing(c);if(m.length){toast('Falta: '+m.join(' y ')+'.');return}

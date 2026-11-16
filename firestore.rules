@@ -249,9 +249,10 @@ service cloud.firestore {
             && (request.resource.data.icon == '' || request.resource.data.icon.matches('^data:image/(jpeg|png|webp);base64,.*'));
         }
 
+        // Estadisticas: cada una entre 0 y 20; se admiten fichas con estadisticas aun sin rellenar (registro)
         function st20(f) {
-          return f.stats['Fuerza'] <= 20 && f.stats['Constitución'] <= 20 && f.stats['Destreza'] <= 20 && f.stats['Voluntad'] <= 20
-            && f.stats['Inteligencia'] <= 20 && f.stats['Carisma'] <= 20 && f.stats['Sabiduría'] <= 20 && f.stats['Suerte'] <= 20;
+          return f.stats.get('Fuerza', 0) <= 20 && f.stats.get('Constitución', 0) <= 20 && f.stats.get('Destreza', 0) <= 20 && f.stats.get('Voluntad', 0) <= 20
+            && f.stats.get('Inteligencia', 0) <= 20 && f.stats.get('Carisma', 0) <= 20 && f.stats.get('Sabiduría', 0) <= 20 && f.stats.get('Suerte', 0) <= 20;
         }
 
         function used(d) { return d.hp.r.size() + d.ma.r.size() + d.an.r.size(); }
@@ -367,7 +368,7 @@ service cloud.firestore {
             && (!k.hasAny(['flower']) || n.flower in tnames('flowerNames', ['Sin Flor','Flor Roja','Flor Azul','Flor Verde','Flor Marrón','Flor Blanca','Flor Morada','Flor Amarilla']))
             && (!k.hasAny(['armF']) || (n.armF is string && n.armF.size() <= 20))
             && (!k.hasAny(['armM']) || (n.armM is string && n.armM.size() <= 20))
-            && (!k.hasAny(['fin']) || (n.fin.stats is map && st20(n.fin)
+            && (!k.hasAny(['fin']) || (n.fin.stats is map && n.fin.stats.keys().hasOnly(['Fuerza','Constitución','Destreza','Voluntad','Inteligencia','Carisma','Sabiduría','Suerte']) && st20(n.fin)
                   && n.fin.puntos is int && n.fin.puntos >= 0 && n.fin.puntos <= 9999
                   && n.fin.hp is int && n.fin.hp >= 0 && n.fin.hp <= 9999
                   && n.fin.mana is int && n.fin.mana >= 0 && n.fin.mana <= 9999
