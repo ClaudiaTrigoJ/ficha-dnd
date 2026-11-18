@@ -455,7 +455,9 @@ function vReg(c,dm){const f=c.fin||{stats:{}},ST=n=>f.stats&&f.stats[n]!=null?f.
  <section><h2>Competencias</h2>${CP.map((t,k)=>`<div class="bar" style="margin:4px 0"><span style="flex:1">${esc(t)}</span><button class="danger" type="button" data-act="cpdel" data-i="${k}" title="Quitar" aria-label="Quitar competencia">&times;</button></div>`).join('')||'<p class="s">Ninguna todavía.</p>'}<div class="bar"><input id="cpn" maxlength="200" placeholder="Nueva competencia" style="flex:1;min-width:140px"><button type="button" data-act="cpadd">Añadir</button></div></section>`+(dm||c.reg==='pending'?'':'<section><button data-act="regsend">Finalizar y enviar al DM</button></section>')}
 function rgSave(t){const x=iconTarget();if(!x)return;const {c,ref}=x;if(!ME.dm&&c.reg!=='draft')return;const k=t.dataset.rg,upd={};
  if(k.startsWith('s:')||k.startsWith('f:')){const fin=c.fin?{...c.fin,stats:{...c.fin.stats}}:{stats:{},hp:0,mana:0,anima:0,puntos:0},n=Math.max(0,Math.floor(+t.value)||0);
-  if(k[0]==='s')fin.stats[k.slice(2)]=Math.min(20,n);else fin[k.slice(2)]=Math.min(9999,n);upd.fin=fin}
+  const nm=k.slice(2),vv=k[0]==='s'?Math.min(20,n):Math.min(9999,n);if(k[0]==='s')fin.stats[nm]=vv;else fin[nm]=vv;upd.fin=fin;
+  /* se escribe solo ese campo (ruta con puntos) para que dos guardados seguidos no se pisen entre si */
+  Object.assign(c,upd);W(()=>ref.update({[k[0]==='s'?'fin.stats.`'+nm+'`':'fin.'+nm]:vv}));toast('Guardado');return}
  else if(k==='level')upd.level=Math.max(1,Math.min(99,Math.floor(+t.value)||1))
  else if(k==='name')upd.name=t.value.trim().slice(0,60)
  else if(k==='cls'){if(!(t.value in CLS))return;upd.cls=t.value;if(c.sub===t.value)upd.sub=''}
