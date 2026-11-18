@@ -368,12 +368,15 @@ service cloud.firestore {
             && (!k.hasAny(['flower']) || n.flower in tnames('flowerNames', ['Sin Flor','Flor Roja','Flor Azul','Flor Verde','Flor Marrón','Flor Blanca','Flor Morada','Flor Amarilla']))
             && (!k.hasAny(['armF']) || (n.armF is string && n.armF.size() <= 20))
             && (!k.hasAny(['armM']) || (n.armM is string && n.armM.size() <= 20))
-            && (!k.hasAny(['fin']) || (n.fin.get('stats', {}) is map && n.fin.get('stats', {}).keys().hasOnly(['Fuerza','Constitución','Destreza','Voluntad','Inteligencia','Carisma','Sabiduría','Suerte']) && st20(n.fin)
+            && (!k.hasAny(['fin']) || (n.fin is map
+                  && n.fin.keys().hasOnly(['stats','puntos','hp','mana','anima'])
+                  && n.fin.get('stats', {}) is map
+                  && n.fin.get('stats', {}).keys().size() <= 8
+                  && n.fin.get('stats', {}).values().hasOnly([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20])
                   && n.fin.get('puntos', 0) is int && n.fin.get('puntos', 0) >= 0 && n.fin.get('puntos', 0) <= 9999
                   && n.fin.get('hp', 0) is int && n.fin.get('hp', 0) >= 0 && n.fin.get('hp', 0) <= 9999
                   && n.fin.get('mana', 0) is int && n.fin.get('mana', 0) >= 0 && n.fin.get('mana', 0) <= 9999
-                  && n.fin.get('anima', 0) is int && n.fin.get('anima', 0) >= 0 && n.fin.get('anima', 0) <= 9999
-                  && n.fin.keys().hasOnly(['stats','puntos','hp','mana','anima'])))
+                  && n.fin.get('anima', 0) is int && n.fin.get('anima', 0) >= 0 && n.fin.get('anima', 0) <= 9999))
             && (!k.hasAny(['habs']) || (n.habs is map && n.habs.size() <= 60))
             && (!k.hasAny(['pass']) || (n.pass is map && n.pass.size() <= 60))
             && (!k.hasAny(['comps']) || (n.comps is list && n.comps.size() <= 60));
