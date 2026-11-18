@@ -118,7 +118,7 @@ service cloud.firestore {
           && request.resource.data.pool.size() == 0
           && request.resource.data.done == false;
 
-        allow update: if isDM() || (me(uid) && (ownerOk() || textOk() || iconOk() || spendOk() || nameOk() || gearOk() || slotsOk() || notesOk() || lvRollOk() || lvRwOk() || flowerOk() || visOk() || regOk() || revealOk()));
+        allow update: if isDM() || (me(uid) && (regOk() || ownerOk() || textOk() || iconOk() || spendOk() || nameOk() || gearOk() || slotsOk() || notesOk() || lvRollOk() || lvRwOk() || flowerOk() || visOk() || revealOk()));
 
         // Cola privada: ids en qH/qP (orden), dH/dP = cuantos se han revelado ya.
         // Se puede revelar el siguiente solo si el anterior ya esta colocado o descartado.
@@ -301,7 +301,7 @@ service cloud.firestore {
           return o.get('done', false) == true && k.hasOnly(['hp','ma','an','fin']) && k.hasAny(['hp','ma','an'])
             && n.hp.nb == o.hp.nb && used(n) - n.hp.nb <= o.level
             && n.hp.r.size() >= o.hp.r.size() && n.ma.r.size() >= o.ma.r.size() && n.an.r.size() >= o.an.r.size()
-            && (!k.hasAny(['fin']) || (n.fin.stats == o.fin.stats && n.fin.puntos == o.fin.puntos));
+            && (!k.hasAny(['fin']) || (n.fin.get('stats', {}) == o.fin.get('stats', {}) && n.fin.get('puntos', 0) == o.fin.get('puntos', 0)));
         }
 
         // Despues de terminar la ficha: tiradas de recompensa de los niveles nuevos (se anaden al final)
@@ -336,8 +336,8 @@ service cloud.firestore {
           return k.hasOnly(['flower','fin','fpick']) && k.hasAny(['fpick'])
             && o.get('fpick', false) == true && n.fpick == false
             && n.flower in tnames('flowerNames', ['Sin Flor','Flor Roja','Flor Azul','Flor Verde','Flor Marrón','Flor Blanca','Flor Morada','Flor Amarilla'])
-            && (!k.hasAny(['fin']) || ('fin' in o && n.fin.puntos == o.fin.puntos && n.fin.hp == o.fin.hp
-                  && n.fin.mana == o.fin.mana && n.fin.anima == o.fin.anima
+            && (!k.hasAny(['fin']) || ('fin' in o && n.fin.get('puntos', 0) == o.fin.get('puntos', 0) && n.fin.get('hp', 0) == o.fin.get('hp', 0)
+                  && n.fin.get('mana', 0) == o.fin.get('mana', 0) && n.fin.get('anima', 0) == o.fin.get('anima', 0)
                   && capOk('Fuerza') && capOk('Constitución') && capOk('Destreza') && capOk('Voluntad')
                   && capOk('Inteligencia') && capOk('Carisma') && capOk('Sabiduría') && capOk('Suerte')
                   && flDd('Fuerza') && flDd('Constitución') && flDd('Destreza') && flDd('Voluntad')
@@ -382,20 +382,23 @@ service cloud.firestore {
         }
 
         // Reparto de puntos de estadística: solo subir estadísticas gastando puntos
+        // Si una estadistica todavia no esta escrita (ficha de registro a medias) cuenta como 0,
+        // en vez de dar error y hacer que se rechace toda la escritura.
         function dd(s) {
-          return request.resource.data.fin.stats[s] - resource.data.fin.stats[s];
+          return request.resource.data.fin.get('stats', {}).get(s, 0) - resource.data.fin.get('stats', {}).get(s, 0);
         }
         // Al repartir puntos, ninguna estadística puede pasar de 20
         function capOk(s) {
-          return request.resource.data.fin.stats[s] <= 20 || dd(s) == 0;
+          return request.resource.data.fin.get('stats', {}).get(s, 0) <= 20 || dd(s) == 0;
         }
         function spendOk() {
           let k = request.resource.data.diff(resource.data).affectedKeys();
           let o = resource.data.fin;
           let n = request.resource.data.fin;
           return k.hasOnly(['fin']) && 'fin' in resource.data
-            && n.puntos is int && n.puntos >= 0 && n.puntos <= o.puntos
-            && n.hp == o.hp && n.mana == o.mana && n.anima == o.anima
+            && n.get('puntos', 0) is int && n.get('puntos', 0) >= 0 && n.get('puntos', 0) <= o.get('puntos', 0)
+            && n.get('hp', 0) == o.get('hp', 0) && n.get('mana', 0) == o.get('mana', 0) && n.get('anima', 0) == o.get('anima', 0)
+            && n.get('puntos', 0) < o.get('puntos', 0)
             && dd('Fuerza') >= 0 && dd('Constitución') >= 0 && dd('Destreza') >= 0 && dd('Voluntad') >= 0
             && dd('Inteligencia') >= 0 && dd('Carisma') >= 0 && dd('Sabiduría') >= 0 && dd('Suerte') >= 0
             && capOk('Fuerza') && capOk('Constitución') && capOk('Destreza') && capOk('Voluntad')
