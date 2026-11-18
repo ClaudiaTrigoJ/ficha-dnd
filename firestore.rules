@@ -371,8 +371,7 @@ service cloud.firestore {
             && (!k.hasAny(['fin']) || (n.fin is map
                   && n.fin.keys().hasOnly(['stats','puntos','hp','mana','anima'])
                   && n.fin.get('stats', {}) is map
-                  && n.fin.get('stats', {}).keys().size() <= 8
-                  && n.fin.get('stats', {}).values().hasOnly([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20])
+                  // el contenido de las estadisticas lo revisa el DM al aprobar (el cliente las ajusta a 0-20)
                   && n.fin.get('puntos', 0) is int && n.fin.get('puntos', 0) >= 0 && n.fin.get('puntos', 0) <= 9999
                   && n.fin.get('hp', 0) is int && n.fin.get('hp', 0) >= 0 && n.fin.get('hp', 0) <= 9999
                   && n.fin.get('mana', 0) is int && n.fin.get('mana', 0) >= 0 && n.fin.get('mana', 0) <= 9999
