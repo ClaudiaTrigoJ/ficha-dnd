@@ -158,11 +158,13 @@ main.wide{max-width:1500px}
 </head>
 <body>
 <main>
-<h1>Fichas de personaje</h1>
+<div class="bar" style="justify-content:space-between;align-items:center;flex-wrap:nowrap">
+ <h1 style="margin:0">Fichas de personaje</h1>
+ <div id="menuslot"></div>
+</div>
 <p class="mut" id="msg"></p>
 <div id="app"><section>Conectando…</section></div>
 </main>
-<p class="mut" style="text-align:center;font-size:11px;margin:18px 0">Versión 2026-11-18 e</p>
 <div id="crop"><div class="box"><p class="s">Arrastra para elegir la parte de la foto y ajusta el zoom.</p><canvas id="ccv" width="280" height="280"></canvas><input id="czoom" type="range" min="1" max="3" step="0.01" value="1"><div class="bar"><button id="cok">Usar recorte</button><button class="o" id="ccancel">Cancelar</button></div></div></div>
 <div id="bgv"><div class="box"><div class="bar"><b id="bgti">Background</b><button class="o" id="bgx" aria-label="Reducir" title="Reducir" style="padding:4px 7px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><polyline points="20 10 14 10 14 4"/><polyline points="4 14 10 14 10 20"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button></div><textarea id="bgt" maxlength="3000"></textarea></div></div>
 <div id="phv"><div class="box"><div id="phi"></div><div class="bar" style="justify-content:center"><label class="btn" title="Subir foto" aria-label="Subir foto" style="padding:8px 12px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><input type="file" accept="image/*" id="phf" hidden></label><button class="danger" id="phd" title="Quitar foto" aria-label="Quitar foto" style="padding:8px 12px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button><button class="o" id="phx">Cerrar</button></div></div></div>
@@ -589,7 +591,8 @@ function vPermits(){
  return h;
 }
 function vConfig(){
- return `<section><h2>Configuración</h2><p class="s">Estos ajustes se guardan en este dispositivo.</p><div class="bar" style="gap:20px"><label class="sw"><input type="checkbox" data-pref="t3" ${SET.t3?'checked':''}><span class="trk"><span class="knb"></span></span>Animación 3D</label><label class="sw"><input type="checkbox" data-pref="snd" ${SET.snd?'checked':''}><span class="trk"><span class="knb"></span></span>Sonido</label></div></section>`;
+ return `<section><h2>Configuración</h2><p class="s">Estos ajustes se guardan en este dispositivo.</p><div class="bar" style="gap:20px"><label class="sw"><input type="checkbox" data-pref="t3" ${SET.t3?'checked':''}><span class="trk"><span class="knb"></span></span>Animación 3D</label><label class="sw"><input type="checkbox" data-pref="snd" ${SET.snd?'checked':''}><span class="trk"><span class="knb"></span></span>Sonido</label></div></section>
+<section><h2>Cuenta</h2><p class="s">Sesión iniciada como ${esc(ME.email||'')}.</p><div class="bar"><button class="o" data-act="out">Salir / cambiar de cuenta</button></div></section>`;
 }
 const REVQ=new Set(),MIG=new Set();
 
@@ -717,22 +720,32 @@ const ICO_MENU='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stro
 function menuBar(){
  const items=ME.dm?[['permits','Permisos de Personajes'],['dm','Personajes'+(NT.some(n=>!n.read)?' ('+NT.filter(n=>!n.read).length+')':'')],['tables','Tablas'],['player','Mis personajes'],['config','Configuración']]
   :[['player','Mis personajes'],['config','Configuración']];
- return `<div class="bar" style="position:relative"><div style="position:relative"><button class="o" data-act="menutoggle" aria-haspopup="true" aria-expanded="${MENU}" aria-label="Menú" title="Menú" style="padding:8px 10px">${ICO_MENU}</button>`
-  +(MENU?`<div class="menudd">${items.map(([v,t])=>`<button class="${view.mode===v?'':'o'}" data-act="mode" data-v="${v}">${t}</button>`).join('')}${ME.dm?'<button class="o" data-act="dtopen">Probar dado 3D</button>':''}</div>`:'')
-  +'</div></div>';
+ return `<div style="position:relative"><button class="o" data-act="menutoggle" aria-haspopup="true" aria-expanded="${MENU}" aria-label="Menú" title="Menú" style="padding:8px 10px">${ICO_MENU}</button>`
+  +(MENU?`<div class="menudd" style="right:0;left:auto">${items.map(([v,t])=>`<button class="${view.mode===v?'':'o'}" data-act="mode" data-v="${v}">${t}</button>`).join('')}${ME.dm?'<button class="o" data-act="dtopen">Probar dado 3D</button>':''}</div>`:'')
+  +'</div>';
+}
+const isHome=()=>ME.id?(ME.dm?(view.mode==='dm'&&!view.pid&&!view.cid):(view.mode==='player'&&!view.oth&&!view.cid)):true;
+let PUSHED=false;
+function navSync(){
+ if(!ME.id)return;
+ const home=isHome();
+ if(!home&&!PUSHED){PUSHED=true;try{history.pushState({app:1},'')}catch(e){}}
+ else if(home&&PUSHED){PUSHED=false;try{history.back()}catch(e){}}
 }
 function render(){
  if(HOLD)return;
  const A=$('app');if(!DB)return;
- if(!ME.id){A.innerHTML=`<section><h2>Entrar</h2><div class="bar"><button data-act="google">Entrar con Google</button></div><p class="mut">o con correo y contraseña</p><div class="g"><div><label>Correo</label><input id="le" type="email" autocomplete="email"></div><div><label>Contraseña</label><input id="lp" type="password" autocomplete="current-password"></div></div><div class="bar"><button class="o" data-act="login">Entrar</button><button class="o" data-act="register">Crear cuenta</button></div></section>`;return}
- let h=`<div class="bar"><span class="mut">${esc(ME.email||'')}</span><button class="o" data-act="out">Salir</button></div>`+menuBar();
+ const slot=$('menuslot');
+ if(!ME.id){if(slot)slot.innerHTML='';A.innerHTML=`<section><h2>Entrar</h2><div class="bar"><button data-act="google">Entrar con Google</button></div><p class="mut">o con correo y contraseña</p><div class="g"><div><label>Correo</label><input id="le" type="email" autocomplete="email"></div><div><label>Contraseña</label><input id="lp" type="password" autocomplete="current-password"></div></div><div class="bar"><button class="o" data-act="login">Entrar</button><button class="o" data-act="register">Crear cuenta</button></div></section>`;return}
+ if(slot)slot.innerHTML=menuBar();
  const body=view.mode==='config'?vConfig():ME.dm&&view.mode==='permits'?vPermits():ME.dm&&view.mode==='dm'?vDM():ME.dm&&view.mode==='tables'?vTables():vPlayer();
  const cc=(view.mode==='tables'||view.mode==='config'||view.mode==='permits')?null:view.oth?(OTH[view.oth]||{}).c:view.mode==='player'?curChar():(DM[view.pid]&&view.cid?DM[view.pid].chars.find(x=>x.id===view.cid):null);
  pvSync(cc,view.mode==='dm'?view.pid:ME.id);
  dmMig();if(view.mode==='player')autoReveal(cc);
  document.querySelector('main').classList.toggle('wide',!!cc&&(view.mode==='player'||view.mode==='dm'));
- const tv=themeVars(cc);A.innerHTML=h+(tv?`<div class="themed" style="${tv}">${body}</div>`:`<div>${body}</div>`);
+ const tv=themeVars(cc);A.innerHTML=tv?`<div class="themed" style="${tv}">${body}</div>`:`<div>${body}</div>`;
  if(view.oth||(view.mode==='player'&&cc&&cc.reg==='pending'))A.querySelectorAll('input,textarea,select,button').forEach(e=>{if(!e.matches('[data-act="back"],[data-act="out"]'))e.disabled=true});
+ navSync();
 }
 
 /* ---------- tiradas ---------- */
@@ -1009,7 +1022,7 @@ $('app').addEventListener('change',e=>{const t=e.target;if(t.id==='csub'||t.id==
  if(t.dataset.sv)saveSheet();else if(t.dataset.icon!==undefined&&t.files&&t.files[0]){const f=t.files[0];t.value='';readIcon(f)}else if(t.closest('#tbl'))grab();
  else if(t.dataset.pt){const c=curChar();if(c){const k=t.dataset.pt,v=t.value.slice(0,3000);c[k]=v;W(()=>chRef(c).update({[k]:v}));toast('Guardado')}}});
 $('app').addEventListener('keydown',e=>{const t=e.target;if(t&&t.dataset&&(e.key==='Enter'||e.key===' ')){if(t.dataset.act==='phbig'){e.preventDefault();phOpen()}else if(t.dataset.act==='ntopen'||t.dataset.act==='nttog'){e.preventDefault();t.click()}}});
-$('app').addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b||b.disabled)return;const a=b.dataset.act,d=b.dataset;toast('');
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b||b.disabled)return;const a=b.dataset.act,d=b.dataset;toast('');
  if(a==='google')signInWithPopup(auth,new GoogleAuthProvider()).catch(e=>toast(authMsg(e)));
  else if(a==='login')signInWithEmailAndPassword(auth,$('le').value.trim(),$('lp').value).catch(e=>toast(authMsg(e)));
  else if(a==='register')createUserWithEmailAndPassword(auth,$('le').value.trim(),$('lp').value).catch(e=>toast(authMsg(e)));
@@ -1094,6 +1107,10 @@ $('app').addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
  else if(a==='itdis')discardItem(d.id)
  else if(a==='save')saveSheet();
 });
+window.addEventListener('popstate',()=>{
+ if(!ME.id||isHome())return;
+ DR={};MENU=false;view.mode=ME.dm?'dm':'player';view.pid=view.cid=view.oth=null;PUSHED=false;render();
+});
 
 /* ---------- Firebase: acceso y datos ---------- */
 let auth,db,subs=[];
@@ -1105,11 +1122,12 @@ const unsubAll=()=>{subs.forEach(f=>f());subs=[]};
  DB={doc:p=>{const r=doc(db,p);return {set:d=>setDoc(r,d),update:d=>updateDoc(r,d),delete:()=>deleteDoc(r),get:async()=>{const g=await getDoc(r);return {exists:g.exists(),data:()=>g.data()}},onSnapshot:(f,e)=>{const u=onSnapshot(r,s=>f({exists:s.exists(),data:()=>s.data()}),e);subs.push(u);return u}}},
   collection:p=>({onSnapshot:(f,e)=>{const u=onSnapshot(collection(db,p),q=>f({docs:q.docs.map(d=>({id:d.id,data:()=>d.data()})),changes:q.docChanges().map(c=>({type:c.type,data:()=>c.doc.data()}))}),e);subs.push(u);return u}})};
  onAuthStateChanged(auth,async u=>{
-  unsubAll();PV={key:'',bg:'',nt:'',un:[]};OTH={};P={prof:null,grants:[],chars:[]};DM={};cfg={maxLevel:1};view={mode:'player',pid:null,cid:null};
+  unsubAll();PV={key:'',bg:'',nt:'',un:[]};OTH={};P={prof:null,grants:[],chars:[]};DM={};cfg={maxLevel:1};view={mode:'player',pid:null,cid:null};MENU=false;PUSHED=false;
   if(!u){ME={id:null,dm:false};render();return}
   ME={id:u.uid,email:u.email,dm:false};
   try{await getDoc(doc(db,'dmcheck/x'));ME.dm=true}catch(e){}
   view.mode=ME.dm?'dm':'player';
+  try{history.replaceState({app:1},'')}catch(e){}
   const er=e=>toast('Error de datos: '+((e&&e.code)||e));
   DB.doc('config/main').onSnapshot(s=>{if(s.exists)cfg=s.data();schedule()},er);
   DB.doc('config/tables').onSnapshot(s=>{TBL=s.exists?s.data():null;applyTables(TBL);schedule()},er);
