@@ -146,22 +146,36 @@ main.wide{max-width:1500px}
 .itw{display:flex;gap:8px;align-items:flex-start;margin:6px 0;padding:6px;border:1px solid var(--bd);border-radius:8px}.itw .it{flex:1}
 #itm{display:none;position:fixed;inset:0;z-index:85;background:rgba(10,8,6,.85);align-items:center;justify-content:center;padding:12px}
 #itm .box{background:var(--card);color:var(--tx);border-radius:12px;padding:14px;width:min(100%,460px);max-height:100%;overflow:auto}
+#dtv{display:none;position:fixed;inset:0;z-index:85;background:rgba(10,8,6,.85);align-items:center;justify-content:center;padding:12px}
+@media (max-width:560px){.btxt{display:none}}
+.menudd{position:absolute;top:calc(100% + 4px);left:0;background:var(--card);border:1px solid var(--bd);border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.35);z-index:40;display:flex;flex-direction:column;min-width:220px;padding:6px;gap:2px}
+.menudd button{text-align:left}
+#dtv .box{background:var(--card);color:var(--tx);border-radius:12px;padding:14px;width:min(100%,520px);max-height:100%;overflow:auto}
+#dtcvwrap{width:100%;height:260px;margin:10px 0;border:1px solid var(--bd);border-radius:8px;overflow:hidden;background:#1c140f}
+#dtcvwrap canvas{display:block;width:100%;height:100%}
 #itf textarea{min-height:90px;height:90px;font-family:inherit;font-size:1rem;resize:vertical}
 </style>
 </head>
 <body>
 <main>
 <h1>Fichas de personaje</h1>
-<div class="bar" style="margin:0 0 10px;gap:20px"><label class="sw"><input type="checkbox" id="t3" checked><span class="trk"><span class="knb"></span></span>Animación 3D</label><label class="sw"><input type="checkbox" id="snd" checked><span class="trk"><span class="knb"></span></span>Sonido</label></div>
 <p class="mut" id="msg"></p>
 <div id="app"><section>Conectando…</section></div>
 </main>
+<p class="mut" style="text-align:center;font-size:11px;margin:18px 0">Versión 2026-11-18 e</p>
 <div id="crop"><div class="box"><p class="s">Arrastra para elegir la parte de la foto y ajusta el zoom.</p><canvas id="ccv" width="280" height="280"></canvas><input id="czoom" type="range" min="1" max="3" step="0.01" value="1"><div class="bar"><button id="cok">Usar recorte</button><button class="o" id="ccancel">Cancelar</button></div></div></div>
 <div id="bgv"><div class="box"><div class="bar"><b id="bgti">Background</b><button class="o" id="bgx" aria-label="Reducir" title="Reducir" style="padding:4px 7px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><polyline points="20 10 14 10 14 4"/><polyline points="4 14 10 14 10 20"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button></div><textarea id="bgt" maxlength="3000"></textarea></div></div>
 <div id="phv"><div class="box"><div id="phi"></div><div class="bar" style="justify-content:center"><label class="btn" title="Subir foto" aria-label="Subir foto" style="padding:8px 12px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><input type="file" accept="image/*" id="phf" hidden></label><button class="danger" id="phd" title="Quitar foto" aria-label="Quitar foto" style="padding:8px 12px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button><button class="o" id="phx">Cerrar</button></div></div></div>
 <div id="itm"><div class="box"><h2 id="itt" style="margin-top:0"></h2><div id="itf"></div><div class="bar" style="margin-top:12px"><button id="itok">Guardar</button><button class="o" id="itx">Cancelar</button></div></div></div>
 <div id="roul"><div class="box"><canvas id="rcv" width="320" height="330"></canvas><p class="big" id="rres" style="text-align:center;margin:6px 0 0"></p></div></div>
 <div id="ov"><canvas id="cv"></canvas><div class="h">Tirando los dados…</div></div>
+<div id="dtv"><div class="box"><div class="bar"><b style="flex:1">Probar dado 3D</b><button class="o" id="dtx">Cerrar</button></div>
+ <p class="s">Elige un archivo .glb exportado desde Blender (las caras numeradas como n1, n2, n3…). Esto es solo para probar el modelo; no se guarda en ninguna ficha.</p>
+ <input type="file" id="dtf" accept=".glb" disabled>
+ <div id="dtcvwrap"></div>
+ <div class="bar"><button id="dtroll" disabled>Tirar</button><label class="sw"><input type="checkbox" id="dtslow"><span class="trk"><span class="knb"></span></span>Lento</label></div>
+ <p class="s" id="dtmsg"></p>
+</div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -173,18 +187,21 @@ const $=id=>document.getElementById(id);
 const rnd=n=>{const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%n+1};
 const mod=v=>Math.floor((v-10)/2);
 const sg=n=>(n>=0?'+':'')+n;
+/* ---------- preferencias (sonido, animacion...), guardadas en este dispositivo ---------- */
+const SET=(()=>{let s={};try{s=JSON.parse(localStorage.getItem('dnd_set')||'{}')}catch(e){}return {t3:s.t3!==false,snd:s.snd!==false}})();
+function setPref(k,v){SET[k]=v;try{localStorage.setItem('dnd_set',JSON.stringify(SET))}catch(e){}}
 /* ---------- sonido ---------- */
 let AC=null,lastC=0;
 function unlock(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();}catch(e){}}
-function clack(){if(!AC||!$('snd').checked)return;const t=AC.currentTime;if(t-lastC<.045)return;lastC=t;
+function clack(){if(!AC||!SET.snd)return;const t=AC.currentTime;if(t-lastC<.045)return;lastC=t;
  const b=AC.createBuffer(1,2205,44100),a=b.getChannelData(0);for(let i=0;i<a.length;i++)a[i]=(Math.random()*2-1)*(1-i/a.length);
  const s=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();s.buffer=b;f.type='bandpass';f.frequency.value=1500+Math.random()*2500;g.gain.value=.3;
  s.connect(f);f.connect(g);g.connect(AC.destination);s.start();}
-function thud(){if(!AC||!$('snd').checked)return;const t=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();
+function thud(){if(!AC||!SET.snd)return;const t=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();
  o.frequency.setValueAtTime(150+Math.random()*40,t);o.frequency.exponentialRampToValueAtTime(55,t+.18);
  g.gain.setValueAtTime(.45,t);g.gain.exponentialRampToValueAtTime(.001,t+.2);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+.22);clack();}
 
-function tone(f1,f2,d,v){if(!AC||!$('snd').checked)return;const t=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();o.type='triangle';
+function tone(f1,f2,d,v){if(!AC||!SET.snd)return;const t=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();o.type='triangle';
  o.frequency.setValueAtTime(f1,t);o.frequency.exponentialRampToValueAtTime(f2,t+d);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d+.02);}
 const pick=()=>tone(500,760,.09,.25),drop=()=>{tone(220,90,.16,.45);clack()},back=()=>tone(700,420,.1,.25);
 
@@ -220,7 +237,7 @@ function readFace(m,dir){let b=-2,bi=0,n;m.userData.faces.forEach((fc,i)=>{const
 function theatre(f,n,col){return new Promise(res=>{
  const fb=()=>Array.from({length:n},()=>rnd(f));
  if(!n)return res([]);
- if(!window.THREE||!$('t3').checked||matchMedia('(prefers-reduced-motion:reduce)').matches)return res(fb());
+ if(!window.THREE||!SET.t3||matchMedia('(prefers-reduced-motion:reduce)').matches)return res(fb());
  const ov=$('ov');ov.style.display='block';let r;
  try{const W=innerWidth,H=innerHeight,rf=()=>rnd(1e6)/1e6;
  r=new THREE.WebGLRenderer({canvas:$('cv'),alpha:true,antialias:true});r.setPixelRatio(Math.min(devicePixelRatio,2));r.setSize(W,H);
@@ -503,11 +520,12 @@ function vFlow(c){
 }
 function othHtml(){const gr={};Object.values(OTH).forEach(o=>{if(o.c&&o.c.done&&o.c.vis)(gr[o.pid]=gr[o.pid]||{name:o.pname,cs:[]}).cs.push(o.c)});
  return Object.entries(gr).sort((a,b)=>String(a[1].name).localeCompare(b[1].name)).map(([pid,g])=>`<section><h2>${esc(g.name||'Jugador')}</h2>${files(g.cs,pid,'openo')}</section>`).join('')}
+function backBtn(t){return `<button class="o" data-act="back" title="${esc(t)}" aria-label="${esc(t)}" style="display:inline-flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg><span class="btxt">${esc(t)}</span></button>`}
 function vPlayer(){
- if(view.oth){const o=OTH[view.oth];if(o&&o.c)return '<div class="bar" style="margin:8px 0 16px"><button class="o" data-act="back" style="display:inline-flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Volver a mis personajes</button></div><p class="mut">Jugador: '+esc(o.pname||'')+'</p>'+folios(o.c,false,false,true);view.oth=null}
+ if(view.oth){const o=OTH[view.oth];if(o&&o.c)return '<div class="bar" style="margin:8px 0 16px">'+backBtn('Volver a mis personajes')+'</div><p class="mut">Jugador: '+esc(o.pname||'')+'</p>'+folios(o.c,false,false,true);view.oth=null}
  if(!P.prof)return '<section><h2>Bienvenido</h2><p class="s">Escribe tu nombre para que el DM te reconozca.</p><div class="g"><div><label>Tu nombre</label><input id="pn"></div></div><div class="bar"><button data-act="prof">Continuar</button></div></section>';
  const c=view.cid&&P.chars.find(x=>x.id===view.cid);
- if(c)return '<div class="bar" style="margin:8px 0 16px"><button class="o" data-act="back" style="display:inline-flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Volver a mis personajes</button>'+(c.done?`<label class="sw" style="margin-left:auto" title="Si lo activas, los demás jugadores verán tu ficha (sin background ni notas)"><input type="checkbox" data-vis ${c.vis?'checked':''}><span class="trk"><span class="knb"></span></span>Visible para otros jugadores</label>`:'')+'</div>'+vFlow(c);
+ if(c)return '<div class="bar" style="margin:8px 0 16px">'+backBtn('Volver a mis personajes')+(c.done?`<label class="sw" style="margin-left:auto" title="Si lo activas, los demás jugadores verán tu ficha (sin background ni notas)"><input type="checkbox" data-vis ${c.vis?'checked':''}><span class="trk"><span class="knb"></span></span>Visible para otros jugadores</label>`:'')+'</div>'+vFlow(c);
  const used=new Set(P.chars.map(x=>x.grant)),freeAll=P.grants.filter(g=>!used.has(g.id)),free=freeAll.filter(g=>!g.reg),freeR=freeAll.filter(g=>g.reg),ml=cfg.maxLevel||1,OH=othHtml(),RH=freeR.length?'<section><h2>Registrar personaje existente</h2><p class="s">El DM te ha dado permiso para registrar un personaje que ya tenías. Escribirás todos sus datos y el DM los confirmará.</p><div class="bar"><button data-act="createreg">Registrar personaje existente</button></div></section>':'';
  let h=`<section><h2>Hola, ${esc(P.prof.name)}</h2>${P.chars.length?files(P.chars,ME.id):'<p class="s">Aún no tienes personajes.</p>'}</section>`;
  if(!free.length)return h+RH+(freeR.length?'':'<section><p class="s">El DM aún no te ha permitido crear un personaje nuevo.</p></section>')+OH;
@@ -553,17 +571,135 @@ function alertNt(d){if(d.read)return;const m=d.type==='new_player'?`Nuevo jugado
  try{if('Notification' in window&&Notification.permission==='granted')new Notification('Fichas de personaje',{body:m})}catch(e){}}
 function vDM(){
  if(view.cid){const p=DM[view.pid],c=p&&p.chars.find(x=>x.id===view.cid);
-  if(c)return `<div class="bar" style="margin:8px 0 16px"><button class="o" data-act="back" style="display:inline-flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Volver a todos los jugadores</button><button data-act="save">Guardar cambios</button>${c.done?`<label class="sw" style="margin-left:auto" title="Si lo activas, los demás jugadores verán tu ficha (sin background ni notas)"><input type="checkbox" data-vis ${c.vis?'checked':''}><span class="trk"><span class="knb"></span></span>Visible para otros jugadores</label>`:''}<button class="danger" data-act="delc" data-p="${view.pid}" data-c="${c.id}">Eliminar personaje</button></div><p class="mut">Jugador: ${esc(p.prof.name)}</p>${c.reg==='draft'||c.reg==='pending'?`<section><h2>Registro de personaje existente</h2><p class="s">Estado: ${c.reg==='draft'?'el jugador aún lo está rellenando':'enviado, pendiente de tu confirmación'}.</p><div class="bar"><button data-act="regok">Aprobar y guardar la ficha</button>${c.reg==='pending'?'<button class="o" data-act="regback">Devolver al jugador</button>':''}</div></section>${vReg(c,true)}`:folios(c,true,false)+'<div class="bar"><button data-act="save">Guardar cambios</button></div>'}`;}
- let h=ntSection()+`<section><h2>Ajustes</h2><div class="g"><div><label>Nivel máximo al crear un personaje nuevo (subir de nivel y registrar personajes llega hasta 99)</label><input id="ml" type="number" min="1" max="99" value="${cfg.maxLevel||1}"></div></div><div class="bar"><button data-act="ml">Guardar</button></div></section>`;
+  if(c)return `<div class="bar" style="margin:8px 0 16px">${backBtn('Volver a todos los jugadores')}<button data-act="save">Guardar cambios</button>${c.done?`<label class="sw" style="margin-left:auto" title="Si lo activas, los demás jugadores verán tu ficha (sin background ni notas)"><input type="checkbox" data-vis ${c.vis?'checked':''}><span class="trk"><span class="knb"></span></span>Visible para otros jugadores</label>`:''}<button class="danger" data-act="delc" data-p="${view.pid}" data-c="${c.id}">Eliminar personaje</button></div><p class="mut">Jugador: ${esc(p.prof.name)}</p>${c.reg==='draft'||c.reg==='pending'?`<section><h2>Registro de personaje existente</h2><p class="s">Estado: ${c.reg==='draft'?'el jugador aún lo está rellenando':'enviado, pendiente de tu confirmación'}.</p><div class="bar"><button data-act="regok">Aprobar y guardar la ficha</button>${c.reg==='pending'?'<button class="o" data-act="regback">Devolver al jugador</button>':''}</div></section>${vReg(c,true)}`:folios(c,true,false)+'<div class="bar"><button data-act="save">Guardar cambios</button></div>'}`;}
+let h=ntSection();
+ const ps=Object.values(DM).sort((a,b)=>String(a.prof.name).localeCompare(b.prof.name));
+ if(!ps.length)h+='<section><p class="s">Aún no hay jugadores. Aparecerán aquí cuando abran la página y escriban su nombre.</p></section>';
+ ps.forEach(p=>{h+=`<section><h2>${esc(p.prof.name)}</h2><p class="mut">${p.chars.length} personaje(s)</p>${files(p.chars,p.id)}</section>`;});
+ return h;
+}
+function vPermits(){
+ let h=`<section><h2>Ajustes</h2><div class="g"><div><label>Nivel máximo al crear un personaje nuevo (subir de nivel y registrar personajes llega hasta 99)</label><input id="ml" type="number" min="1" max="99" value="${cfg.maxLevel||1}"></div></div><div class="bar"><button data-act="ml">Guardar</button></div></section>`;
  const ps=Object.values(DM).sort((a,b)=>String(a.prof.name).localeCompare(b.prof.name));
  if(!ps.length)h+='<section><p class="s">Aún no hay jugadores. Aparecerán aquí cuando abran la página y escriban su nombre.</p></section>';
  ps.forEach(p=>{const used=new Set(p.chars.map(c=>c.grant)),free=p.grants.filter(g=>!used.has(g.id));
   h+=`<section><h2>${esc(p.prof.name)}</h2><p class="mut">${p.chars.length} personaje(s) · ${free.length} permiso(s) sin usar</p>
   <div class="bar"><label>Dados extra de bono <input data-xin="${p.id}" type="number" min="0" value="0" style="width:70px"></label><label style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-rbin="${p.id}" style="width:auto">Bono de recursos</label><button data-act="grant" data-p="${p.id}">Permitir nuevo personaje</button><button class="o" data-act="grantreg" data-p="${p.id}">Permitir registrar personaje existente</button><button class="danger" data-act="delp" data-p="${p.id}">Eliminar jugador</button></div>
-  ${free.map(g=>`<div class="mut">Permiso sin usar (${g.reg?'registro de personaje existente':`+${g.extra||0} dados${g.rb?', bono de recursos':''}`}) <button class="o" data-act="rev" data-p="${p.id}" data-g="${g.id}">Revocar</button></div>`).join('')}${files(p.chars,p.id)}</section>`;});
+  ${free.map(g=>`<div class="mut">Permiso sin usar (${g.reg?'registro de personaje existente':`+${g.extra||0} dados${g.rb?', bono de recursos':''}`}) <button class="o" data-act="rev" data-p="${p.id}" data-g="${g.id}">Revocar</button></div>`).join('')}</section>`;});
  return h;
 }
+function vConfig(){
+ return `<section><h2>Configuración</h2><p class="s">Estos ajustes se guardan en este dispositivo.</p><div class="bar" style="gap:20px"><label class="sw"><input type="checkbox" data-pref="t3" ${SET.t3?'checked':''}><span class="trk"><span class="knb"></span></span>Animación 3D</label><label class="sw"><input type="checkbox" data-pref="snd" ${SET.snd?'checked':''}><span class="trk"><span class="knb"></span></span>Sonido</label></div></section>`;
+}
 const REVQ=new Set(),MIG=new Set();
+
+/* ---------- probar un dado 3D propio (solo para el DM; no se guarda en ninguna ficha) ---------- */
+let DT=null,GLTF_READY=null;
+function loadGLTFLoader(){
+ if(window.THREE&&THREE.GLTFLoader)return Promise.resolve();
+ if(GLTF_READY)return GLTF_READY;
+ GLTF_READY=new Promise((res,rej)=>{
+  const s=document.createElement('script');
+  s.src='https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js';
+  s.onload=()=>res();s.onerror=()=>rej(new Error('No se pudo cargar el lector de archivos .glb (revisa la conexión a internet).'));
+  document.head.appendChild(s);
+ });
+ return GLTF_READY;
+}
+function dtMsg(t){const e=$('dtmsg');if(e)e.innerHTML=t}
+function dtOpen(){
+ if(!ME.dm)return;
+ $('dtv').style.display='flex';
+ if(!window.THREE){dtMsg('<span class="ie neg">No se pudo cargar three.js (revisa la conexión a internet y recarga la página).</span>');return}
+ if(!DT){
+  const wrap=$('dtcvwrap'),renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+  wrap.appendChild(renderer.domElement);
+  const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(45,1,.1,100);camera.position.set(0,0,5);
+  scene.add(new THREE.HemisphereLight(0xfff2d8,0x201208,1.1));
+  const dl=new THREE.DirectionalLight(0xffffff,.6);dl.position.set(3,4,5);scene.add(dl);
+  DT={renderer,scene,camera,wrap,model:null,faces:[],rolling:false};
+  (function loop(){
+   if($('dtv').style.display==='flex'){
+    const w=wrap.clientWidth||1,hh=wrap.clientHeight||1;
+    if(renderer.domElement.width!==w||renderer.domElement.height!==hh){renderer.setSize(w,hh);camera.aspect=w/hh;camera.updateProjectionMatrix()}
+    renderer.render(scene,camera);
+   }
+   requestAnimationFrame(loop);
+  })();
+ }
+ dtMsg('Cargando el lector de archivos .glb…');
+ $('dtf').disabled=true;
+ loadGLTFLoader().then(()=>{$('dtf').disabled=false;dtMsg('Elige un archivo .glb para empezar.')}).catch(e=>dtMsg('<span class="ie neg">'+esc(e.message)+'</span>'));
+}
+function dtClose(){const e=$('dtv');if(e)e.style.display='none'}
+function dtFindFaces(root){
+ const out=[];
+ root.traverse(o=>{
+  const m=/^n(\d+)$/.exec(o.name||'');
+  if(m&&o.geometry){
+   const pos=o.geometry.attributes.position,nor=o.geometry.attributes.normal;let n;
+   if(nor&&nor.count){n=new THREE.Vector3();for(let i=0;i<nor.count;i++)n.add(new THREE.Vector3().fromBufferAttribute(nor,i));n.normalize()}
+   else if(pos&&pos.count>=3){const a=new THREE.Vector3().fromBufferAttribute(pos,0),b=new THREE.Vector3().fromBufferAttribute(pos,1),c=new THREE.Vector3().fromBufferAttribute(pos,2);n=new THREE.Vector3().crossVectors(b.clone().sub(a),c.clone().sub(a)).normalize()}
+   if(n){n.applyQuaternion(o.quaternion);out.push({num:+m[1],n})}
+  }
+ });
+ return out.sort((a,b)=>a.num-b.num);
+}
+function dtReadTop(){
+ if(!DT||!DT.model||!DT.faces.length)return null;
+ const up=new THREE.Vector3(0,1,0);let best=-2,bi=null;
+ DT.faces.forEach(fc=>{const w=fc.n.clone().applyQuaternion(DT.model.quaternion).normalize(),d=w.dot(up);if(d>best){best=d;bi=fc.num}});
+ return {num:bi,align:best};
+}
+$('dtf')&&$('dtf').addEventListener('change',function(e){
+ const file=e.target.files[0];if(!file||!DT)return;
+ dtMsg('Leyendo el archivo…');
+ if(DT.model){DT.scene.remove(DT.model);DT.model=null;DT.faces=[]}
+ const reader=new FileReader();
+ reader.onerror=()=>dtMsg('<span class="ie neg">No se pudo leer el archivo desde el disco.</span>');
+ reader.onload=()=>{
+  dtMsg('Interpretando el modelo…');
+  const loader=new THREE.GLTFLoader();loader.crossOrigin=undefined;
+  loader.parse(reader.result,'',gltf=>{
+   const model=gltf.scene;
+   const box=new THREE.Box3().setFromObject(model),size=box.getSize(new THREE.Vector3()),center=box.getCenter(new THREE.Vector3());
+   model.position.sub(center);const sc=2/Math.max(size.x,size.y,size.z,.001);model.scale.setScalar(sc);
+   DT.scene.add(model);DT.model=model;DT.faces=dtFindFaces(model);
+   $('dtroll').disabled=false;
+   const nums=DT.faces.map(f=>f.num),esperado=[];for(let i=1;i<=Math.max(nums.length,1);i++)esperado.push(i);
+   const faltan=esperado.filter(n=>nums.indexOf(n)===-1),sobran=nums.filter((n,i)=>nums.indexOf(n)!==i);
+   let msg='Cargado. '+DT.faces.length+' caras numeradas encontradas.';
+   if(faltan.length)msg+=' <span class="ie neg">Faltan: '+faltan.join(', ')+'.</span>';
+   if(sobran.length)msg+=' <span class="ie neg">Repetidos: '+sobran.join(', ')+'.</span>';
+   if(!DT.faces.length)msg='<span class="ie neg">No se ha encontrado ningún objeto llamado n1, n2… Revisa los nombres en Blender.</span>';
+   dtMsg(msg);
+  },err=>dtMsg('<span class="ie neg">No se pudo interpretar el .glb. Comprueba en Blender que la exportación es glTF Binario (.glb).</span>'));
+ };
+ reader.readAsArrayBuffer(file);
+});
+$('dtroll')&&$('dtroll').addEventListener('click',function(){
+ if(!DT||!DT.model||DT.rolling)return;
+ DT.rolling=true;$('dtroll').disabled=true;dtMsg('Tirando…');
+ const slow=$('dtslow').checked,dur=slow?4500:1300;
+ const ax=new THREE.Vector3(Math.random()-.5,Math.random()-.5,Math.random()-.5).normalize(),turns=2+Math.random()*2;
+ const q0=DT.model.quaternion.clone();
+ const qEnd=new THREE.Quaternion().setFromAxisAngle(ax,turns*Math.PI*2).multiply(q0);
+ const qFinal=new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.random()*6,Math.random()*6,Math.random()*6)).multiply(qEnd);
+ const t0=performance.now();
+ (function frame(){
+  const t=Math.min(1,(performance.now()-t0)/dur),ee=1-Math.pow(1-t,3);
+  THREE.Quaternion.slerp(q0,qFinal,DT.model.quaternion,ee);
+  if(t<1)requestAnimationFrame(frame);
+  else{
+   DT.rolling=false;$('dtroll').disabled=false;
+   const r=dtReadTop();
+   if(!r){dtMsg('<span class="ie neg">No se puede leer: no hay caras numeradas.</span>');return}
+   const nota=r.align>.97?'lectura clara':r.align>.9?'<span class="ie neg">lectura algo ambigua, revisa esa cara</span>':'<span class="ie neg">lectura dudosa, esa cara puede estar mal orientada</span>';
+   dtMsg('Resultado: <b style="font-size:1.2em">'+r.num+'</b> ('+nota+')');
+  }
+ })();
+});
+
 function autoReveal(c){if(!c||!c.done||view.oth||view.mode!=='player'||!ME.id)return;
  for(const k of ['h','p']){const q=qIds(c,k),d=qD(c,k);if(q.length<=d||unres(c,k).length)continue;const id=q[d],key=c.id+':'+id+':'+d;if(REVQ.has(key))continue;REVQ.add(key);
   const mk=k==='h'?'habs':'pass',dk=k==='h'?'dH':'dP',cid=c.id;
@@ -576,14 +712,22 @@ function dmMig(){if(!ME.dm)return;
    leg.sort((a,b)=>{const A=o[a].lv==null?1e9:o[a].lv,B=o[b].lv==null?1e9:o[b].lv;return A-B||(a<b?-1:a>b?1:0)});
    if(leg.length){const no={...o};leg.forEach(id=>{delete no[id];docs.push([id,k,o[id]])});upd[mk]=no;upd[qk]=[...q.slice(0,d),...leg,...q.slice(d)]}}
   W(async()=>{for(const [id,k,it] of docs)await DB.doc(base+'/queue/'+id).set({k,it});await DB.doc(base).update(upd)})}}
+let MENU=false;
+const ICO_MENU='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>';
+function menuBar(){
+ const items=ME.dm?[['permits','Permisos de Personajes'],['dm','Personajes'+(NT.some(n=>!n.read)?' ('+NT.filter(n=>!n.read).length+')':'')],['tables','Tablas'],['player','Mis personajes'],['config','Configuración']]
+  :[['player','Mis personajes'],['config','Configuración']];
+ return `<div class="bar" style="position:relative"><div style="position:relative"><button class="o" data-act="menutoggle" aria-haspopup="true" aria-expanded="${MENU}" aria-label="Menú" title="Menú" style="padding:8px 10px">${ICO_MENU}</button>`
+  +(MENU?`<div class="menudd">${items.map(([v,t])=>`<button class="${view.mode===v?'':'o'}" data-act="mode" data-v="${v}">${t}</button>`).join('')}${ME.dm?'<button class="o" data-act="dtopen">Probar dado 3D</button>':''}</div>`:'')
+  +'</div></div>';
+}
 function render(){
  if(HOLD)return;
  const A=$('app');if(!DB)return;
  if(!ME.id){A.innerHTML=`<section><h2>Entrar</h2><div class="bar"><button data-act="google">Entrar con Google</button></div><p class="mut">o con correo y contraseña</p><div class="g"><div><label>Correo</label><input id="le" type="email" autocomplete="email"></div><div><label>Contraseña</label><input id="lp" type="password" autocomplete="current-password"></div></div><div class="bar"><button class="o" data-act="login">Entrar</button><button class="o" data-act="register">Crear cuenta</button></div></section>`;return}
- let h=`<div class="bar"><span class="mut">${esc(ME.email||'')}</span><button class="o" data-act="out">Salir</button></div>`;
- if(ME.dm)h+=`<div class="bar">${[['dm','Panel del DM'+(NT.some(n=>!n.read)?' ('+NT.filter(n=>!n.read).length+')':'')],['tables','Tablas'],['player','Mis personajes']].map(([v,t])=>`<button class="${view.mode===v?'':'o'}" data-act="mode" data-v="${v}">${t}</button>`).join('')}</div>`;
- const body=ME.dm&&view.mode==='dm'?vDM():ME.dm&&view.mode==='tables'?vTables():vPlayer();
- const cc=view.mode==='tables'?null:view.oth?(OTH[view.oth]||{}).c:view.mode==='player'?curChar():(DM[view.pid]&&view.cid?DM[view.pid].chars.find(x=>x.id===view.cid):null);
+ let h=`<div class="bar"><span class="mut">${esc(ME.email||'')}</span><button class="o" data-act="out">Salir</button></div>`+menuBar();
+ const body=view.mode==='config'?vConfig():ME.dm&&view.mode==='permits'?vPermits():ME.dm&&view.mode==='dm'?vDM():ME.dm&&view.mode==='tables'?vTables():vPlayer();
+ const cc=(view.mode==='tables'||view.mode==='config'||view.mode==='permits')?null:view.oth?(OTH[view.oth]||{}).c:view.mode==='player'?curChar():(DM[view.pid]&&view.cid?DM[view.pid].chars.find(x=>x.id===view.cid):null);
  pvSync(cc,view.mode==='dm'?view.pid:ME.id);
  dmMig();if(view.mode==='player')autoReveal(cc);
  document.querySelector('main').classList.toggle('wide',!!cc&&(view.mode==='player'||view.mode==='dm'));
@@ -645,6 +789,7 @@ addEventListener('pointermove',e=>{if(!dr)return;
 addEventListener('pointerup',e=>{if(!dr)return;const d=dr;dr=null;
  if(d.m){d.g.remove();place(e.clientX,e.clientY,d.id);sel=null;}else sel=sel===d.id?null:d.id;render();});
 addEventListener('pointercancel',()=>{if(dr){if(dr.g)dr.g.remove();dr=null;render();}});
+document.addEventListener('click',e=>{if(MENU&&!e.target.closest('.menudd')&&!e.target.closest('[data-act="menutoggle"]')){MENU=false;render()}});
 document.addEventListener('click',e=>{if(sel===null||e.target.closest('.d[data-id]'))return;
  if(e.target.closest('[data-slot],#pool')){place(e.clientX,e.clientY,sel);sel=null;render();}});
 
@@ -836,6 +981,7 @@ function itSave(){const x=iconTarget();if(!x||!IT||!(ME.dm||x.c.reg==='draft'))r
   const upd={[mk]:m,sh:c.sh,sp:c.sp,disc:c.disc};W(()=>ref.update(upd))}
  itClose();toast('Guardado');render()}
 $('itok').onclick=itSave;$('itx').onclick=itClose;
+$('dtx')&&($('dtx').onclick=dtClose);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('itm').style.display==='flex')itClose()});
 /* arrastrar con el ratón; en pantalla táctil: tocar la habilidad y luego la casilla */
 let di=null;
@@ -855,6 +1001,7 @@ $('app').addEventListener('change',e=>{const t=e.target;if(t.id==='csub'||t.id==
  if(t.dataset.eq!==undefined||t.dataset.inv!==undefined||t.dataset.mo!==undefined){gearSave(t);return}
  if(t.dataset.bg!==undefined){bgWrite(t.value);return}
  if(t.dataset.rg!==undefined){rgSave(t);return}
+ if(t.dataset.pref!==undefined){setPref(t.dataset.pref,t.checked);return}
  if(t.dataset.vis!==undefined){setVis(t.checked);return}
  if(t.dataset.cp!==undefined){cpSave(t);return}
  if(t.dataset.tg!==undefined){if(!ME.dm)return;const x=iconTarget();if(!x)return;x.c[t.dataset.tg]=t.checked;const v=t.checked,k=t.dataset.tg;W(()=>x.ref.update({[k]:v}));toast('Guardado');render();return}
@@ -867,7 +1014,9 @@ $('app').addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
  else if(a==='login')signInWithEmailAndPassword(auth,$('le').value.trim(),$('lp').value).catch(e=>toast(authMsg(e)));
  else if(a==='register')createUserWithEmailAndPassword(auth,$('le').value.trim(),$('lp').value).catch(e=>toast(authMsg(e)));
  else if(a==='out')signOut(auth);
- else if(a==='mode'){DR={};if(d.v==='tables')TD=mkTD();view.mode=d.v;view.cid=view.pid=null;render()}
+ else if(a==='mode'){DR={};if(d.v==='tables')TD=mkTD();view.mode=d.v;view.cid=view.pid=null;MENU=false;render()}
+ else if(a==='menutoggle'){MENU=!MENU;render()}
+ else if(a==='dtopen'){MENU=false;dtOpen()}
  else if(a==='back'){DR={};view.cid=view.pid=view.oth=null;render()}
  else if(a==='open'){DR={};view.oth=null;view.pid=d.p;view.cid=d.c;render()}
  else if(a==='openo'){DR={};view.oth=d.c;view.pid=null;view.cid=null;render()}
