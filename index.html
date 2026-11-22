@@ -84,6 +84,17 @@ button.file[style]{background:var(--card);color:var(--tx);border-color:var(--bd)
 #roul .box{background:var(--card);border-radius:14px;padding:14px;width:min(94%,360px)}#rcv{width:100%;height:auto;display:block}
 button.danger{background:#a32121;color:#fff}.res{border-top:1px dashed var(--bd);padding:8px 0}
 .fcard{border:1px solid var(--bd);border-radius:10px;padding:8px;margin:8px 0}th{font-size:.8rem;color:var(--mut)}h3{margin:12px 0 4px;font-size:1rem;color:var(--ac)}
+.rgrid{display:grid;grid-template-columns:1fr 1fr;gap:3px;border-radius:14px;overflow:hidden;margin:10px 0}
+.rtile{padding:14px 10px;color:#fff}
+.rtile .rhead{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.rtile .rhead b{font-size:1rem;font-weight:bold}
+.rtile .rhead button{background:transparent;padding:4px;color:#fff;opacity:.85}
+.rtile .rhead button:hover{opacity:1}
+.rbody{display:flex;align-items:center;justify-content:space-between;gap:4px;margin-top:8px}
+.rbody button{background:transparent;color:#fff;font-size:1.7rem;font-weight:bold;padding:2px 8px;opacity:.85;line-height:1}
+.rnum{background:transparent !important;border:0 !important;color:#fff !important;font-size:2.5rem;font-weight:bold;text-align:center;width:auto;flex:1;padding:0 !important;min-width:0}
+.rnum:focus{outline:2px solid rgba(255,255,255,.65)}
+.rmax{margin:2px 0 0;font-size:.78rem;opacity:.8;text-align:center}
 .cb{position:relative}
 .cb::after{content:'';position:absolute;right:13px;top:50%;margin-top:-6px;width:7px;height:7px;border:solid var(--mut);border-width:0 2px 2px 0;transform:rotate(45deg);pointer-events:none}
 .cb .cbi{padding-right:32px;text-overflow:ellipsis}
@@ -619,7 +630,7 @@ function vPermits(){
 function vConfig(){
  return `<section><h2>Configuración</h2><p class="s">Estos ajustes se guardan en este dispositivo.</p><div class="bar" style="gap:20px"><label class="sw"><input type="checkbox" data-pref="t3" ${SET.t3?'checked':''}><span class="trk"><span class="knb"></span></span>Animación 3D</label><label class="sw"><input type="checkbox" data-pref="snd" ${SET.snd?'checked':''}><span class="trk"><span class="knb"></span></span>Sonido</label></div>
 <h3 style="margin-top:14px">Apariencia</h3><div class="bar">${[['auto','Automático'],['light','Claro'],['dark','Oscuro']].map(([v,t])=>`<button type="button" class="${SET.theme===v?'':'o'}" data-act="theme" data-v="${v}">${t}</button>`).join('')}</div></section>
-<section><h2>Cuenta</h2><p class="s">Sesión iniciada como ${esc(ME.email||'')}.</p><div class="bar"><button class="o" data-act="out">Salir / cambiar de cuenta</button></div></section>`;
+<section><h2>Cuenta</h2><p class="s">Sesión iniciada como ${esc(ME.email||'')}.</p><div class="bar"><button class="o" data-act="out">Salir</button></div></section>`;
 }
 function liveKeys(){return Array.isArray(SET.liveSel)?SET.liveSel:[];}
 function liveSave(arr){setPref('liveSel',arr);}
@@ -634,17 +645,21 @@ function liveResolve(pid,cid){
  if(pid===ME.id){const c=P.chars.find(x=>x.id===cid);return c?{pid,c}:null;}
  const o=OTH[cid];return o&&o.c&&o.pid===pid?{pid,c:o.c}:null;
 }
+const ICO_RST='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>';
+const RCOLS={hp:'#c0392b',mana:'#2e6fd6',anima:'#2f9e44',shield:'#9c7a2d'};
+function liveTile(pid,cid,k,t,hasMax,L,mx){
+ return `<div class="rtile" style="background:${RCOLS[k]}"><div class="rhead"><button type="button" data-act="liveresetone" data-p="${pid}" data-c="${cid}" data-k="${k}" title="Restablecer ${esc(t)}" aria-label="Restablecer ${esc(t)}">${ICO_RST}</button><b>${esc(t)}</b><button type="button" data-act="livefocus" data-p="${pid}" data-c="${cid}" data-k="${k}" title="Editar" aria-label="Editar">${PEN}</button></div>
+ <div class="rbody"><button type="button" data-act="liveadj" data-p="${pid}" data-c="${cid}" data-k="${k}" data-d="-1" aria-label="Quitar 1">−</button><input class="rnum" id="rn-${k}-${cid}" type="text" inputmode="tel" autocomplete="off" data-act2="livein" data-p="${pid}" data-c="${cid}" data-k="${k}" value="${L[k]}"><button type="button" data-act="liveadj" data-p="${pid}" data-c="${cid}" data-k="${k}" data-d="1" aria-label="Añadir 1">+</button></div>
+ ${hasMax?`<p class="rmax">máx ${mx[k]}</p>`:''}</div>`;
+}
 function liveCard(pid,cid,c){
  const L=liveOf(c),mx=liveMax(c);
- const adj=(k)=>`<button class="o" type="button" data-act="liveadj" data-p="${pid}" data-c="${cid}" data-k="${k}" data-d="-1" aria-label="Quitar 1">−</button><input type="number" min="0" max="9999" style="width:64px;text-align:center" data-act2="livein" data-p="${pid}" data-c="${cid}" data-k="${k}" value="${L[k]}"><button class="o" type="button" data-act="liveadj" data-p="${pid}" data-c="${cid}" data-k="${k}" data-d="1" aria-label="Añadir 1">+</button>`;
  return `<div class="res"><div class="bar" style="justify-content:space-between"><b>${esc(cnm(c))}</b><button class="o" type="button" data-act="liveunpin" data-c="${cid}">Quitar de esta lista</button></div>
- <div class="g">${LRES.map(([k,t])=>`<div><label>${t} (máx ${mx[k]})</label><div class="bar" style="flex-wrap:nowrap">${adj(k)}</div></div>`).join('')}
- <div><label>Sobreescudo</label><div class="bar" style="flex-wrap:nowrap">${adj('shield')}</div></div></div>
- <div class="bar"><button class="o" type="button" data-act="livereset" data-p="${pid}" data-c="${cid}">Restablecer al máximo</button></div></div>`;
+ <div class="rgrid">${LRES.map(([k,t])=>liveTile(pid,cid,k,t,true,L,mx)).join('')}${liveTile(pid,cid,'shield','Sobreescudo',false,L,mx)}</div></div>`;
 }
 function vLive(){
  const sel=liveKeys(),avail=liveAvail(),selSet=new Set(sel),pick=avail.filter(a=>!selSet.has(a.pid+'|'+a.cid));
- let h='<section><h2>En partida</h2><p class="s">Elige qué personajes quieres tener a mano durante la partida para ir anotando su vida y recursos. Puedes añadir tus propios personajes y también los de otro jugador que sean visibles (por ejemplo si tienes que llevar el de dos).</p>';
+ let h='<section><h2>Gestión de recursos</h2><p class="s">Elige qué personajes quieres tener a mano durante la partida para ir anotando su vida y recursos. Puedes añadir tus propios personajes y también los de otro jugador que sean visibles (por ejemplo si tienes que llevar el de dos). Puedes tocar + / − o escribir directamente un número o una suma, como 10+5 o -3.</p>';
  h+=pick.length?`<div class="bar"><select id="liveadd" style="width:auto;flex:1;min-width:160px">${pick.map(a=>`<option value="${a.pid}|${a.cid}">${a.label}</option>`).join('')}</select><button type="button" data-act="liveadd">Añadir</button></div>`:'<p class="mut">No hay más personajes disponibles para añadir.</p>';
  h+='</section>';
  const cards=sel.map(k=>{const [pid,cid]=k.split('|');return liveResolve(pid,cid)}).filter(Boolean);
@@ -654,9 +669,10 @@ function vLive(){
 function liveWrite(pid,cid,patch){const r=liveResolve(pid,cid);if(!r)return;const live={...liveOf(r.c),...patch};r.c.live=live;W(()=>charRef(pid,cid).update({live}));render();}
 function liveAdj(pid,cid,k,delta){const r=liveResolve(pid,cid);if(!r)return;const cur=liveOf(r.c),mx=liveMax(r.c);
  const top=k==='shield'?9999:mx[k];liveWrite(pid,cid,{[k]:Math.max(0,Math.min(top,(cur[k]||0)+delta))});}
-function liveSet(pid,cid,k,v){const r=liveResolve(pid,cid);if(!r)return;const mx=liveMax(r.c),top=k==='shield'?9999:mx[k];
- liveWrite(pid,cid,{[k]:Math.max(0,Math.min(top,Math.floor(+v)||0))});}
-function liveReset(pid,cid){const r=liveResolve(pid,cid);if(!r)return;const mx=liveMax(r.c);liveWrite(pid,cid,{hp:mx.hp,mana:mx.mana,anima:mx.anima,shield:0});toast('Restablecido al máximo')}
+function liveSet(pid,cid,k,v){const r=liveResolve(pid,cid);if(!r)return;const cur=liveOf(r.c)[k]||0,mx=liveMax(r.c),top=k==='shield'?9999:mx[k];
+ const n=calcExp(v,cur);if(n===null){toast('Escribe un número o una suma, como 10+5.');render();return}
+ liveWrite(pid,cid,{[k]:Math.max(0,Math.min(top,n))});}
+function liveResetOne(pid,cid,k){const r=liveResolve(pid,cid);if(!r)return;const mx=liveMax(r.c);liveWrite(pid,cid,{[k]:k==='shield'?0:mx[k]});}
 const REVQ=new Set(),MIG=new Set();
 
 /* ---------- probar un dado 3D propio (solo para el DM; no se guarda en ninguna ficha) ---------- */
@@ -781,8 +797,8 @@ function dmMig(){if(!ME.dm)return;
 let MENU=false;
 const ICO_MENU='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>';
 function menuBar(){
- const items=ME.dm?[['permits','Permisos de Personajes'],['dm','Personajes'+(NT.some(n=>!n.read)?' ('+NT.filter(n=>!n.read).length+')':'')],['tables','Tablas'],['player','Mis personajes'],['live','En partida'],['config','Configuración']]
-  :[['player','Mis personajes'],['live','En partida'],['config','Configuración']];
+ const items=ME.dm?[['permits','Permisos de Personajes'],['dm','Personajes'+(NT.some(n=>!n.read)?' ('+NT.filter(n=>!n.read).length+')':'')],['tables','Tablas'],['player','Mis personajes'],['live','Gestión de recursos'],['config','Configuración']]
+  :[['player','Mis personajes'],['live','Gestión de recursos'],['config','Configuración']];
  return `<div style="position:relative"><button class="o" data-act="menutoggle" aria-haspopup="true" aria-expanded="${MENU}" aria-label="Menú" title="Menú" style="padding:8px 10px">${ICO_MENU}</button>`
   +(MENU?`<div class="menudd" style="right:0;left:auto">${items.map(([v,t])=>`<button class="${view.mode===v?'':'o'}" data-act="mode" data-v="${v}">${t}</button>`).join('')}${ME.dm?'<button class="o" data-act="dtopen">Probar dado 3D</button>':''}</div>`:'')
   +'</div>';
@@ -902,7 +918,9 @@ function extractPal(src){const im=new Image();im.onload=()=>{const c=document.cr
  let best=B[0];B.forEach(b=>{if(b.w>best.w)best=b});PAL.set(src,tot>2&&best.w>0?{h:best.h/best.w,s:best.s/best.w}:false);schedule()};im.src=src}
 function themeVars(c){if(!c||!c.icon)return '';const p=PAL.get(c.icon);if(p===undefined){PAL.set(c.icon,null);extractPal(c.icon);return ''}if(!p)return '';
  const H=Math.round(p.h),S=Math.round(Math.max(35,Math.min(80,p.s*100))),C=(H+180)%360,hs=(h,sa,l)=>`hsl(${h} ${sa}% ${l}%)`;
- return `--ac:${hs(H,S,68)};--ac2:${hs(H,Math.round(S*.4),30)};--bd:${hs(H,Math.round(S*.3),36)};--card:${hs(H,Math.round(S*.5),22)};--bg:${hs(H,Math.round(S*.45),14)};--tx:${hs(H,15,94)};--mut:${hs(H,15,72)};--comp:${hs(C,S,62)};--pbg:${hs(H,Math.round(S*.5),13)};--onac:#111;--oncomp:#111;color-scheme:dark`}
+ const dark=SET.theme==='dark'||(SET.theme!=='light'&&matchMedia('(prefers-color-scheme:dark)').matches);
+ if(dark)return `--ac:${hs(H,S,68)};--ac2:${hs(H,Math.round(S*.4),30)};--bd:${hs(H,Math.round(S*.3),36)};--card:${hs(H,Math.round(S*.5),22)};--bg:${hs(H,Math.round(S*.45),14)};--tx:${hs(H,15,94)};--mut:${hs(H,15,72)};--comp:${hs(C,S,62)};--pbg:${hs(H,Math.round(S*.5),13)};--onac:#111;--oncomp:#111;color-scheme:dark`;
+ return `--ac:${hs(H,S,40)};--ac2:${hs(H,Math.round(S*.35),90)};--bd:${hs(H,Math.round(S*.3),80)};--card:${hs(H,Math.round(S*.35),98)};--bg:${hs(H,Math.round(S*.3),93)};--tx:${hs(H,25,16)};--mut:${hs(H,18,38)};--comp:${hs(C,S,42)};--pbg:${hs(H,Math.round(S*.3),92)};--onac:#fff;--oncomp:#fff;color-scheme:light`}
 function saveSheet(){const p=DM[view.pid],c=p&&p.chars.find(x=>x.id===view.cid);if(!c)return;const o={},fin=c.fin?{...c.fin,stats:{...c.fin.stats}}:null;
  document.querySelectorAll('#app [data-sv]').forEach(el=>{const k=el.dataset.sv;
   if(k[0]==='s'){if(fin)fin.stats[k.slice(2)]=+el.value||0}else if(k[0]==='f'){if(fin)fin[k.slice(2)]=+el.value||0}else{const f=k.slice(2);o[f]=f==='name'?el.value.trim().slice(0,60):el.value}});
@@ -1100,7 +1118,8 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
  else if(a==='liveadd'){const s=$('liveadd');if(!s||!s.value)return;const k=liveKeys();if(!k.includes(s.value))liveSave([...k,s.value]);render()}
  else if(a==='liveunpin'){liveSave(liveKeys().filter(k=>!k.endsWith('|'+d.c)));render()}
  else if(a==='liveadj'){liveAdj(d.p,d.c,d.k,+d.d)}
- else if(a==='livereset'){liveReset(d.p,d.c)}
+ else if(a==='liveresetone'){liveResetOne(d.p,d.c,d.k)}
+ else if(a==='livefocus'){const el=document.getElementById('rn-'+d.k+'-'+d.c);if(el){el.focus();el.select()}}
  else if(a==='dtopen'){MENU=false;dtOpen()}
  else if(a==='back'){DR={};view.cid=view.pid=view.oth=null;render()}
  else if(a==='open'){DR={};view.oth=null;view.pid=d.p;view.cid=d.c;render()}
