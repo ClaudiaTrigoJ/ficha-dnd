@@ -118,7 +118,22 @@ service cloud.firestore {
           && request.resource.data.pool.size() == 0
           && request.resource.data.done == false;
 
-        allow update: if isDM() || (me(uid) && (regOk() || ownerOk() || textOk() || iconOk() || spendOk() || nameOk() || gearOk() || slotsOk() || notesOk() || lvRollOk() || lvRwOk() || flowerOk() || visOk() || revealOk()));
+        // Vida y recursos durante la partida (campo 'live'): el dueño siempre; cualquier jugador conectado
+        // solo si el personaje es visible (mismo criterio que ya se usa para leerlo), y solo ese campo.
+        function liveOk() {
+          let k = request.resource.data.diff(resource.data).affectedKeys();
+          let n = request.resource.data;
+          return k.hasOnly(['live'])
+            && n.live is map
+            && n.live.keys().hasOnly(['hp', 'mana', 'anima', 'shield'])
+            && (!('hp' in n.live) || (n.live.hp is int && n.live.hp >= 0 && n.live.hp <= 9999))
+            && (!('mana' in n.live) || (n.live.mana is int && n.live.mana >= 0 && n.live.mana <= 9999))
+            && (!('anima' in n.live) || (n.live.anima is int && n.live.anima >= 0 && n.live.anima <= 9999))
+            && (!('shield' in n.live) || (n.live.shield is int && n.live.shield >= 0 && n.live.shield <= 9999));
+        }
+
+        allow update: if isDM() || (me(uid) && (regOk() || ownerOk() || textOk() || iconOk() || spendOk() || nameOk() || gearOk() || slotsOk() || notesOk() || lvRollOk() || lvRwOk() || flowerOk() || visOk() || revealOk() || liveOk()))
+          || (request.auth != null && resource.data.get('vis', false) == true && liveOk());
 
         // Cola privada: ids en qH/qP (orden), dH/dP = cuantos se han revelado ya.
         // Se puede revelar el siguiente solo si el anterior ya esta colocado o descartado.
@@ -160,14 +175,14 @@ service cloud.firestore {
           return k.hasOnly(['eq','inv','money'])
             && (!k.hasAny(['eq']) || (n.eq is map
                   && n.eq.keys().hasOnly(['casco', 'pechera', 'guantes', 'grebas', 'botas', 'a1', 'a2', 'a3'])
-                  && (!('casco' in n.eq) || (n.eq.casco is string && n.eq.casco.size() <= 60))
-                  && (!('pechera' in n.eq) || (n.eq.pechera is string && n.eq.pechera.size() <= 60))
-                  && (!('guantes' in n.eq) || (n.eq.guantes is string && n.eq.guantes.size() <= 60))
-                  && (!('grebas' in n.eq) || (n.eq.grebas is string && n.eq.grebas.size() <= 60))
-                  && (!('botas' in n.eq) || (n.eq.botas is string && n.eq.botas.size() <= 60))
-                  && (!('a1' in n.eq) || (n.eq.a1 is string && n.eq.a1.size() <= 60))
-                  && (!('a2' in n.eq) || (n.eq.a2 is string && n.eq.a2.size() <= 60))
-                  && (!('a3' in n.eq) || (n.eq.a3 is string && n.eq.a3.size() <= 60))))
+                  && (!('casco' in n.eq) || (n.eq.casco is string && n.eq.casco.size() <= 150))
+                  && (!('pechera' in n.eq) || (n.eq.pechera is string && n.eq.pechera.size() <= 150))
+                  && (!('guantes' in n.eq) || (n.eq.guantes is string && n.eq.guantes.size() <= 150))
+                  && (!('grebas' in n.eq) || (n.eq.grebas is string && n.eq.grebas.size() <= 150))
+                  && (!('botas' in n.eq) || (n.eq.botas is string && n.eq.botas.size() <= 150))
+                  && (!('a1' in n.eq) || (n.eq.a1 is string && n.eq.a1.size() <= 150))
+                  && (!('a2' in n.eq) || (n.eq.a2 is string && n.eq.a2.size() <= 150))
+                  && (!('a3' in n.eq) || (n.eq.a3 is string && n.eq.a3.size() <= 150))))
             && (!k.hasAny(['inv']) || (n.inv is string && n.inv.size() <= 3000))
             && (!k.hasAny(['money']) || (n.money is map
                   && n.money.keys().hasOnly(['cobre', 'plata', 'electrum', 'oro', 'platino'])

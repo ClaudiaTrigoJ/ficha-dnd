@@ -11,6 +11,8 @@
 :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
 --bg:#f6f1e7;--card:#fffdf8;--tx:#2b2118;--mut:#7a6a58;--ac:#8b2e2e;--ac2:#f0e4d0;--bd:#d9ccb6;--ok:#2f6b3a}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#1b1612;--card:#251e18;--tx:#efe6d6;--mut:#a8977f;--ac:#d9685f;--ac2:#352b21;--bd:#443728;--ok:#7fc58b}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#1b1612;--card:#251e18;--tx:#efe6d6;--mut:#a8977f;--ac:#d9685f;--ac2:#352b21;--bd:#443728;--ok:#7fc58b}
+:root[data-theme="light"]{color-scheme:light;--bg:#f6f1e7;--card:#fffdf8;--tx:#2b2118;--mut:#7a6a58;--ac:#8b2e2e;--ac2:#f0e4d0;--bd:#d9ccb6;--ok:#2f6b3a}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 Georgia,'Times New Roman',serif}
 main{max-width:760px;margin:0 auto;padding:16px}
@@ -190,8 +192,10 @@ const rnd=n=>{const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%n
 const mod=v=>Math.floor((v-10)/2);
 const sg=n=>(n>=0?'+':'')+n;
 /* ---------- preferencias (sonido, animacion...), guardadas en este dispositivo ---------- */
-const SET=(()=>{let s={};try{s=JSON.parse(localStorage.getItem('dnd_set')||'{}')}catch(e){}return {t3:s.t3!==false,snd:s.snd!==false}})();
-function setPref(k,v){SET[k]=v;try{localStorage.setItem('dnd_set',JSON.stringify(SET))}catch(e){}}
+const SET=(()=>{let s={};try{s=JSON.parse(localStorage.getItem('dnd_set')||'{}')}catch(e){}return {t3:s.t3!==false,snd:s.snd!==false,theme:s.theme==='light'||s.theme==='dark'?s.theme:'auto',liveSel:Array.isArray(s.liveSel)?s.liveSel:[]}})();
+function setPref(k,v){SET[k]=v;try{localStorage.setItem('dnd_set',JSON.stringify(SET))}catch(e){}if(k==='theme')applyTheme()}
+function applyTheme(){document.documentElement.setAttribute('data-theme',SET.theme==='light'||SET.theme==='dark'?SET.theme:'auto')}
+applyTheme();
 /* ---------- sonido ---------- */
 let AC=null,lastC=0;
 function unlock(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();}catch(e){}}
@@ -278,17 +282,18 @@ const STATS=['Fuerza','Constitución','Destreza','Voluntad','Inteligencia','Cari
 const DEF={classes:[{n:'Guerrero',h:8,m:0,a:6},{n:'Monje',h:6,m:4,a:4},{n:'Clérigo',h:6,m:4,a:4},{n:'Bardo',h:4,m:4,a:4},{n:'Druida',h:6,m:4,a:4},{n:'Tirador',h:4,m:0,a:6},{n:'Asesino',h:4,m:4,a:4},{n:'Hechicero',h:4,m:6,a:0},{n:'Warlock',h:6,m:4,a:6},{n:'Mago',h:4,m:6,a:0}],
  flowers:[{n:'Sin Flor',res:'',d:4,b:{}},{n:'Flor Roja',res:'hp',d:4,b:{}},{n:'Flor Azul',res:'ma',d:4,b:{}},{n:'Flor Verde',res:'an',d:4,b:{}},{n:'Flor Marrón',res:'',d:4,b:{Fuerza:2,Constitución:2}},{n:'Flor Blanca',res:'',d:4,b:{Destreza:2,Voluntad:2}},{n:'Flor Morada',res:'',d:4,b:{Inteligencia:2,Sabiduría:2}},{n:'Flor Amarilla',res:'',d:4,b:{Carisma:2,Suerte:2}}],
  rewards:['Más 2 puntos de estadísticas','Hueco de habilidad','Nueva competencia o mejora','Poder de clase','Habilidad especial','Más 2 puntos de estadísticas','Hueco de habilidad','Poder de profesión','Poder de clase o subclase','Poder de raza'],
- races:['Humano','Ángel','Demonio','Vampiro','Dracónido'],resBonus:2};
-let RESB=2,CLS={},FLO={},REW=[],RACES=[],TBL=null,TD=null;
+ races:['Humano','Ángel','Demonio','Vampiro','Dracónido'],resBonus:2,
+ professions:["Acólito / Cuidador de templo", "Actor / comediante", "Adivino / Astrólogo", "Agricultor / Granjero", "Albañil / Cantero", "Alfarero", "Alquimista aficionado", "Apicultor", "Bailarín", "Banquero / Cambista", "Camarero / Sirviente", "Carpintero", "Cartógrafo", "Cazador / Trampero", "Cazador de monstruos menores", "Cazarrecompensas", "Chamán local", "Cocinero / Panadero", "Contrabandista", "Cronista / Historiador", "Curtidor (trabajador de cuero)", "Domador de bestias", "Espía", "Estafador / Jugador profesional", "Explorador de frontera", "Falsificador", "Gladiador", "Guardia de ciudad", "Herborista / Boticario", "Herrero", "Joyero u orfebre", "Ladrón de poca monta", "Leñador", "Librero / Escribano", "Marinero mercante", "Matón", "Mercader / Vendedor ambulante", "Mercenario", "Minero", "Molinero", "Monje copista", "Músico callejero", "Navegante", "Pastor / Ganadero", "Pescador", "Pintor / Escultor", "Poeta / Juglar", "Sanador / Curandero", "Sastre", "Soldado raso", "Tabernero / Posadero", "Tejedor", "Vidriero"]};
+let RESB=2,CLS={},FLO={},REW=[],RACES=[],PROFS=[],TBL=null,TD=null;
 const RES={hp:'Vida',ma:'Maná',an:'Ánima'};
 const flText=f=>[f.res?`Más 1d${f.d||4} en cada tirada de ${RES[f.res]}`:'',...Object.entries(f.b||{}).filter(([,v])=>v).map(([n,v])=>`${v>0?'+':''}${v} ${n}`)].filter(Boolean).join(' · ');
 const COLS=[['roj','#c0392b'],['azul','#2e6fd6'],['verd','#2f9e44'],['marr','#8d5a2b'],['blanc','#f2f2f2'],['morad','#8e44ad'],['amaril','#e6b800'],['rosa','#e76f9a'],['naranj','#e8801a'],['negr','#333333']];
 const guessCol=n=>{n=(n||'').toLowerCase();const m=COLS.find(([k])=>n.includes(k));return m?m[1]:'#888888'};
 const withSF=a=>a.some(f=>f.n==='Sin Flor')?a:[{n:'Sin Flor',res:'',d:4,b:{}},...a];
-function applyTables(t){t=t||DEF;t={...t,flowers:withSF(t.flowers)};RESB=Number.isFinite(+t.resBonus)&&t.resBonus!==undefined&&t.resBonus!==null?+t.resBonus:2;CLS=Object.fromEntries(t.classes.map(c=>[c.n,[c.h,c.m,c.a]]));FLO=Object.fromEntries(t.flowers.map(f=>[f.n,{t:flText(f),k:f.res||'',d:f.d||4,b:f.b||{},col:f.col||guessCol(f.n)}]));REW=t.rewards;RACES=(t.races&&t.races.length)?t.races:DEF.races;}
+function applyTables(t){t=t||DEF;t={...t,flowers:withSF(t.flowers)};RESB=Number.isFinite(+t.resBonus)&&t.resBonus!==undefined&&t.resBonus!==null?+t.resBonus:2;CLS=Object.fromEntries(t.classes.map(c=>[c.n,[c.h,c.m,c.a]]));FLO=Object.fromEntries(t.flowers.map(f=>[f.n,{t:flText(f),k:f.res||'',d:f.d||4,b:f.b||{},col:f.col||guessCol(f.n)}]));REW=t.rewards;RACES=(t.races&&t.races.length)?t.races:DEF.races;PROFS=(t.professions&&t.professions.length)?t.professions:DEF.professions;}
 applyTables();
 const clone=o=>JSON.parse(JSON.stringify(o));
-const mkTD=()=>{const t=clone(TBL||DEF);t.flowers=withSF(t.flowers);t.resBonus=RESB;t.races=(t.races&&t.races.length)?t.races:clone(DEF.races);return t};
+const mkTD=()=>{const t=clone(TBL||DEF);t.flowers=withSF(t.flowers);t.resBonus=RESB;t.races=(t.races&&t.races.length)?t.races:clone(DEF.races);t.professions=(t.professions&&t.professions.length)?t.professions:clone(DEF.professions);return t};
 
 const sum=a=>a.reduce((x,y)=>x+y,0);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -297,7 +302,6 @@ const pts=L=>2*(Math.floor(L/5)+1);
 const bon=c=>(FLO[c.flower]||{}).b||{};
 const dv=(c,i)=>{const k=c.sl&&c.sl[i];return k>=0&&c.pool[k]!==undefined?c.pool[k]:null};
 const total=(c,i)=>{const d=dv(c,i);return d===null?null:Math.min(20,d+(bon(c)[STATS[i]]||0))};
-const PROF=["Acólito / Cuidador de templo", "Actor / comediante", "Adivino / Astrólogo", "Agricultor / Granjero", "Albañil / Cantero", "Alfarero", "Alquimista aficionado", "Apicultor", "Bailarín", "Banquero / Cambista", "Camarero / Sirviente", "Carpintero", "Cartógrafo", "Cazador / Trampero", "Cazador de monstruos menores", "Cazarrecompensas", "Chamán local", "Cocinero / Panadero", "Contrabandista", "Cronista / Historiador", "Curtidor (trabajador de cuero)", "Domador de bestias", "Espía", "Estafador / Jugador profesional", "Explorador de frontera", "Falsificador", "Gladiador", "Guardia de ciudad", "Herborista / Boticario", "Herrero", "Joyero u orfebre", "Ladrón de poca monta", "Leñador", "Librero / Escribano", "Marinero mercante", "Matón", "Mercader / Vendedor ambulante", "Mercenario", "Minero", "Molinero", "Monje copista", "Músico callejero", "Navegante", "Pastor / Ganadero", "Pescador", "Pintor / Escultor", "Poeta / Juglar", "Sanador / Curandero", "Sastre", "Soldado raso", "Tabernero / Posadero", "Tejedor", "Vidriero"];
 const ALIN=["Lawful Good", "Lawful Neutral", "Lawful Evil", "Neutral Good", "True Neutral", "Neutral Evil", "Chaotic Good", "Chaotic Neutral", "Chaotic Evil"];
 const cnm=c=>c.name||'Sin nombre';
 const clsTxt=c=>c.sub?c.cls+' / '+c.sub:c.cls;
@@ -315,7 +319,7 @@ function cbList(k){
  if(k==='cf')return Object.entries(FLO).map(([n,f])=>({v:n,l:n,d:f.t}));
  if(k==='cl99')return Array.from({length:99},(_,i)=>({v:String(i+1),l:String(i+1)}));
  if(k==='cl')return Array.from({length:cfg.maxLevel||1},(_,i)=>({v:String(i+1),l:String(i+1)}));
- if(k==='profesion')return PROF.map(n=>({v:n,l:n}));
+ if(k==='profesion')return PROFS.map(n=>({v:n,l:n}));
  if(k==='alineamiento')return ALIN.map(n=>({v:n,l:n}));
  return [];}
 const cbox=(key,val,attr,o={})=>{const cu=cbList(key).find(x=>x.v===val);
@@ -348,10 +352,16 @@ const sTot=(o,c)=>o?sum(o.r)+sum(o.f)+RB(c)*o.r.length:0;
 const hpTot=c=>c.hp?c.hp.r.reduce((t,x,i)=>t+Math.max(1,x+(c.hp.f[i]||0)+c.hp.mod+RB(c)),0):0;
 const usedDice=c=>(c.hp?c.hp.r.length:0)+(c.ma?c.ma.r.length:0)+(c.an?c.an.r.length:0);
 const finOf=c=>({stats:Object.fromEntries(STATS.map((n,i)=>[n,total(c,i)])),hp:hpTot(c),mana:sTot(c.ma,c),anima:sTot(c.an,c),puntos:pts(c.level)});
+const charRef=(pid,cid)=>DB.doc(`players/${pid}/chars/${cid}`);
+const LRES=[['hp','Vida'],['mana','Maná'],['anima','Ánima']];
+const liveMax=c=>({hp:(c.fin&&c.fin.hp)||0,mana:(c.fin&&c.fin.mana)||0,anima:(c.fin&&c.fin.anima)||0});
+const liveOf=c=>{const mx=liveMax(c),l=c.live||{},n=k=>Number.isFinite(l[k])?l[k]:(k==='shield'?0:mx[k]);
+ return {hp:n('hp'),mana:n('mana'),anima:n('anima'),shield:n('shield')};};
 
 /* ---------- estado ---------- */
 let OTH={},PV={key:'',bg:'',nt:'',un:[]};
-let DB=null,U=null,ME={id:null,dm:false},cfg={maxLevel:1},P={prof:null,grants:[],chars:[]},DM={},view={mode:'player',pid:null,cid:null,oth:null},sel=null,busy=false,pend=false,wq=Promise.resolve();
+let DB=null,U=null,ME={id:null,dm:false},cfg={maxLevel:1,groups:[]},P={prof:null,grants:[],chars:[]},DM={},view={mode:'player',pid:null,cid:null,oth:null},sel=null,busy=false,pend=false,wq=Promise.resolve();
+function saveCfg(patch){const doc={maxLevel:cfg.maxLevel||1,groups:cfg.groups||[],...patch};cfg=doc;W(()=>DB.doc('config/main').set(doc));}
 let DR={},NT=[],selI=null,IT=null,FX=null,HOLD=0,RWV=null,RWPG={};
 const COINS=[['cobre','Cobre'],['plata','Plata'],['electrum','Electrum'],['oro','Oro'],['platino','Platino']],COIN=COINS.map(x=>x[0]),MAXM=999999999;
 function calcExp(t,cur){t=String(t).replace(/\s+/g,'').replace(/,/g,'');if(!/^[+-]?\d+([+-]\d+)*$/.test(t))return null;const rel=/^[+-]/.test(t);const n=(t.match(/[+-]?\d+/g)||[]).reduce((a,x)=>a+parseInt(x,10),0);return rel?(cur||0)+n:n}
@@ -407,7 +417,7 @@ function folios(c,dm,own,ro){
  a+=`<section><h2>Defensas y recursos</h2><div class="pjr">${arm('armF','Armadura física')}${CIR('x n',ani,'Ánima')}${CIR('x n',vid,'Vida')}${CIR('x n',man,'Maná')}${arm('armM','Armadura mágica')}</div>`
   +(dm?'<h3>Detalle de tiradas</h3>'+res('Vida',c.hp,cl[0],'hp',c.hp?` · Con ${c.hp.con} (${sg(c.hp.mod)} por dado)`:'')+res('Maná',c.ma,cl[1],'mana')+res('Ánima',c.an,cl[2],'anima'):'')+'</section>';
  const eq=c.eq||{},mo=c.money||{};
- const eqf=(k,l)=>`<div class="el">${l?`<label>${l}</label>`:''}<input data-eq="${k}" maxlength="60" value="${esc(eq[k]||'')}"${l?'':' placeholder="Arma equipada"'}></div>`;
+ const eqf=(k,l)=>`<div class="el">${l?`<label>${l}</label>`:''}<input data-eq="${k}" maxlength="150" value="${esc(eq[k]||'')}"${l?'':' placeholder="Arma equipada"'}></div>`;
  a+=`<div class="g2"><section><h2>Equipamiento</h2>${[['casco','Casco'],['pechera','Pechera'],['guantes','Guantes'],['grebas','Grebas'],['botas','Botas']].map(([k,l])=>eqf(k,l)).join('')}<div style="height:10px"></div><label>Armas</label>${['a1','a2','a3'].map(k=>eqf(k,'')).join('')}</section>
   <section>${expBtn('inv','Inventario')}<textarea data-inv data-bigk="inv" maxlength="3000" style="min-height:220px;height:220px;resize:none;font-family:inherit">${esc(c.inv||'')}</textarea><h3>Dinero</h3><div class="mo">${COINS.map(([k,l])=>`<div class="mc"><label>${l}</label><input type="text" inputmode="tel" autocomplete="off" data-mo="${k}" value="${mo[k]??0}"></div>`).join('')}</div><p class="mut" style="margin:6px 0 0">Al llegar a 100 se pasa a la siguiente moneda. Puedes escribir sumas y si empiezas con + o − se aplica al valor actual.</p></section></div>`;
  if(!ro)a+=`<section>${bgBox(c,dm?'dm':'me')}</section>`;
@@ -423,7 +433,7 @@ function folios(c,dm,own,ro){
  z+=`<section><h2>Habilidades</h2>${ro?'':pendBox('Habilidades',stH,'h')}<div class="hg">${Array.from({length:24},(_,i)=>hcell(i)).join('')}</div></section>`;
  const NS=ntGet(c),TRI='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>';
  const CP=Array.isArray(c.comps)?c.comps:[];
- z+=`<section><h2>Competencias</h2>`+(CP.length?CP.map((t,k)=>dm?`<div class="bar" style="margin:4px 0"><input data-cp="${k}" maxlength="200" value="${esc(t)}" style="flex:1;min-width:140px"><button class="danger" type="button" data-act="cpdel" data-i="${k}" title="Quitar" aria-label="Quitar competencia">${'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>'}</button></div>`:`<div class="cpl">${esc(t)}</div>`).join(''):'<p class="s">Aún no tienes competencias.</p>')+(dm?`<div class="bar"><input id="cpn" maxlength="200" placeholder="Nueva competencia" style="flex:1;min-width:140px"><button type="button" data-act="cpadd">Añadir</button></div>`:'')+'</section>';
+ z+=`<section><h2>Competencias</h2>`+(CP.length?CP.map((t,k)=>dm?`<div class="bar" style="margin:4px 0"><input data-cp="${k}" maxlength="400" value="${esc(t)}" style="flex:1;min-width:140px"><button class="danger" type="button" data-act="cpdel" data-i="${k}" title="Quitar" aria-label="Quitar competencia">${'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>'}</button></div>`:`<div class="cpl">${esc(t)}</div>`).join(''):'<p class="s">Aún no tienes competencias.</p>')+(dm?`<div class="bar"><input id="cpn" maxlength="400" placeholder="Nueva competencia" style="flex:1;min-width:140px"><button type="button" data-act="cpadd">Añadir</button></div>`:'')+'</section>';
 const NSX=ro?ntShared(c):NS;
 if(!ro||NSX.length)z+=`<section><h2>Notas</h2>`+(NSX.length?NSX.map(q=>!ro&&NTO===q.id?ntEdit(q,TRI):ntView(q,ro)).join(''):'<p class="s">Aún no tienes notas. Crea una sección para empezar.</p>')+(ro?'':`<h3>Nueva sección</h3><div class="bar"><input id="ntn" maxlength="60" placeholder="Título de la sección nueva" style="flex:1;min-width:140px"><select id="ntk" style="width:auto"><option value="t">Texto</option><option value="l">Lista con ticks</option></select><button type="button" data-act="ntadd">Crear sección</button></div>`)+`</section>`;
 const RD=c.rwd||{},given=n=>[...Object.values(HB),...Object.values(PB)].filter(x=>x.lv===n).length;
@@ -443,7 +453,7 @@ const RD=c.rwd||{},given=n=>[...Object.values(HB),...Object.values(PB)].filter(x
    +(all.length?all.map(([id,k,it])=>`<div class="res"><b>${esc(it.n)}</b> <span class="mut">${k==='h'?'Habilidad':'Pasiva'}${it.lv!=null?' · Nivel '+it.lv:''} · ${est(id,k)}</span><div class="bar"><button class="o" data-act="itedit" data-id="${id}">Editar</button>${ds.has(id)?`<button class="o" data-act="itrec" data-id="${id}">Recuperar</button>`:''}<button class="danger" data-act="itdel" data-id="${id}">Eliminar</button></div></div>`).join(''):'<p class="s">Todavía no has dado ninguna.</p>')+'</section>'}
  return `<div class="folios"><div class="folio">${a}</div><div class="folio">${z}</div></div>`;
 }
-const files=(cs,p,act='open')=>cs.length?`<div class="files">${cs.map(c=>`<button class="file${c.icon?' has':''}" ${c.icon&&themeVars(c)?`style="${themeVars(c)}"`:''} data-act="${act}" data-p="${p}" data-c="${c.id}">${av(c,'card')}<span>${esc(cnm(c))}<small>${rtxt(c)}${esc(clsTxt(c))} · Nv ${c.level} · ${c.reg==='draft'?'registro en curso':c.reg==='pending'?'pendiente del DM':c.done?'completa':'en curso'}${act==='open'&&c.fin&&c.fin.puntos>0?' · '+c.fin.puntos+' pts por repartir':''}</small></span></button>`).join('')}</div>`:'';
+const files=(cs,p,act='open')=>cs.length?`<div class="files">${cs.map(c=>`<button class="file${c.icon?' has':''}" ${c.icon&&themeVars(c)?`style="${themeVars(c)}"`:''} data-act="${act}" data-p="${p}" data-c="${c.id}">${av(c,'card')}<span>${esc(cnm(c))}<small>${rtxt(c)}${esc(clsTxt(c))} · Nv ${c.level} · ${c.reg==='draft'?'registro en curso':c.reg==='pending'?'pendiente del DM':c.done?'completa':'en curso'}${act==='open'&&c.fin&&c.fin.puntos>0?' · '+c.fin.puntos+' pts por repartir':''}${ME.dm&&act==='open'&&c.grp?' · Carpeta: '+esc(c.grp):''}</small></span></button>`).join('')}</div>`:'';
 
 function lvPanel(c){if(!c.hp||!c.done)return '';
  const cl=clsD(c),left=c.level-(usedDice(c)-c.hp.nb),rl=rwLv(c.level).length-(c.rw?c.rw.r.length:0);
@@ -471,7 +481,7 @@ function vReg(c,dm){const f=c.fin||{stats:{}},ST=n=>f.stats&&f.stats[n]!=null?f.
  <section><h2>Recursos y armaduras</h2><div class="g">${rr.map(([k,t])=>`<div><label>${t}</label>${num('f:'+k,f[k]??0,9999)}</div>`).join('')}<div><label>Armadura física</label><input data-rg="armF" maxlength="20" value="${esc(c.armF||'')}" placeholder="12+2"></div><div><label>Armadura mágica</label><input data-rg="armM" maxlength="20" value="${esc(c.armM||'')}" placeholder="12+2"></div></div></section>
  <section><h2>Pasivas</h2>${lst(PB)}<div class="bar"><button class="o" data-act="itnew" data-k="p" data-lv="">Añadir pasiva</button></div></section>
  <section><h2>Habilidades</h2>${lst(HB)}<div class="bar"><button class="o" data-act="itnew" data-k="h" data-lv="">Añadir habilidad</button></div></section>
- <section><h2>Competencias</h2>${CP.map((t,k)=>`<div class="bar" style="margin:4px 0"><span style="flex:1">${esc(t)}</span><button class="danger" type="button" data-act="cpdel" data-i="${k}" title="Quitar" aria-label="Quitar competencia">&times;</button></div>`).join('')||'<p class="s">Ninguna todavía.</p>'}<div class="bar"><input id="cpn" maxlength="200" placeholder="Nueva competencia" style="flex:1;min-width:140px"><button type="button" data-act="cpadd">Añadir</button></div></section>`+(dm||c.reg==='pending'?'':'<section><button data-act="regsend">Finalizar y enviar al DM</button></section>')}
+ <section><h2>Competencias</h2>${CP.map((t,k)=>`<div class="bar" style="margin:4px 0"><span style="flex:1">${esc(t)}</span><button class="danger" type="button" data-act="cpdel" data-i="${k}" title="Quitar" aria-label="Quitar competencia">&times;</button></div>`).join('')||'<p class="s">Ninguna todavía.</p>'}<div class="bar"><input id="cpn" maxlength="400" placeholder="Nueva competencia" style="flex:1;min-width:140px"><button type="button" data-act="cpadd">Añadir</button></div></section>`+(dm||c.reg==='pending'?'':'<section><button data-act="regsend">Finalizar y enviar al DM</button></section>')}
 function rgSave(t){const x=iconTarget();if(!x)return;const {c,ref}=x;if(!ME.dm&&c.reg!=='draft')return;const k=t.dataset.rg,upd={};
  if(k.startsWith('s:')||k.startsWith('f:')){const hadFin0=!!c.fin&&!!c.fin.stats&&Object.prototype.hasOwnProperty.call(c.fin,'puntos'),fin=c.fin?{...c.fin,stats:{...c.fin.stats}}:{stats:{},hp:0,mana:0,anima:0,puntos:0},n=Math.max(0,Math.floor(+t.value)||0);
   const nm=k.slice(2),vv=k[0]==='s'?Math.min(20,n):Math.min(9999,n);if(k[0]==='s')fin.stats[nm]=vv;else fin[nm]=vv;upd.fin=fin;
@@ -542,19 +552,26 @@ function vPlayer(){
  <p class="mut">Después de crear el personaje, estos datos no se pueden cambiar. Si eliges raza aleatoria, la ruleta se gira dentro de la ficha y te da 1 dado extra de estadística. El nombre puedes dejarlo en blanco y ponerlo cuando termines la ficha; una vez guardado, solo el DM podrá cambiarlo.</p><div class="bar"><button data-act="create">Crear y empezar tiradas</button></div></section>`+OH;
 }
 const sOpt=v=>'<option value="">—</option>'+STATS.map(n=>`<option ${n===v?'selected':''}>${n}</option>`).join('');
+let TTAB='clases';
+const TTABS=[['clases','Clases'],['flores','Flores'],['razas','Razas'],['profesiones','Profesiones'],['recompensas','Recompensas']];
 function vTables(){
  if(!TD)TD=mkTD();
- let h='<section><h2>Tablas de información</h2><p class="s">Solo el DM ve y edita esto. Los cambios se aplican a los personajes que se creen a partir de ahora; los ya creados conservan sus datos. Pon 0 si una clase no tiene ese dado.</p></section>';
- h+='<section id="tbl"><h2>Clases</h2><div class="sc"><table><tr><th>Clase</th><th>Vida (d)</th><th>Maná (d)</th><th>Ánima (d)</th><th></th></tr>'+TD.classes.map((c,i)=>`<tr><td><input data-c="${i}" data-k="n" value="${esc(c.n)}" style="width:130px"></td><td><input type="number" data-c="${i}" data-k="h" value="${c.h}"></td><td><input type="number" data-c="${i}" data-k="m" value="${c.m}"></td><td><input type="number" data-c="${i}" data-k="a" value="${c.a}"></td><td><button class="o" data-act="tcdel" data-i="${i}">Quitar</button></td></tr>`).join('')+'</table></div><div class="bar"><button class="o" data-act="tcadd">Añadir clase</button></div>';
- h+='<h2 style="margin-top:16px">Flores</h2>'+TD.flowers.map((f,i)=>{const be=Object.entries(f.b||{});
+ const pnl=(k,body)=>`<div data-tp="${k}" style="${TTAB===k?'':'display:none'}">${body}</div>`;
+ let h='<section><h2>Tablas de información</h2><p class="s">Solo el DM ve y edita esto. Los cambios se aplican a los personajes que se creen a partir de ahora; los ya creados conservan sus datos. Pon 0 si una clase no tiene ese dado.</p>'
+  +'<div class="bar">'+TTABS.map(([k,t])=>`<button type="button" class="${TTAB===k?'':'o'}" data-act="ttab" data-v="${k}">${t}</button>`).join('')+'</div></section>';
+ h+='<section id="tbl">';
+ h+=pnl('clases','<h2>Clases</h2><div class="sc"><table><tr><th>Clase</th><th>Vida (d)</th><th>Maná (d)</th><th>Ánima (d)</th><th></th></tr>'+TD.classes.map((c,i)=>`<tr><td><input data-c="${i}" data-k="n" value="${esc(c.n)}" style="width:130px"></td><td><input type="number" data-c="${i}" data-k="h" value="${c.h}"></td><td><input type="number" data-c="${i}" data-k="m" value="${c.m}"></td><td><input type="number" data-c="${i}" data-k="a" value="${c.a}"></td><td><button class="o" data-act="tcdel" data-i="${i}">Quitar</button></td></tr>`).join('')+'</table></div><div class="bar"><button class="o" data-act="tcadd">Añadir clase</button></div>');
+ h+=pnl('flores',TD.flowers.map((f,i)=>{const be=Object.entries(f.b||{});
   return `<div class="fcard"><div class="g"><div><label>Nombre</label><input data-f="${i}" data-k="n" value="${esc(f.n)}"></div>
   <div><label>Dado extra en cada tirada de…</label><select data-f="${i}" data-k="res">${[['','Ninguno'],['hp','Vida'],['ma','Maná'],['an','Ánima']].map(([v,t])=>`<option value="${v}" ${v===(f.res||'')?'selected':''}>${t}</option>`).join('')}</select></div>
   <div><label>Caras del dado extra</label><input type="number" data-f="${i}" data-k="d" value="${f.d||4}"></div>
   <div><label>Color</label><input type="color" data-f="${i}" data-k="col" value="${f.col||guessCol(f.n)}" style="padding:2px;height:38px"></div></div>
   <div class="g" style="margin-top:6px">${[0,1].map(n=>`<div><label>Bono de estadística ${n+1}</label><select data-f="${i}" data-k="s${n}">${sOpt(be[n]&&be[n][0])}</select></div><div><label>Valor</label><input type="number" data-f="${i}" data-k="v${n}" value="${be[n]?be[n][1]:0}"></div>`).join('')}</div>
-  <p class="mut">Efecto: ${esc(flText(f))||'—'}</p><button class="o" data-act="tfdel" data-i="${i}">Quitar flor</button></div>`}).join('')+'<div class="bar"><button class="o" data-act="tfadd">Añadir flor</button></div>';
- h+=`<h2 style="margin-top:16px">Bono de recursos</h2><p class="s">Cuando concedes un personaje con la casilla "Bono de recursos", se suma este número a cada dado de vida, maná y ánima que tire el jugador. Afecta a las tiradas que se hagan a partir de ahora.</p><div class="g"><div><label>Bono por dado</label><input type="number" data-rbv value="${TD.resBonus}"></div></div>`+'<h2 style="margin-top:16px">Razas</h2><p class="s">Por ahora solo los nombres. Más adelante se podrán añadir bonos.</p>'+TD.races.map((r,i)=>`<div class="bar"><input data-ra="${i}" value="${esc(r)}" style="flex:1"><button class="o" data-act="trdel" data-i="${i}">Quitar</button></div>`).join('')+'<div class="bar"><button class="o" data-act="tradd">Añadir raza</button></div>';
- h+='<h2 style="margin-top:16px">Recompensas por nivel</h2><p class="s">Según la última cifra del nivel. Los niveles múltiplos de 5 dan siempre 2 puntos de estadística y no tiran dado.</p>'+TD.rewards.map((t,i)=>`<div class="bar"><b style="width:36px">X${i}</b><input data-r="${i}" value="${esc(t)}" style="flex:1"></div>`).join('');
+  <p class="mut">Efecto: ${esc(flText(f))||'—'}</p><button class="o" data-act="tfdel" data-i="${i}">Quitar flor</button></div>`}).join('')+'<div class="bar"><button class="o" data-act="tfadd">Añadir flor</button></div>'
+  +`<h2 style="margin-top:16px">Bono de recursos</h2><p class="s">Cuando concedes un personaje con la casilla "Bono de recursos", se suma este número a cada dado de vida, maná y ánima que tire el jugador. Afecta a las tiradas que se hagan a partir de ahora.</p><div class="g"><div><label>Bono por dado</label><input type="number" data-rbv value="${TD.resBonus}"></div></div>`);
+ h+=pnl('razas','<p class="s">Por ahora solo los nombres. Más adelante se podrán añadir bonos.</p>'+TD.races.map((r,i)=>`<div class="bar"><input data-ra="${i}" value="${esc(r)}" style="flex:1"><button class="o" data-act="trdel" data-i="${i}">Quitar</button></div>`).join('')+'<div class="bar"><button class="o" data-act="tradd">Añadir raza</button></div>');
+ h+=pnl('profesiones','<p class="s">Lista de profesiones que los jugadores pueden elegir (o buscar escribiendo) al rellenar el Trasfondo de su personaje.</p>'+TD.professions.map((r,i)=>`<div class="bar"><input data-pf="${i}" value="${esc(r)}" style="flex:1"><button class="o" data-act="tpfdel" data-i="${i}">Quitar</button></div>`).join('')+'<div class="bar"><button class="o" data-act="tpfadd">Añadir profesión</button></div>');
+ h+=pnl('recompensas','<p class="s">Según la última cifra del nivel. Los niveles múltiplos de 5 dan siempre 2 puntos de estadística y no tiran dado.</p>'+TD.rewards.map((t,i)=>`<div class="bar"><b style="width:36px">X${i}</b><input data-r="${i}" value="${esc(t)}" style="flex:1"></div>`).join(''));
  h+=`<h2 style="margin-top:16px">Estadísticas</h2><p class="mut">${STATS.join(' · ')} (no editable)</p><div class="bar"><button data-act="tsave">Guardar tablas</button><button class="o" data-act="treset">Restaurar valores iniciales</button></div></section>`;
  return h;
 }
@@ -565,23 +582,32 @@ function grab(){if(!TD)return;
  TD.flowers.forEach(f=>{if(f._e){const b={};[0,1].forEach(i=>{const n=f._e['s'+i],v=+f._e['v'+i]||0;if(n&&v)b[n]=(b[n]||0)+v});f.b=b;delete f._e}});
  document.querySelectorAll('#tbl [data-rbv]').forEach(e=>{TD.resBonus=Math.max(-20,Math.min(20,Math.floor(+e.value)||0))});
  document.querySelectorAll('#tbl [data-ra]').forEach(e=>{TD.races[+e.dataset.ra]=e.value.trim()});
+ document.querySelectorAll('#tbl [data-pf]').forEach(e=>{TD.professions[+e.dataset.pf]=e.value.trim()});
  document.querySelectorAll('#tbl [data-r]').forEach(e=>{TD.rewards[+e.dataset.r]=e.value.trim()});}
 function ntSection(){const u=NT.filter(n=>!n.read);
  return `<section><h2>Avisos${u.length?' ('+u.length+')':''}</h2>`+(u.length?u.slice(0,15).map(n=>`<div class="res"><b>${n.type==='new_player'?'Nuevo jugador':n.type==='char_reg'?'Personaje registrado':'Personaje terminado'}</b>: ${esc(n.type==='new_player'?n.name:n.type==='char_reg'?`${n.name} ha registrado ${n.cname?`"${n.cname}"`:'un personaje'} y espera tu confirmación`:`${n.name} ha terminado ${n.cname?`"${n.cname}"`:'un personaje sin nombre'}`)}<div class="bar">${n.type==='char_done'||n.type==='char_reg'?`<button data-act="nview" data-id="${n.id}" data-p="${n.pid}" data-c="${n.cid}">Ver ficha</button>`:''}<button class="o" data-act="nread" data-id="${n.id}">Marcar como leído</button></div></div>`).join('')+'<div class="bar"><button class="o" data-act="nall">Marcar todo como leído</button></div>':'<p class="s">Sin avisos nuevos.</p>')
   +(('Notification' in window&&Notification.permission==='default')?'<div class="bar"><button class="o" data-act="nperm">Activar avisos del navegador</button></div><p class="mut">Con los avisos activados, el navegador te avisa mientras la app esté abierta.</p>':'')+'</section>'}
 function alertNt(d){if(d.read)return;const m=d.type==='new_player'?`Nuevo jugador: ${d.name}`:d.type==='char_reg'?`${d.name} ha registrado ${d.cname||'un personaje'}`:`${d.name} ha terminado ${d.cname?'el personaje '+d.cname:'un personaje sin nombre'}`;toast(m);
  try{if('Notification' in window&&Notification.permission==='granted')new Notification('Fichas de personaje',{body:m})}catch(e){}}
+let DMFLT='';
 function vDM(){
  if(view.cid){const p=DM[view.pid],c=p&&p.chars.find(x=>x.id===view.cid);
-  if(c)return `<div class="bar" style="margin:8px 0 16px">${backBtn('Volver a todos los jugadores')}<button data-act="save">Guardar cambios</button>${c.done?`<label class="sw" style="margin-left:auto" title="Si lo activas, los demás jugadores verán tu ficha (sin background ni notas)"><input type="checkbox" data-vis ${c.vis?'checked':''}><span class="trk"><span class="knb"></span></span>Visible para otros jugadores</label>`:''}<button class="danger" data-act="delc" data-p="${view.pid}" data-c="${c.id}">Eliminar personaje</button></div><p class="mut">Jugador: ${esc(p.prof.name)}</p>${c.reg==='draft'||c.reg==='pending'?`<section><h2>Registro de personaje existente</h2><p class="s">Estado: ${c.reg==='draft'?'el jugador aún lo está rellenando':'enviado, pendiente de tu confirmación'}.</p><div class="bar"><button data-act="regok">Aprobar y guardar la ficha</button>${c.reg==='pending'?'<button class="o" data-act="regback">Devolver al jugador</button>':''}</div></section>${vReg(c,true)}`:folios(c,true,false)+'<div class="bar"><button data-act="save">Guardar cambios</button></div>'}`;}
+  if(c)return `<div class="bar" style="margin:8px 0 16px">${backBtn('Volver a todos los jugadores')}<button data-act="save">Guardar cambios</button>${c.done?`<label class="sw" style="margin-left:auto" title="Si lo activas, los demás jugadores verán tu ficha (sin background ni notas)"><input type="checkbox" data-vis ${c.vis?'checked':''}><span class="trk"><span class="knb"></span></span>Visible para otros jugadores</label>`:''}<button class="danger" data-act="delc" data-p="${view.pid}" data-c="${c.id}">Eliminar personaje</button></div><p class="mut">Jugador: ${esc(p.prof.name)}</p>
+  <div class="bar"><label style="display:flex;gap:6px;align-items:center">Carpeta<select data-grp="1" data-p="${view.pid}" data-c="${c.id}" style="width:auto"><option value="" ${!c.grp?'selected':''}>Sin carpeta</option>${(cfg.groups||[]).map(g=>`<option value="${esc(g)}" ${c.grp===g?'selected':''}>${esc(g)}</option>`).join('')}${c.grp&&!(cfg.groups||[]).includes(c.grp)?`<option value="${esc(c.grp)}" selected>${esc(c.grp)} (carpeta eliminada)</option>`:''}</select></label></div>
+  ${c.reg==='draft'||c.reg==='pending'?`<section><h2>Registro de personaje existente</h2><p class="s">Estado: ${c.reg==='draft'?'el jugador aún lo está rellenando':'enviado, pendiente de tu confirmación'}.</p><div class="bar"><button data-act="regok">Aprobar y guardar la ficha</button>${c.reg==='pending'?'<button class="o" data-act="regback">Devolver al jugador</button>':''}</div></section>${vReg(c,true)}`:folios(c,true,false)+'<div class="bar"><button data-act="save">Guardar cambios</button></div>'}`;}
 let h=ntSection();
  const ps=Object.values(DM).sort((a,b)=>String(a.prof.name).localeCompare(b.prof.name));
+ if((cfg.groups||[]).length)h+=`<section><div class="bar"><label style="display:flex;gap:6px;align-items:center">Filtrar por carpeta<select id="dmflt" data-act2="dmflt" style="width:auto"><option value="" ${!DMFLT?'selected':''}>Todas</option>${(cfg.groups||[]).map(g=>`<option value="${esc(g)}" ${DMFLT===g?'selected':''}>${esc(g)}</option>`).join('')}</select></label></div></section>`;
  if(!ps.length)h+='<section><p class="s">Aún no hay jugadores. Aparecerán aquí cuando abran la página y escriban su nombre.</p></section>';
- ps.forEach(p=>{h+=`<section><h2>${esc(p.prof.name)}</h2><p class="mut">${p.chars.length} personaje(s)</p>${files(p.chars,p.id)}</section>`;});
+ ps.forEach(p=>{const cs=DMFLT?p.chars.filter(c=>c.grp===DMFLT):p.chars;if(DMFLT&&!cs.length)return;
+  h+=`<section><h2>${esc(p.prof.name)}</h2><p class="mut">${cs.length} personaje(s)${DMFLT?' en esta carpeta':''}</p>${files(cs,p.id)}</section>`;});
  return h;
 }
 function vPermits(){
  let h=`<section><h2>Ajustes</h2><div class="g"><div><label>Nivel máximo al crear un personaje nuevo (subir de nivel y registrar personajes llega hasta 99)</label><input id="ml" type="number" min="1" max="99" value="${cfg.maxLevel||1}"></div></div><div class="bar"><button data-act="ml">Guardar</button></div></section>`;
+ h+=`<section><h2>Carpetas de personajes</h2><p class="s">Crea carpetas o etiquetas (por ejemplo "Vivos", "Muertos" o el nombre de un grupo) para organizar los personajes, sea quien sea su jugador. Las asignas desde la ficha de cada personaje.</p>
+ ${(cfg.groups||[]).map(g=>`<div class="bar"><span style="flex:1">${esc(g)}</span><button class="danger" type="button" data-act="grpdel" data-v="${esc(g)}">Quitar</button></div>`).join('')||'<p class="s">Aún no has creado ninguna.</p>'}
+ <div class="bar"><input id="grpn" maxlength="40" placeholder="Nombre de la carpeta" style="flex:1;min-width:140px"><button type="button" data-act="grpadd">Crear carpeta</button></div></section>`;
  const ps=Object.values(DM).sort((a,b)=>String(a.prof.name).localeCompare(b.prof.name));
  if(!ps.length)h+='<section><p class="s">Aún no hay jugadores. Aparecerán aquí cuando abran la página y escriban su nombre.</p></section>';
  ps.forEach(p=>{const used=new Set(p.chars.map(c=>c.grant)),free=p.grants.filter(g=>!used.has(g.id));
@@ -591,9 +617,46 @@ function vPermits(){
  return h;
 }
 function vConfig(){
- return `<section><h2>Configuración</h2><p class="s">Estos ajustes se guardan en este dispositivo.</p><div class="bar" style="gap:20px"><label class="sw"><input type="checkbox" data-pref="t3" ${SET.t3?'checked':''}><span class="trk"><span class="knb"></span></span>Animación 3D</label><label class="sw"><input type="checkbox" data-pref="snd" ${SET.snd?'checked':''}><span class="trk"><span class="knb"></span></span>Sonido</label></div></section>
+ return `<section><h2>Configuración</h2><p class="s">Estos ajustes se guardan en este dispositivo.</p><div class="bar" style="gap:20px"><label class="sw"><input type="checkbox" data-pref="t3" ${SET.t3?'checked':''}><span class="trk"><span class="knb"></span></span>Animación 3D</label><label class="sw"><input type="checkbox" data-pref="snd" ${SET.snd?'checked':''}><span class="trk"><span class="knb"></span></span>Sonido</label></div>
+<h3 style="margin-top:14px">Apariencia</h3><div class="bar">${[['auto','Automático'],['light','Claro'],['dark','Oscuro']].map(([v,t])=>`<button type="button" class="${SET.theme===v?'':'o'}" data-act="theme" data-v="${v}">${t}</button>`).join('')}</div></section>
 <section><h2>Cuenta</h2><p class="s">Sesión iniciada como ${esc(ME.email||'')}.</p><div class="bar"><button class="o" data-act="out">Salir / cambiar de cuenta</button></div></section>`;
 }
+function liveKeys(){return Array.isArray(SET.liveSel)?SET.liveSel:[];}
+function liveSave(arr){setPref('liveSel',arr);}
+function liveAvail(){
+ if(ME.dm){const out=[];Object.values(DM).forEach(p=>(p.chars||[]).forEach(c=>{if(c.done&&c.reg!=='draft'&&c.reg!=='pending')out.push({pid:p.id,cid:c.id,c,label:cnm(c)+' — '+esc(p.prof.name)})}));return out;}
+ const mine=P.chars.filter(c=>c.done&&c.reg!=='draft'&&c.reg!=='pending').map(c=>({pid:ME.id,cid:c.id,c,label:cnm(c)+' — tú'}));
+ const oth=Object.entries(OTH).filter(([,o])=>o.c).map(([cid,o])=>({pid:o.pid,cid,c:o.c,label:cnm(o.c)+' — '+esc(o.pname||'')}));
+ return [...mine,...oth];
+}
+function liveResolve(pid,cid){
+ if(ME.dm){const p=DM[pid];const c=p&&p.chars.find(x=>x.id===cid);return c?{pid,c}:null;}
+ if(pid===ME.id){const c=P.chars.find(x=>x.id===cid);return c?{pid,c}:null;}
+ const o=OTH[cid];return o&&o.c&&o.pid===pid?{pid,c:o.c}:null;
+}
+function liveCard(pid,cid,c){
+ const L=liveOf(c),mx=liveMax(c);
+ const adj=(k)=>`<button class="o" type="button" data-act="liveadj" data-p="${pid}" data-c="${cid}" data-k="${k}" data-d="-1" aria-label="Quitar 1">−</button><input type="number" min="0" max="9999" style="width:64px;text-align:center" data-act2="livein" data-p="${pid}" data-c="${cid}" data-k="${k}" value="${L[k]}"><button class="o" type="button" data-act="liveadj" data-p="${pid}" data-c="${cid}" data-k="${k}" data-d="1" aria-label="Añadir 1">+</button>`;
+ return `<div class="res"><div class="bar" style="justify-content:space-between"><b>${esc(cnm(c))}</b><button class="o" type="button" data-act="liveunpin" data-c="${cid}">Quitar de esta lista</button></div>
+ <div class="g">${LRES.map(([k,t])=>`<div><label>${t} (máx ${mx[k]})</label><div class="bar" style="flex-wrap:nowrap">${adj(k)}</div></div>`).join('')}
+ <div><label>Sobreescudo</label><div class="bar" style="flex-wrap:nowrap">${adj('shield')}</div></div></div>
+ <div class="bar"><button class="o" type="button" data-act="livereset" data-p="${pid}" data-c="${cid}">Restablecer al máximo</button></div></div>`;
+}
+function vLive(){
+ const sel=liveKeys(),avail=liveAvail(),selSet=new Set(sel),pick=avail.filter(a=>!selSet.has(a.pid+'|'+a.cid));
+ let h='<section><h2>En partida</h2><p class="s">Elige qué personajes quieres tener a mano durante la partida para ir anotando su vida y recursos. Puedes añadir tus propios personajes y también los de otro jugador que sean visibles (por ejemplo si tienes que llevar el de dos).</p>';
+ h+=pick.length?`<div class="bar"><select id="liveadd" style="width:auto;flex:1;min-width:160px">${pick.map(a=>`<option value="${a.pid}|${a.cid}">${a.label}</option>`).join('')}</select><button type="button" data-act="liveadd">Añadir</button></div>`:'<p class="mut">No hay más personajes disponibles para añadir.</p>';
+ h+='</section>';
+ const cards=sel.map(k=>{const [pid,cid]=k.split('|');return liveResolve(pid,cid)}).filter(Boolean);
+ h+=cards.length?cards.map(x=>liveCard(x.pid,x.c.id,x.c)).join(''):'<section><p class="s">Aún no has añadido ningún personaje aquí.</p></section>';
+ return h;
+}
+function liveWrite(pid,cid,patch){const r=liveResolve(pid,cid);if(!r)return;const live={...liveOf(r.c),...patch};r.c.live=live;W(()=>charRef(pid,cid).update({live}));render();}
+function liveAdj(pid,cid,k,delta){const r=liveResolve(pid,cid);if(!r)return;const cur=liveOf(r.c),mx=liveMax(r.c);
+ const top=k==='shield'?9999:mx[k];liveWrite(pid,cid,{[k]:Math.max(0,Math.min(top,(cur[k]||0)+delta))});}
+function liveSet(pid,cid,k,v){const r=liveResolve(pid,cid);if(!r)return;const mx=liveMax(r.c),top=k==='shield'?9999:mx[k];
+ liveWrite(pid,cid,{[k]:Math.max(0,Math.min(top,Math.floor(+v)||0))});}
+function liveReset(pid,cid){const r=liveResolve(pid,cid);if(!r)return;const mx=liveMax(r.c);liveWrite(pid,cid,{hp:mx.hp,mana:mx.mana,anima:mx.anima,shield:0});toast('Restablecido al máximo')}
 const REVQ=new Set(),MIG=new Set();
 
 /* ---------- probar un dado 3D propio (solo para el DM; no se guarda en ninguna ficha) ---------- */
@@ -718,8 +781,8 @@ function dmMig(){if(!ME.dm)return;
 let MENU=false;
 const ICO_MENU='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>';
 function menuBar(){
- const items=ME.dm?[['permits','Permisos de Personajes'],['dm','Personajes'+(NT.some(n=>!n.read)?' ('+NT.filter(n=>!n.read).length+')':'')],['tables','Tablas'],['player','Mis personajes'],['config','Configuración']]
-  :[['player','Mis personajes'],['config','Configuración']];
+ const items=ME.dm?[['permits','Permisos de Personajes'],['dm','Personajes'+(NT.some(n=>!n.read)?' ('+NT.filter(n=>!n.read).length+')':'')],['tables','Tablas'],['player','Mis personajes'],['live','En partida'],['config','Configuración']]
+  :[['player','Mis personajes'],['live','En partida'],['config','Configuración']];
  return `<div style="position:relative"><button class="o" data-act="menutoggle" aria-haspopup="true" aria-expanded="${MENU}" aria-label="Menú" title="Menú" style="padding:8px 10px">${ICO_MENU}</button>`
   +(MENU?`<div class="menudd" style="right:0;left:auto">${items.map(([v,t])=>`<button class="${view.mode===v?'':'o'}" data-act="mode" data-v="${v}">${t}</button>`).join('')}${ME.dm?'<button class="o" data-act="dtopen">Probar dado 3D</button>':''}</div>`:'')
   +'</div>';
@@ -738,8 +801,8 @@ function render(){
  const slot=$('menuslot');
  if(!ME.id){if(slot)slot.innerHTML='';A.innerHTML=`<section><h2>Entrar</h2><div class="bar"><button data-act="google">Entrar con Google</button></div><p class="mut">o con correo y contraseña</p><div class="g"><div><label>Correo</label><input id="le" type="email" autocomplete="email"></div><div><label>Contraseña</label><input id="lp" type="password" autocomplete="current-password"></div></div><div class="bar"><button class="o" data-act="login">Entrar</button><button class="o" data-act="register">Crear cuenta</button></div></section>`;return}
  if(slot)slot.innerHTML=menuBar();
- const body=view.mode==='config'?vConfig():ME.dm&&view.mode==='permits'?vPermits():ME.dm&&view.mode==='dm'?vDM():ME.dm&&view.mode==='tables'?vTables():vPlayer();
- const cc=(view.mode==='tables'||view.mode==='config'||view.mode==='permits')?null:view.oth?(OTH[view.oth]||{}).c:view.mode==='player'?curChar():(DM[view.pid]&&view.cid?DM[view.pid].chars.find(x=>x.id===view.cid):null);
+ const body=view.mode==='config'?vConfig():view.mode==='live'?vLive():ME.dm&&view.mode==='permits'?vPermits():ME.dm&&view.mode==='dm'?vDM():ME.dm&&view.mode==='tables'?vTables():vPlayer();
+ const cc=(view.mode==='tables'||view.mode==='config'||view.mode==='permits'||view.mode==='live')?null:view.oth?(OTH[view.oth]||{}).c:view.mode==='player'?curChar():(DM[view.pid]&&view.cid?DM[view.pid].chars.find(x=>x.id===view.cid):null);
  pvSync(cc,view.mode==='dm'?view.pid:ME.id);
  dmMig();if(view.mode==='player')autoReveal(cc);
  document.querySelector('main').classList.toggle('wide',!!cc&&(view.mode==='player'||view.mode==='dm'));
@@ -921,6 +984,7 @@ function setVis(v){const x=iconTarget();if(!x||!x.c.done)return;const {c,ref}=x,
  c.vis=v;W(()=>ref.update({vis:v}));
  if(v)W(()=>DB.doc('pub/'+c.id).set({pid,pname:String(pname).slice(0,40),cid:c.id,at:Date.now()}));else W(()=>DB.doc('pub/'+c.id).delete());
  toast(v?'Tu ficha es visible para los demás jugadores.':'Tu ficha ya no es visible para los demás.');render()}
+function grpSet(pid,cid,v){if(!ME.dm)return;const p=DM[pid],c=p&&p.chars.find(x=>x.id===cid);if(!c)return;v=(v||'').trim().slice(0,40);c.grp=v;W(()=>DB.doc('players/'+pid+'/chars/'+cid).update({grp:v}));toast('Guardado');render()}
 function pvSync(c,pid){const key=c&&pid&&view.cid&&!view.oth?pid+'/'+c.id:'';if(key===PV.key)return;PV.un.forEach(f=>f&&f());PV={key,bg:'',nt:'',un:[],q:{}};if(!key)return;
  const base=`players/${pid}/chars/${c.id}/priv/`,cur=()=>{const x=iconTarget();return x&&x.c.id===c.id?x:null};
  if(ME.dm)PV.un.push(DB.collection(`players/${pid}/chars/${c.id}/queue`).onSnapshot(sn=>{if(PV.key!==key)return;const m={};sn.docs.forEach(d=>m[d.id]=d.data());PV.q=m;schedule()},()=>{}));
@@ -952,8 +1016,8 @@ function ntAdd(){const t=($('ntn').value.trim()||'Sin título').slice(0,60),k=$(
 function ntDel(sid){if(!confirm('¿Borrar esta sección de notas y todo lo que contiene?'))return;NTO=null;ntPut(a=>{const i=a.findIndex(z=>z.id===sid);if(i>=0)a.splice(i,1)})}
 function ntIAdd(sid){const inp=document.querySelector(`#app [data-ntin="${sid}"]`),v=inp?inp.value.trim().slice(0,200):'';if(!v)return;ntPut(a=>{const q=a.find(z=>z.id===sid);if(q&&q.i&&q.i.length<100)q.i.push({t:v,d:false})})}
 function ntIDel(sid,i){ntPut(a=>{const q=a.find(z=>z.id===sid);if(q&&q.i)q.i.splice(i,1)})}
-function cpSave(t){if(!ME.dm)return;const x=iconTarget();if(!x)return;const {c,ref}=x,a=[...(c.comps||[])],k=+t.dataset.cp;if(!(k>=0&&k<a.length))return;const v=t.value.trim().slice(0,200);if(v)a[k]=v;else a.splice(k,1);c.comps=a;W(()=>ref.update({comps:a}));toast('Guardado');render()}
-function cpAdd(){const x=iconTarget(),inp=$('app').querySelector('#cpn');if(!x||!inp||!(ME.dm||x.c.reg==='draft'))return;const v=inp.value.trim().slice(0,200);if(!v)return;const a=[...(x.c.comps||[]),v];if(a.length>60){toast('Máximo 60 competencias.');return}x.c.comps=a;W(()=>x.ref.update({comps:a}));toast('Guardado');render()}
+function cpSave(t){if(!ME.dm)return;const x=iconTarget();if(!x)return;const {c,ref}=x,a=[...(c.comps||[])],k=+t.dataset.cp;if(!(k>=0&&k<a.length))return;const v=t.value.trim().slice(0,400);if(v)a[k]=v;else a.splice(k,1);c.comps=a;W(()=>ref.update({comps:a}));toast('Guardado');render()}
+function cpAdd(){const x=iconTarget(),inp=$('app').querySelector('#cpn');if(!x||!inp||!(ME.dm||x.c.reg==='draft'))return;const v=inp.value.trim().slice(0,400);if(!v)return;const a=[...(x.c.comps||[]),v];if(a.length>60){toast('Máximo 60 competencias.');return}x.c.comps=a;W(()=>x.ref.update({comps:a}));toast('Guardado');render()}
 function cpDel(i){const x=iconTarget();if(!x||!(ME.dm||x.c.reg==='draft'))return;const a=[...(x.c.comps||[])];if(!(i>=0&&i<a.length))return;if(!confirm(`¿Quitar la competencia "${a[i]}"?`))return;a.splice(i,1);x.c.comps=a;W(()=>x.ref.update({comps:a}));toast('Guardado');render()}
 function slotAt(el){const q=el&&el.closest&&el.closest('[data-hs],[data-ps]');return q?(q.dataset.hs!==undefined?{k:'h',i:+q.dataset.hs}:{k:'p',i:+q.dataset.ps}):null}
 function tryMove(id,k,i){const x=iconTarget();if(!x)return;const {c,ref}=x,M=(c.habs||{})[id]?'h':(c.pass||{})[id]?'p':null;if(!M||M!==k)return;
@@ -975,12 +1039,12 @@ function delItem(id){const x=iconTarget();if(!x||!(ME.dm||x.c.reg==='draft'))ret
  else W(()=>ref.update(upd));toast('Eliminada');render()}
 function itOpen(k,id,lv){const x=iconTarget();if(!x||!(ME.dm||x.c.reg==='draft'))return;const it=id&&k!=='c'?((k==='h'?x.c.habs:x.c.pass)||{})[id]||((PV.q||{})[id]||{}).it||{}:{};IT={k,id,lv};
  $('itt').textContent=(id?'Editar ':'Dar ')+(k==='h'?'habilidad':k==='c'?'competencia':'pasiva')+(lv!==''&&lv!=null&&!id?' (recompensa del nivel '+lv+')':'');
- if(k==='c'){$('itf').innerHTML='<label>Competencia</label><input id="itn" maxlength="200" value="">';$('itm').style.display='flex';$('itn').focus();return}
+ if(k==='c'){$('itf').innerHTML='<label>Competencia</label><input id="itn" maxlength="400" value="">';$('itm').style.display='flex';$('itn').focus();return}
  $('itf').innerHTML=`<label>Nombre</label><input id="itn" maxlength="60" value="${esc(it.n||'')}">`+(k==='h'?`<label style="margin-top:8px">Coste</label><input id="itc" maxlength="40" value="${esc(it.c||'')}"><label style="margin-top:8px">Efecto</label><textarea id="ite" maxlength="600">${esc(it.e||'')}</textarea>`:`<label style="margin-top:8px">Efecto positivo</label><textarea id="ite" maxlength="400">${esc(it.e||'')}</textarea><label style="margin-top:8px">Efecto negativo (opcional)</label><textarea id="itg" maxlength="400">${esc(it.g||'')}</textarea>`);
  $('itm').style.display='flex';$('itn').focus()}
 function itClose(){$('itm').style.display='none';IT=null}
 function itSave(){const x=iconTarget();if(!x||!IT||!(ME.dm||x.c.reg==='draft'))return;const {c,ref}=x,g=q=>(($(q)||{}).value||'').trim(),n=g('itn').slice(0,60);
- if(IT.k==='c'){const v=g('itn').slice(0,200);if(!v){toast('Escribe la competencia.');return}const a=[...(c.comps||[]),v];if(a.length>60){toast('Máximo 60 competencias.');return}c.comps=a;W(()=>ref.update({comps:a}));itClose();toast('Guardado');render();return}
+ if(IT.k==='c'){const v=g('itn').slice(0,400);if(!v){toast('Escribe la competencia.');return}const a=[...(c.comps||[]),v];if(a.length>60){toast('Máximo 60 competencias.');return}c.comps=a;W(()=>ref.update({comps:a}));itClose();toast('Guardado');render();return}
  if(!n){toast('Escribe el nombre.');return}
  const it=IT.k==='h'?{n,c:g('itc').slice(0,40),e:g('ite').slice(0,600)}:{n,e:g('ite').slice(0,400),g:g('itg').slice(0,400)},mk=IT.k==='h'?'habs':'pass',sk=IT.k==='h'?'sh':'sp',m={...(c[mk]||{})};
  if(IT.id&&!m[IT.id]&&(PV.q||{})[IT.id]&&ME.dm){const old=PV.q[IT.id].it||{};if(old.lv!=null)it.lv=old.lv;PV.q[IT.id]={k:IT.k,it};const qp=qPath(c)+'/'+IT.id,qv={k:IT.k,it};W(()=>DB.doc(qp).set(qv))}
@@ -1016,6 +1080,9 @@ $('app').addEventListener('change',e=>{const t=e.target;if(t.id==='csub'||t.id==
  if(t.dataset.rg!==undefined){rgSave(t);return}
  if(t.dataset.pref!==undefined){setPref(t.dataset.pref,t.checked);return}
  if(t.dataset.vis!==undefined){setVis(t.checked);return}
+ if(t.dataset.grp!==undefined){grpSet(t.dataset.p,t.dataset.c,t.value);return}
+ if(t.dataset.act2==='dmflt'){DMFLT=t.value;render();return}
+ if(t.dataset.act2==='livein'){liveSet(t.dataset.p,t.dataset.c,t.dataset.k,t.value);return}
  if(t.dataset.cp!==undefined){cpSave(t);return}
  if(t.dataset.tg!==undefined){if(!ME.dm)return;const x=iconTarget();if(!x)return;x.c[t.dataset.tg]=t.checked;const v=t.checked,k=t.dataset.tg;W(()=>x.ref.update({[k]:v}));toast('Guardado');render();return}
  if(t.dataset.ntt!==undefined||t.dataset.nt!==undefined||t.dataset.nti!==undefined||t.dataset.ntc!==undefined||t.dataset.ntsh!==undefined){ntChange(t);return}
@@ -1029,6 +1096,11 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
  else if(a==='out')signOut(auth);
  else if(a==='mode'){DR={};if(d.v==='tables')TD=mkTD();view.mode=d.v;view.cid=view.pid=null;MENU=false;render()}
  else if(a==='menutoggle'){MENU=!MENU;render()}
+ else if(a==='theme'){setPref('theme',d.v);render()}
+ else if(a==='liveadd'){const s=$('liveadd');if(!s||!s.value)return;const k=liveKeys();if(!k.includes(s.value))liveSave([...k,s.value]);render()}
+ else if(a==='liveunpin'){liveSave(liveKeys().filter(k=>!k.endsWith('|'+d.c)));render()}
+ else if(a==='liveadj'){liveAdj(d.p,d.c,d.k,+d.d)}
+ else if(a==='livereset'){liveReset(d.p,d.c)}
  else if(a==='dtopen'){MENU=false;dtOpen()}
  else if(a==='back'){DR={};view.cid=view.pid=view.oth=null;render()}
  else if(a==='open'){DR={};view.oth=null;view.pid=d.p;view.cid=d.c;render()}
@@ -1061,21 +1133,27 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
  else if(a==='nall'){NT.filter(n=>!n.read).forEach(n=>{n.read=true;W(()=>DB.doc('notifs/'+n.id).update({read:true}))});render()}
  else if(a==='nview'){const n=NT.find(x=>x.id===d.id);if(n){n.read=true;W(()=>DB.doc('notifs/'+d.id).update({read:true}))}DR={};view.pid=d.p;view.cid=d.c;render()}
  else if(a==='nperm'){Notification.requestPermission().then(()=>render())}
+ else if(a==='ttab'){grab();TTAB=d.v;render()}
  else if(a==='tradd'){grab();TD.races.push('Nueva raza');render()}
  else if(a==='trdel'){grab();TD.races.splice(+d.i,1);render()}
+ else if(a==='tpfadd'){grab();TD.professions.push('Nueva profesión');render()}
+ else if(a==='tpfdel'){grab();TD.professions.splice(+d.i,1);render()}
  else if(a==='tcadd'){grab();TD.classes.push({n:'Nueva clase',h:6,m:4,a:4});render()}
  else if(a==='tcdel'){grab();TD.classes.splice(+d.i,1);render()}
  else if(a==='tfadd'){grab();TD.flowers.push({n:'Nueva flor',res:'',d:4,b:{},col:'#888888'});render()}
  else if(a==='tfdel'){grab();TD.flowers.splice(+d.i,1);render()}
  else if(a==='treset'){if(confirm('¿Restaurar las tablas iniciales? Se perderán los cambios sin guardar.')){TD=clone(DEF);render()}}
- else if(a==='tsave'){grab();const cn=TD.classes.map(c=>c.n),fn=TD.flowers.map(f=>f.n),rn=TD.races;
+ else if(a==='tsave'){grab();const cn=TD.classes.map(c=>c.n),fn=TD.flowers.map(f=>f.n),rn=TD.races,pn=TD.professions;
   if(!cn.length||!fn.length||cn.some(x=>!x)||fn.some(x=>!x)||new Set(cn).size!==cn.length||new Set(fn).size!==fn.length||!rn.length||rn.some(x=>!x)||new Set(rn).size!==rn.length){toast('Revisa los nombres: no pueden estar vacíos ni repetidos.');return}
-  const doc={classes:TD.classes.map(c=>({n:c.n,h:c.h,m:c.m,a:c.a})),flowers:TD.flowers.map(f=>({n:f.n,res:f.res||'',d:f.d||4,b:f.b||{},col:f.col||guessCol(f.n)})),rewards:TD.rewards.slice(0,10),resBonus:TD.resBonus,flowerBonus:Object.fromEntries(TD.flowers.map(f=>[f.n,f.b||{}])),classNames:cn,flowerNames:fn,races:rn,raceNames:rn};
+  if(!pn.length||pn.some(x=>!x)){toast('Revisa las profesiones: no pueden estar vacías.');return}
+  const doc={classes:TD.classes.map(c=>({n:c.n,h:c.h,m:c.m,a:c.a})),flowers:TD.flowers.map(f=>({n:f.n,res:f.res||'',d:f.d||4,b:f.b||{},col:f.col||guessCol(f.n)})),rewards:TD.rewards.slice(0,10),resBonus:TD.resBonus,flowerBonus:Object.fromEntries(TD.flowers.map(f=>[f.n,f.b||{}])),classNames:cn,flowerNames:fn,races:rn,raceNames:rn,professions:pn};
   TBL=doc;applyTables(doc);W(()=>DB.doc('config/tables').set(doc));toast('Tablas guardadas');render()}
  else if(a==='pp'){const c=curChar();if(!c||!c.fin)return;const dl=+d.d,n=d.n;if(dl>0&&(c.fin.puntos-sum(Object.values(DR))<=0||c.fin.stats[n]+(DR[n]||0)>=20))return;if(dl<0&&!(DR[n]>0))return;DR[n]=(DR[n]||0)+dl;render()}
  else if(a==='pc'){const c=curChar();if(!c||!c.fin)return;const fin={...c.fin,stats:{...c.fin.stats}};let g=0;STATS.forEach(n=>{const v=DR[n]||0;fin.stats[n]+=v;g+=v});
   if(!g||g>fin.puntos)return;fin.puntos-=g;c.fin=fin;DR={};W(()=>chRef(c).update({fin}));toast('Puntos repartidos');render()}
- else if(a==='ml'){const n=Math.max(1,Math.min(99,+$('ml').value||1));cfg.maxLevel=n;W(()=>DB.doc('config/main').set({maxLevel:n}));toast('Nivel máximo guardado: '+n)}
+ else if(a==='ml'){const n=Math.max(1,Math.min(99,+$('ml').value||1));saveCfg({maxLevel:n});toast('Nivel máximo guardado: '+n)}
+ else if(a==='grpadd'){const inp=$('grpn'),v=inp&&inp.value.trim().slice(0,40);if(!v)return;const g=[...(cfg.groups||[])];if(g.includes(v)){toast('Esa carpeta ya existe.');return}g.push(v);saveCfg({groups:g});toast('Carpeta creada');render()}
+ else if(a==='grpdel'){if(!confirm('¿Quitar la carpeta "'+d.v+'"? Los personajes que la tenían quedarán sin carpeta.'))return;const g=(cfg.groups||[]).filter(x=>x!==d.v);saveCfg({groups:g});toast('Carpeta eliminada');render()}
  else if(a==='grant'){const x=Math.max(0,+document.querySelector(`[data-xin="${d.p}"]`).value||0),gid='g'+Date.now().toString(36);
   const rb=!!document.querySelector(`[data-rbin="${d.p}"]`).checked;DM[d.p].grants.push({id:gid,extra:x,rb});W(()=>DB.doc(`permits/${d.p}/grants/${gid}`).set({extra:x,rb,at:Date.now()}));render()}
  else if(a==='grantreg'){const gid='g'+Date.now().toString(36);DM[d.p].grants.push({id:gid,extra:0,reg:true});W(()=>DB.doc(`permits/${d.p}/grants/${gid}`).set({extra:0,reg:true,at:Date.now()}));render()}
