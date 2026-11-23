@@ -150,7 +150,12 @@ main.wide{max-width:1500px}
 .nbx{width:18px;height:18px;box-sizing:border-box;border:2px solid var(--ac);border-radius:5px;display:inline-flex;align-items:center;justify-content:center;flex:none;cursor:pointer}.nbx.on{background:var(--ac);color:var(--onac,#fff)}
 .tgl{display:flex;gap:8px;align-items:center;cursor:pointer}.tgl input{width:auto;margin:0}
 .cpl{padding:6px 4px;border-bottom:1px dashed var(--bd)}.cpl:last-of-type{border-bottom:0}
-@media (max-width:760px){.hg{grid-template-columns:1fr}}
+@media (max-width:760px){.hg{grid-template-columns:1fr}.rgrid{grid-template-columns:1fr}}
+.acw{border:1px solid var(--bd);border-radius:8px;margin-bottom:8px;overflow:hidden}
+.ach{display:flex;align-items:center;justify-content:space-between;width:100%;padding:12px 14px;background:var(--ac2);border:0;border-radius:0;cursor:pointer;font-weight:bold;font-size:1rem;color:var(--tx);text-align:left}
+.ach svg{transition:transform .15s;flex:none}
+.ach.on svg{transform:rotate(180deg)}
+.acb{padding:12px 14px;border-top:1px solid var(--bd)}
 .hc.hv{box-shadow:inset 0 0 0 2px var(--ac)}
 .it{cursor:grab;user-select:none;-webkit-user-select:none;border-radius:6px;padding:1px 2px}
 .it.sel{outline:2px solid var(--ac)}
@@ -567,12 +572,12 @@ let TTAB='clases';
 const TTABS=[['clases','Clases'],['flores','Flores'],['razas','Razas'],['profesiones','Profesiones'],['recompensas','Recompensas']];
 function vTables(){
  if(!TD)TD=mkTD();
- const pnl=(k,body)=>`<div data-tp="${k}" style="${TTAB===k?'':'display:none'}">${body}</div>`;
- let h='<section><h2>Tablas de información</h2><p class="s">Solo el DM ve y edita esto. Los cambios se aplican a los personajes que se creen a partir de ahora; los ya creados conservan sus datos. Pon 0 si una clase no tiene ese dado.</p>'
-  +'<div class="bar">'+TTABS.map(([k,t])=>`<button type="button" class="${TTAB===k?'':'o'}" data-act="ttab" data-v="${k}">${t}</button>`).join('')+'</div></section>';
+ const pnl=(k,title,body)=>{const open=TTAB===k;
+  return `<div class="acw"><button type="button" class="ach${open?' on':''}" data-act="ttab" data-v="${k}">${esc(title)}${ICO_CHEV}</button><div class="acb" data-tp="${k}" style="${open?'':'display:none'}">${body}</div></div>`};
+ let h='<section><h2>Tablas de información</h2><p class="s">Solo el DM ve y edita esto. Los cambios se aplican a los personajes que se creen a partir de ahora; los ya creados conservan sus datos. Pon 0 si una clase no tiene ese dado.</p></section>';
  h+='<section id="tbl">';
- h+=pnl('clases','<h2>Clases</h2><div class="sc"><table><tr><th>Clase</th><th>Vida (d)</th><th>Maná (d)</th><th>Ánima (d)</th><th></th></tr>'+TD.classes.map((c,i)=>`<tr><td><input data-c="${i}" data-k="n" value="${esc(c.n)}" style="width:130px"></td><td><input type="number" data-c="${i}" data-k="h" value="${c.h}"></td><td><input type="number" data-c="${i}" data-k="m" value="${c.m}"></td><td><input type="number" data-c="${i}" data-k="a" value="${c.a}"></td><td><button class="o" data-act="tcdel" data-i="${i}">Quitar</button></td></tr>`).join('')+'</table></div><div class="bar"><button class="o" data-act="tcadd">Añadir clase</button></div>');
- h+=pnl('flores',TD.flowers.map((f,i)=>{const be=Object.entries(f.b||{});
+ h+=pnl('clases','Clases','<div class="sc"><table><tr><th>Clase</th><th>Vida (d)</th><th>Maná (d)</th><th>Ánima (d)</th><th></th></tr>'+TD.classes.map((c,i)=>`<tr><td><input data-c="${i}" data-k="n" value="${esc(c.n)}" style="width:130px"></td><td><input type="number" data-c="${i}" data-k="h" value="${c.h}"></td><td><input type="number" data-c="${i}" data-k="m" value="${c.m}"></td><td><input type="number" data-c="${i}" data-k="a" value="${c.a}"></td><td><button class="o" data-act="tcdel" data-i="${i}">Quitar</button></td></tr>`).join('')+'</table></div><div class="bar"><button class="o" data-act="tcadd">Añadir clase</button></div>');
+ h+=pnl('flores','Flores',TD.flowers.map((f,i)=>{const be=Object.entries(f.b||{});
   return `<div class="fcard"><div class="g"><div><label>Nombre</label><input data-f="${i}" data-k="n" value="${esc(f.n)}"></div>
   <div><label>Dado extra en cada tirada de…</label><select data-f="${i}" data-k="res">${[['','Ninguno'],['hp','Vida'],['ma','Maná'],['an','Ánima']].map(([v,t])=>`<option value="${v}" ${v===(f.res||'')?'selected':''}>${t}</option>`).join('')}</select></div>
   <div><label>Caras del dado extra</label><input type="number" data-f="${i}" data-k="d" value="${f.d||4}"></div>
@@ -580,9 +585,9 @@ function vTables(){
   <div class="g" style="margin-top:6px">${[0,1].map(n=>`<div><label>Bono de estadística ${n+1}</label><select data-f="${i}" data-k="s${n}">${sOpt(be[n]&&be[n][0])}</select></div><div><label>Valor</label><input type="number" data-f="${i}" data-k="v${n}" value="${be[n]?be[n][1]:0}"></div>`).join('')}</div>
   <p class="mut">Efecto: ${esc(flText(f))||'—'}</p><button class="o" data-act="tfdel" data-i="${i}">Quitar flor</button></div>`}).join('')+'<div class="bar"><button class="o" data-act="tfadd">Añadir flor</button></div>'
   +`<h2 style="margin-top:16px">Bono de recursos</h2><p class="s">Cuando concedes un personaje con la casilla "Bono de recursos", se suma este número a cada dado de vida, maná y ánima que tire el jugador. Afecta a las tiradas que se hagan a partir de ahora.</p><div class="g"><div><label>Bono por dado</label><input type="number" data-rbv value="${TD.resBonus}"></div></div>`);
- h+=pnl('razas','<p class="s">Por ahora solo los nombres. Más adelante se podrán añadir bonos.</p>'+TD.races.map((r,i)=>`<div class="bar"><input data-ra="${i}" value="${esc(r)}" style="flex:1"><button class="o" data-act="trdel" data-i="${i}">Quitar</button></div>`).join('')+'<div class="bar"><button class="o" data-act="tradd">Añadir raza</button></div>');
- h+=pnl('profesiones','<p class="s">Lista de profesiones que los jugadores pueden elegir (o buscar escribiendo) al rellenar el Trasfondo de su personaje.</p>'+TD.professions.map((r,i)=>`<div class="bar"><input data-pf="${i}" value="${esc(r)}" style="flex:1"><button class="o" data-act="tpfdel" data-i="${i}">Quitar</button></div>`).join('')+'<div class="bar"><button class="o" data-act="tpfadd">Añadir profesión</button></div>');
- h+=pnl('recompensas','<p class="s">Según la última cifra del nivel. Los niveles múltiplos de 5 dan siempre 2 puntos de estadística y no tiran dado.</p>'+TD.rewards.map((t,i)=>`<div class="bar"><b style="width:36px">X${i}</b><input data-r="${i}" value="${esc(t)}" style="flex:1"></div>`).join(''));
+ h+=pnl('razas','Razas','<p class="s">Por ahora solo los nombres. Más adelante se podrán añadir bonos.</p>'+TD.races.map((r,i)=>`<div class="bar"><input data-ra="${i}" value="${esc(r)}" style="flex:1"><button class="o" data-act="trdel" data-i="${i}">Quitar</button></div>`).join('')+'<div class="bar"><button class="o" data-act="tradd">Añadir raza</button></div>');
+ h+=pnl('profesiones','Profesiones','<p class="s">Lista de profesiones que los jugadores pueden elegir (o buscar escribiendo) al rellenar el Trasfondo de su personaje.</p>'+TD.professions.map((r,i)=>`<div class="bar"><input data-pf="${i}" value="${esc(r)}" style="flex:1"><button class="o" data-act="tpfdel" data-i="${i}">Quitar</button></div>`).join('')+'<div class="bar"><button class="o" data-act="tpfadd">Añadir profesión</button></div>');
+ h+=pnl('recompensas','Recompensas','<p class="s">Según la última cifra del nivel. Los niveles múltiplos de 5 dan siempre 2 puntos de estadística y no tiran dado.</p>'+TD.rewards.map((t,i)=>`<div class="bar"><b style="width:36px">X${i}</b><input data-r="${i}" value="${esc(t)}" style="flex:1"></div>`).join(''));
  h+=`<h2 style="margin-top:16px">Estadísticas</h2><p class="mut">${STATS.join(' · ')} (no editable)</p><div class="bar"><button data-act="tsave">Guardar tablas</button><button class="o" data-act="treset">Restaurar valores iniciales</button></div></section>`;
  return h;
 }
@@ -646,6 +651,7 @@ function liveResolve(pid,cid){
  const o=OTH[cid];return o&&o.c&&o.pid===pid?{pid,c:o.c}:null;
 }
 const ICO_RST='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>';
+const ICO_CHEV='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><polyline points="6 9 12 15 18 9"/></svg>';
 const RCOLS={hp:'#c0392b',mana:'#2e6fd6',anima:'#2f9e44',shield:'#9c7a2d'};
 function liveTile(pid,cid,k,t,hasMax,L,mx){
  return `<div class="rtile" style="background:${RCOLS[k]}"><div class="rhead"><button type="button" data-act="liveresetone" data-p="${pid}" data-c="${cid}" data-k="${k}" title="Restablecer ${esc(t)}" aria-label="Restablecer ${esc(t)}">${ICO_RST}</button><b>${esc(t)}</b><button type="button" data-act="livefocus" data-p="${pid}" data-c="${cid}" data-k="${k}" title="Editar" aria-label="Editar">${PEN}</button></div>
@@ -920,7 +926,7 @@ function themeVars(c){if(!c||!c.icon)return '';const p=PAL.get(c.icon);if(p===un
  const H=Math.round(p.h),S=Math.round(Math.max(35,Math.min(80,p.s*100))),C=(H+180)%360,hs=(h,sa,l)=>`hsl(${h} ${sa}% ${l}%)`;
  const dark=SET.theme==='dark'||(SET.theme!=='light'&&matchMedia('(prefers-color-scheme:dark)').matches);
  if(dark)return `--ac:${hs(H,S,68)};--ac2:${hs(H,Math.round(S*.4),30)};--bd:${hs(H,Math.round(S*.3),36)};--card:${hs(H,Math.round(S*.5),22)};--bg:${hs(H,Math.round(S*.45),14)};--tx:${hs(H,15,94)};--mut:${hs(H,15,72)};--comp:${hs(C,S,62)};--pbg:${hs(H,Math.round(S*.5),13)};--onac:#111;--oncomp:#111;color-scheme:dark`;
- return `--ac:${hs(H,S,40)};--ac2:${hs(H,Math.round(S*.35),90)};--bd:${hs(H,Math.round(S*.3),80)};--card:${hs(H,Math.round(S*.35),98)};--bg:${hs(H,Math.round(S*.3),93)};--tx:${hs(H,25,16)};--mut:${hs(H,18,38)};--comp:${hs(C,S,42)};--pbg:${hs(H,Math.round(S*.3),92)};--onac:#fff;--oncomp:#fff;color-scheme:light`}
+ return `--ac:${hs(H,S,38)};--ac2:${hs(H,Math.round(S*.4),88)};--bd:${hs(H,Math.round(S*.3),72)};--card:${hs(H,Math.round(S*.5),96)};--bg:${hs(H,Math.round(S*.45),87)};--tx:${hs(H,20,15)};--mut:${hs(H,16,36)};--comp:${hs(C,S,42)};--pbg:${hs(H,Math.round(S*.5),90)};--onac:#fff;--oncomp:#fff;color-scheme:light`}
 function saveSheet(){const p=DM[view.pid],c=p&&p.chars.find(x=>x.id===view.cid);if(!c)return;const o={},fin=c.fin?{...c.fin,stats:{...c.fin.stats}}:null;
  document.querySelectorAll('#app [data-sv]').forEach(el=>{const k=el.dataset.sv;
   if(k[0]==='s'){if(fin)fin.stats[k.slice(2)]=+el.value||0}else if(k[0]==='f'){if(fin)fin[k.slice(2)]=+el.value||0}else{const f=k.slice(2);o[f]=f==='name'?el.value.trim().slice(0,60):el.value}});
@@ -1152,7 +1158,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
  else if(a==='nall'){NT.filter(n=>!n.read).forEach(n=>{n.read=true;W(()=>DB.doc('notifs/'+n.id).update({read:true}))});render()}
  else if(a==='nview'){const n=NT.find(x=>x.id===d.id);if(n){n.read=true;W(()=>DB.doc('notifs/'+d.id).update({read:true}))}DR={};view.pid=d.p;view.cid=d.c;render()}
  else if(a==='nperm'){Notification.requestPermission().then(()=>render())}
- else if(a==='ttab'){grab();TTAB=d.v;render()}
+ else if(a==='ttab'){grab();TTAB=TTAB===d.v?'':d.v;render()}
  else if(a==='tradd'){grab();TD.races.push('Nueva raza');render()}
  else if(a==='trdel'){grab();TD.races.splice(+d.i,1);render()}
  else if(a==='tpfadd'){grab();TD.professions.push('Nueva profesión');render()}
