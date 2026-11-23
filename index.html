@@ -84,15 +84,15 @@ button.file[style]{background:var(--card);color:var(--tx);border-color:var(--bd)
 #roul .box{background:var(--card);border-radius:14px;padding:14px;width:min(94%,360px)}#rcv{width:100%;height:auto;display:block}
 button.danger{background:#a32121;color:#fff}.res{border-top:1px dashed var(--bd);padding:8px 0}
 .fcard{border:1px solid var(--bd);border-radius:10px;padding:8px;margin:8px 0}th{font-size:.8rem;color:var(--mut)}h3{margin:12px 0 4px;font-size:1rem;color:var(--ac)}
-.rgrid{display:grid;grid-template-columns:1fr 1fr;gap:3px;border-radius:14px;overflow:hidden;margin:10px 0}
-.rtile{padding:14px 10px;color:#fff}
-.rtile .rhead{display:flex;align-items:center;justify-content:space-between;gap:6px}
-.rtile .rhead b{font-size:1rem;font-weight:bold}
-.rtile .rhead button{background:transparent;padding:4px;color:#fff;opacity:.85}
+.rgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:3px;border-radius:14px;overflow:hidden;margin:10px 0}
+.rtile{padding:14px 8px;color:#fff;min-width:0;box-sizing:border-box;overflow:hidden}
+.rtile .rhead{display:flex;align-items:center;justify-content:space-between;gap:6px;min-width:0}
+.rtile .rhead b{font-size:1rem;font-weight:bold;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.rtile .rhead button{background:transparent;padding:4px;color:#fff;opacity:.85;flex:none}
 .rtile .rhead button:hover{opacity:1}
-.rbody{display:flex;align-items:center;justify-content:space-between;gap:4px;margin-top:8px}
-.rbody button{background:transparent;color:#fff;font-size:1.7rem;font-weight:bold;padding:2px 8px;opacity:.85;line-height:1}
-.rnum{background:transparent !important;border:0 !important;color:#fff !important;font-size:2.5rem;font-weight:bold;text-align:center;width:auto;flex:1;padding:0 !important;min-width:0}
+.rbody{display:flex;align-items:center;justify-content:space-between;gap:2px;margin-top:8px;min-width:0}
+.rbody button{background:transparent;color:#fff;font-size:1.5rem;font-weight:bold;padding:2px 4px;opacity:.85;line-height:1;flex:none}
+.rnum{background:transparent !important;border:0 !important;color:#fff !important;font-size:2rem;font-weight:bold;text-align:center;width:0;flex:1;padding:0 !important;min-width:0}
 .rnum:focus{outline:2px solid rgba(255,255,255,.65)}
 .rmax{margin:2px 0 0;font-size:.78rem;opacity:.8;text-align:center}
 .cb{position:relative}
@@ -150,7 +150,7 @@ main.wide{max-width:1500px}
 .nbx{width:18px;height:18px;box-sizing:border-box;border:2px solid var(--ac);border-radius:5px;display:inline-flex;align-items:center;justify-content:center;flex:none;cursor:pointer}.nbx.on{background:var(--ac);color:var(--onac,#fff)}
 .tgl{display:flex;gap:8px;align-items:center;cursor:pointer}.tgl input{width:auto;margin:0}
 .cpl{padding:6px 4px;border-bottom:1px dashed var(--bd)}.cpl:last-of-type{border-bottom:0}
-@media (max-width:760px){.hg{grid-template-columns:1fr}.rgrid{grid-template-columns:1fr}}
+@media (max-width:760px){.hg{grid-template-columns:1fr}.rgrid{grid-template-columns:minmax(0,1fr)}}
 .acw{border:1px solid var(--bd);border-radius:8px;margin-bottom:8px;overflow:hidden}
 .ach{display:flex;align-items:center;justify-content:space-between;width:100%;padding:12px 14px;background:var(--ac2);border:0;border-radius:0;cursor:pointer;font-weight:bold;font-size:1rem;color:var(--tx);text-align:left}
 .ach svg{transition:transform .15s;flex:none}
@@ -665,7 +665,7 @@ function liveCard(pid,cid,c){
 }
 function vLive(){
  const sel=liveKeys(),avail=liveAvail(),selSet=new Set(sel),pick=avail.filter(a=>!selSet.has(a.pid+'|'+a.cid));
- let h='<section><h2>Gestión de recursos</h2><p class="s">Elige qué personajes quieres tener a mano durante la partida para ir anotando su vida y recursos. Puedes añadir tus propios personajes y también los de otro jugador que sean visibles (por ejemplo si tienes que llevar el de dos). Puedes tocar + / − o escribir directamente un número o una suma, como 10+5 o -3.</p>';
+ let h='<section><h2>Gestión de recursos</h2>';
  h+=pick.length?`<div class="bar"><select id="liveadd" style="width:auto;flex:1;min-width:160px">${pick.map(a=>`<option value="${a.pid}|${a.cid}">${a.label}</option>`).join('')}</select><button type="button" data-act="liveadd">Añadir</button></div>`:'<p class="mut">No hay más personajes disponibles para añadir.</p>';
  h+='</section>';
  const cards=sel.map(k=>{const [pid,cid]=k.split('|');return liveResolve(pid,cid)}).filter(Boolean);
@@ -923,10 +923,10 @@ function extractPal(src){const im=new Image();im.onload=()=>{const c=document.cr
  for(let i=0;i<d.length;i+=4){if(d[i+3]<128)continue;const [h,sa,l]=rgb2hsl(d[i],d[i+1],d[i+2]),w=sa*(1-Math.abs(2*l-1));if(w<.05)continue;const b=B[Math.floor(h/15)%24];b.w+=w;b.h+=h*w;b.s+=sa*w;tot+=w}
  let best=B[0];B.forEach(b=>{if(b.w>best.w)best=b});PAL.set(src,tot>2&&best.w>0?{h:best.h/best.w,s:best.s/best.w}:false);schedule()};im.src=src}
 function themeVars(c){if(!c||!c.icon)return '';const p=PAL.get(c.icon);if(p===undefined){PAL.set(c.icon,null);extractPal(c.icon);return ''}if(!p)return '';
- const H=Math.round(p.h),S=Math.round(Math.max(35,Math.min(80,p.s*100))),C=(H+180)%360,hs=(h,sa,l)=>`hsl(${h} ${sa}% ${l}%)`;
+ const H=Math.round(p.h),S=Math.round(Math.max(50,Math.min(95,p.s*100))),C=(H+180)%360,hs=(h,sa,l)=>`hsl(${h} ${sa}% ${l}%)`;
  const dark=SET.theme==='dark'||(SET.theme!=='light'&&matchMedia('(prefers-color-scheme:dark)').matches);
- if(dark)return `--ac:${hs(H,S,68)};--ac2:${hs(H,Math.round(S*.4),30)};--bd:${hs(H,Math.round(S*.3),36)};--card:${hs(H,Math.round(S*.5),22)};--bg:${hs(H,Math.round(S*.45),14)};--tx:${hs(H,15,94)};--mut:${hs(H,15,72)};--comp:${hs(C,S,62)};--pbg:${hs(H,Math.round(S*.5),13)};--onac:#111;--oncomp:#111;color-scheme:dark`;
- return `--ac:${hs(H,S,38)};--ac2:${hs(H,Math.round(S*.4),88)};--bd:${hs(H,Math.round(S*.3),72)};--card:${hs(H,Math.round(S*.5),96)};--bg:${hs(H,Math.round(S*.45),87)};--tx:${hs(H,20,15)};--mut:${hs(H,16,36)};--comp:${hs(C,S,42)};--pbg:${hs(H,Math.round(S*.5),90)};--onac:#fff;--oncomp:#fff;color-scheme:light`}
+ if(dark)return `--ac:${hs(H,S,68)};--ac2:${hs(H,Math.round(S*.55),30)};--bd:${hs(H,Math.round(S*.4),38)};--card:${hs(H,Math.round(S*.7),22)};--bg:${hs(H,Math.round(S*.65),14)};--tx:${hs(H,15,94)};--mut:${hs(H,15,72)};--comp:${hs(C,S,62)};--pbg:${hs(H,Math.round(S*.7),13)};--onac:#111;--oncomp:#111;color-scheme:dark`;
+ return `--ac:${hs(H,S,38)};--ac2:${hs(H,Math.round(S*.55),87)};--bd:${hs(H,Math.round(S*.4),70)};--card:${hs(H,Math.round(S*.7),95)};--bg:${hs(H,Math.round(S*.65),85)};--tx:${hs(H,20,15)};--mut:${hs(H,16,36)};--comp:${hs(C,S,42)};--pbg:${hs(H,Math.round(S*.7),88)};--onac:#fff;--oncomp:#fff;color-scheme:light`}
 function saveSheet(){const p=DM[view.pid],c=p&&p.chars.find(x=>x.id===view.cid);if(!c)return;const o={},fin=c.fin?{...c.fin,stats:{...c.fin.stats}}:null;
  document.querySelectorAll('#app [data-sv]').forEach(el=>{const k=el.dataset.sv;
   if(k[0]==='s'){if(fin)fin.stats[k.slice(2)]=+el.value||0}else if(k[0]==='f'){if(fin)fin[k.slice(2)]=+el.value||0}else{const f=k.slice(2);o[f]=f==='name'?el.value.trim().slice(0,60):el.value}});
